@@ -31,6 +31,9 @@ namespace CFDI.BuildPdf.Models
         public string Exportacion { get; set; }
         public string CondicionesPago { get; set; }
         public string UUID { get; set; }
+        public string LogoBase64 { get; set; }
+
+        public AddendaViewModel Addenda { get; set; }
 
 
         // Conceptos
@@ -56,6 +59,19 @@ namespace CFDI.BuildPdf.Models
         public string UrlQr { get; set; }
         public string QRCodeBase64 { get; set; }
     }
+    public class AddendaViewModel
+    {
+        public bool IsParserGenerico { get; set; }
+        public List<AddendaSeccionViewModel> Secciones { get; set; } = new();
+        public string XmlRaw { get; set; }
+    }
+
+    public class AddendaSeccionViewModel
+    {
+        public string NombreSeccion { get; set; }
+        public List<KeyValuePair<string, string>> Campos { get; set; } = new();
+    }
+
 
     public class ConceptoViewModel
     {

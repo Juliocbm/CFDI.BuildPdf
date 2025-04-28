@@ -93,6 +93,14 @@ namespace CFDI.BuildPdf.Mappers
                 QRCodeBase64 = ""
             };
 
+            var addendaNode = comprobante.Element(cfdi + "Addenda");
+
+            if (addendaNode != null)
+            {
+                model.Addenda = MapAddenda(addendaNode);
+            }
+
+
             var mercanciasNode = cartaPorte.Element(cartaporte + "Mercancias");
 
             // Carta Porte
@@ -163,6 +171,157 @@ namespace CFDI.BuildPdf.Mappers
 
             return model;
         }
+
+        //private static AddendaViewModel MapAddenda(XElement addendaNode)
+        //{
+        //    var result = new AddendaViewModel();
+
+        //    // Buscar InformacionAdicional
+        //    var informacionAdicional = addendaNode.Descendants()
+        //        .FirstOrDefault(x => x.Name.LocalName == "InformacionAdicional");
+
+        //    if (informacionAdicional != null && informacionAdicional.ToString().Contains("buzone.com.mx"))
+        //    {
+        //        result.IsParserGenerico = true;
+
+        //        // Hay 2 casos:
+        //        // 1. InformacionAdicional ya parseado (normal)
+        //        // 2. InformacionAdicional en CDATA
+        //        var cdata = informacionAdicional.Nodes().OfType<XCData>().FirstOrDefault();
+        //        string xmlContent;
+
+        //        if (cdata != null)
+        //        {
+        //            xmlContent = cdata.Value;
+        //        }
+        //        else
+        //        {
+        //            xmlContent = informacionAdicional.ToString();
+        //        }
+
+        //        try
+        //        {
+        //            var innerDoc = XDocument.Parse(xmlContent);
+
+        //            foreach (var seccion in innerDoc.Root.Elements())
+        //            {
+        //                var nuevaSeccion = new AddendaSeccionViewModel
+        //                {
+        //                    NombreSeccion = seccion.Name.LocalName
+        //                };
+
+        //                foreach (var attr in seccion.Attributes())
+        //                {
+        //                    nuevaSeccion.Campos.Add(new KeyValuePair<string, string>(attr.Name.LocalName, attr.Value));
+        //                }
+
+        //                result.Secciones.Add(nuevaSeccion);
+        //            }
+        //        }
+        //        catch
+        //        {
+        //            // Si fallamos parseando CDATA, fallback: guardar el texto crudo
+        //            result.XmlRaw = xmlContent;
+        //        }
+        //    }
+        //    else
+        //    {
+        //        // No es Parser Generico ➔ guardar Addenda como XML crudo
+        //        result.XmlRaw = addendaNode.ToString();
+        //    }
+
+        //    return result;
+        //}
+
+        private static AddendaViewModel MapAddenda(XElement addendaNode)
+        {
+            var result = new AddendaViewModel();
+
+            var informacionAdicional = addendaNode.Descendants()
+                .FirstOrDefault(x => x.Name.LocalName == "InformacionAdicional");
+
+            if (informacionAdicional != null && informacionAdicional.ToString().Contains("buzone.com.mx"))
+            {
+                result.IsParserGenerico = true;
+
+                var cdata = informacionAdicional.Nodes().OfType<XCData>().FirstOrDefault();
+                string xmlContent;
+
+                if (cdata != null)
+                {
+                    xmlContent = cdata.Value;
+                }
+                else
+                {
+                    xmlContent = informacionAdicional.ToString();
+                }
+
+                try
+                {
+                    var innerDoc = XDocument.Parse(xmlContent);
+
+                    foreach (var seccion in innerDoc.Root.Elements())
+                    {
+                        var nuevaSeccion = new AddendaSeccionViewModel
+                        {
+                            NombreSeccion = seccion.Name.LocalName
+                        };
+
+                        // Mapeo especial: detectar etiquetaX + valorX
+                        var atributos = seccion.Attributes().ToList();
+                        var etiquetas = atributos.Where(a => a.Name.LocalName.StartsWith("etiqueta")).ToList();
+                        var valores = atributos.Where(a => a.Name.LocalName.StartsWith("valor")).ToList();
+
+                        foreach (var etiqueta in etiquetas)
+                        {
+                            // Sacar número de la etiqueta (por ejemplo: etiqueta8T --> 8)
+                            var numero = new string(etiqueta.Name.LocalName.Where(char.IsDigit).ToArray());
+
+                            var valorCorrespondiente = valores
+                                .FirstOrDefault(v => v.Name.LocalName.Contains(numero));
+
+                            if (!string.IsNullOrWhiteSpace(etiqueta.Value) && valorCorrespondiente != null && !string.IsNullOrWhiteSpace(valorCorrespondiente.Value))
+                            {
+                                nuevaSeccion.Campos.Add(new KeyValuePair<string, string>(
+                                    etiqueta.Value, // El texto amigable de la etiqueta
+                                    valorCorrespondiente.Value // El dato real
+                                ));
+                            }
+                        }
+
+                        // También capturamos cualquier otro atributo (que no sea etiqueta/valor)
+                        foreach (var atributo in atributos
+                            .Where(a => !a.Name.LocalName.StartsWith("etiqueta") && !a.Name.LocalName.StartsWith("valor")))
+                        {
+                            if (!string.IsNullOrWhiteSpace(atributo.Value))
+                            {
+                                nuevaSeccion.Campos.Add(new KeyValuePair<string, string>(
+                                    atributo.Name.LocalName,
+                                    atributo.Value
+                                ));
+                            }
+                        }
+
+                        if (nuevaSeccion.Campos.Any())
+                        {
+                            result.Secciones.Add(nuevaSeccion);
+                        }
+                    }
+                }
+                catch
+                {
+                    result.XmlRaw = xmlContent;
+                }
+            }
+            else
+            {
+                result.XmlRaw = addendaNode.ToString();
+            }
+
+            return result;
+        }
+
+
         private static UbicacionViewModel MapUbicacion(XElement ubicacion)
         {
             if (ubicacion == null) return null;

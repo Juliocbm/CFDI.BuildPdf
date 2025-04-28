@@ -70,89 +70,142 @@
             margin-top: 20px;
             text-align: center;
         }
+
+        /* Nuevo estilo para Addenda */
+        .addenda-section table {
+            width: 100%;
+            border: 1px solid black; /* ✅ Borde externo visible */
+            border-collapse: collapse; /* ✅ Junta el borde exterior */
+            margin-top: 5px;
+            margin-bottom: 15px;
+        }
+
+        .addenda-section td {
+            border: none; /* ❌ No bordes internos */
+            padding: 3px 6px;
+            font-size: 9px;
+            vertical-align: top;
+        }
+
+            .addenda-section td:first-child {
+                font-weight: bold;
+                width: 30%;
+            }
+
+            .addenda-section td:last-child {
+                width: 70%;
+            }
+
+        .addenda-title {
+            font-weight: bold;
+            font-size: 10px;
+            text-align: left;
+            margin-top: 10px;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            color: #333;
+        }
     </style>
 </head>
 <body>
-    <div class="header">COMPROBANTE FISCAL DIGITAL POR INTERNET (CFDI)</div>
-    <div class="sub-header">Representación Impresa del CFDI Carta Porte 3.1</div>
-    <!-- Datos Generales del CFDI -->
-    <div class="section">
-        <div class="section-title">Datos del CFDI</div>
-        <table>
-            <tr>
-                <th>Versión</th>
-                <td>@Model.Version</td>
-                <th>Serie y folio</th>
-                <td>@Model.Folio</td>
-            </tr>
-            <tr>
-                <th>Fecha de Emisión</th>
-                <td>@Model.FechaEmision.ToString("yyyy-MM-dd'T'HH:mm:ss")</td>
-                <th>Fecha Certificación</th>
-                <td>@Model.FechaCertificacion.ToString("yyyy-MM-dd'T'HH:mm:ss")</td>
-            </tr>
-            <tr>
-                <th>Lugar de Expedición</th>
-                <td>@Model.LugarExpedicion</td>
-                <th>Tipo Cambio</th>
-                <td>@Model.TipoCambio</td>
-            </tr>
-            <tr>
-                <th>Moneda</th>
-                <td>@Model.Moneda</td>
-                <th>Forma de Pago</th>
-                <td>@Model.FormaPago</td>
-            </tr>
-            <tr>
-                <th>Método de Pago</th>
-                <td>@Model.MetodoPago</td>
-                <th>Tipo de Comprobante</th>
-                <td>@Model.TipoComprobante</td>
-            </tr>
-            <tr>
-                <th>Exportación</th>
-                <td>@Model.Exportacion</td>
-                <th>Condiciones de Pago</th>
-                <td>@Model.CondicionesPago</td>
-            </tr>
-        </table>
+
+    <!-- Encabezado General corregido para que esté PEGADO a la derecha -->
+    <div style="width: 100%; text-align: right; margin-bottom: 20px; font-size: 12px;">
+        <div style="display: inline-block; text-align: right;">
+            <strong>@Model.EmisorNombre</strong><br />
+            @Model.EmisorRFC
+        </div>
     </div>
-    <!-- Emisor -->
-    <div class="section">
-        <div class="section-title">Datos del Emisor</div>
-        <table>
-            <tr>
-                <th>Nombre</th>
-                <td>@Model.EmisorNombre</td>
-                <th>RFC</th>
-                <td>@Model.EmisorRFC</td>
-                <th>Régimen Fiscal</th>
-                <td>@Model.EmisorRegimenFiscal</td>
-            </tr>
-        </table>
-    </div>
-    <!-- Receptor -->
-    <div class="section">
-        <div class="section-title">Datos del Receptor</div>
-        <table>
-            <tr>
-                <th>Nombre</th>
-                <td>@Model.ReceptorNombre</td>
-                <th>RFC</th>
-                <td>@Model.ReceptorRFC</td>
-            </tr>
-            <tr>
-                <th>Domicilio Fiscal</th>
-                <td>@Model.ReceptorDomicilioFiscal</td>
-                <th>Régimen Fiscal</th>
-                <td>@Model.ReceptorRegimenFiscal</td>
-            </tr>
-            <tr>
-                <th>Uso CFDI</th>
-                <td>@Model.UsoCFDI</td>
-            </tr>
-        </table>
-    </div>
+
+
+    <!-- Sección: Logo a la izquierda / UUID y certificados a la derecha, SIN NINGÚN BORDE -->
+    <table style="width: 100%; border: none; border-collapse: collapse; margin-top: 10px; font-size: 10px;">
+        <tr style="border: none;">
+            <!-- Logo (Izquierda) -->
+            <td style="width: 30%; text-align: center; vertical-align: top; border: none;">
+                @if (!string.IsNullOrEmpty(Model.LogoBase64))
+                {
+                    <img src="data:image/png;base64,@Model.LogoBase64" alt="Logo Empresa" style="max-width: 150px; max-height: 100px;" />
+                }
+            </td>
+
+            <!-- UUID y Certificados (Derecha) -->
+            <td style="width: 70%; vertical-align: top; border: none;">
+                <table style="width: 100%; border: none; border-collapse: collapse; table-layout: fixed;">
+                    <tr style="border: none;">
+                        <th style="width: 45%; text-align: left; padding: 2px; border: 1px solid black;">Folio Fiscal (UUID):</th>
+                        <td style="padding: 2px; border: 1px solid black;">@Model.UUID</td>
+                    </tr>
+                    <tr style="border: border: none;">
+                        <th style="text-align: left; padding: 2px; border: 1px solid black;">Fecha de Certificación:</th>
+                        <td style="padding: 2px; 1px solid black;">@Model.FechaCertificacion.ToString("yyyy-MM-dd'T'HH:mm:ss")</td>
+                    </tr>
+                    <tr style="border: none;">
+                        <th style="text-align: left; padding: 2px; border: 1px solid black;;">No. Certificado SAT:</th>
+                        <td style="padding: 2px; 1px solid black;">@Model.NoCertificadoSAT</td>
+                    </tr>
+                    <tr style="border: none;">
+                        <th style="text-align: left; padding: 2px; border: 1px solid black;">No. Certificado Emisor:</th>
+                        <td style="padding: 2px; 1px solid black;">@Model.NoCertificadoEmisor</td>
+                    </tr>
+                    <tr style="border: none;">
+                        <th style="text-align: left; padding: 2px; border: 1px solid black;">Versión:</th>
+                        <td style="padding: 2px; 1px solid black;">@Model.Version</td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+
+
+
+
+    <!-- Cliente y Emisión usando tabla -->
+    <table style="width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 10px;">
+        <tr>
+            <!-- CLIENTE (Izquierda) -->
+            <td style="width: 50%; border: 1px solid black; vertical-align: top; padding: 8px;">
+                <strong>CLIENTE</strong><br />
+                @Model.ReceptorNombre<br />
+                <strong>RFC:</strong> @Model.ReceptorRFC<br />
+                <strong>Domicilio Fiscal:</strong> @Model.ReceptorDomicilioFiscal<br />
+                <strong>Régimen Fiscal:</strong> @Model.ReceptorRegimenFiscal<br />
+                <strong>Uso del CFDI:</strong> @Model.UsoCFDI
+            </td>
+
+            <!-- EMISIÓN (Derecha) -->
+            <td style="width: 50%; border: 1px solid black; vertical-align: top; padding: 8px;">
+                <strong>Fecha y Hora de Emisión:</strong> @Model.FechaEmision.ToString("yyyy-MM-dd'T'HH:mm:ss")<br />
+                <strong>Lugar de Expedición:</strong> @Model.LugarExpedicion<br />
+                <strong>Serie y Folio:</strong> @Model.Folio<br />
+                <strong>Tipo de Cambio:</strong> @Model.TipoCambio<br />
+                <strong>Moneda:</strong> @Model.Moneda<br />
+                <strong>Exportación:</strong> @Model.Exportacion
+            </td>
+        </tr>
+    </table>
+
+
+
+    <!-- Comprobante y Pago usando tabla, sin bordes en ningún lado -->
+    <table style="width: 100%; border: none; border-collapse: collapse; margin-top: 10px; font-size: 10px;">
+        <tr>
+            <!-- Forma de Pago y Método de Pago -->
+            <td style="width: 50%; vertical-align: top; padding: 5px; border: none;">
+                <strong>Forma de Pago:</strong> @Model.FormaPago<br />
+                <strong>Método de Pago:</strong> @Model.MetodoPago
+            </td>
+
+            <!-- Tipo de Comprobante y Condiciones de Pago -->
+            <td style="width: 50%; vertical-align: top; padding: 5px; border: none;">
+                <strong>Tipo de Comprobante:</strong> @Model.TipoComprobante<br />
+                <strong>Condiciones de Pago:</strong> @Model.CondicionesPago
+            </td>
+        </tr>
+    </table>
+
+
+
 
     <!-- Conceptos -->
     @if (Model.Conceptos != null && Model.Conceptos.Any())
@@ -215,16 +268,48 @@
         </table>
     </div>
 
+    <!-- Addenda -->
+    @if (Model.Addenda != null)
+    {
+        <div class="section-title">Addenda Genérica</div>
+
+        @if (Model.Addenda.IsParserGenerico && Model.Addenda.Secciones.Any())
+        {
+            @foreach (var seccion in Model.Addenda.Secciones.Where(s => s.Campos.Any(c => !string.IsNullOrWhiteSpace(c.Value))))
+            {
+                <div class="addenda-section">
+                    @* <div class="addenda-title">@seccion.NombreSeccion</div> *@
+                    <table>
+                        @foreach (var campo in seccion.Campos.Where(c => !string.IsNullOrWhiteSpace(c.Value)))
+                        {
+                            <tr>
+                                <td>@campo.Key</td>
+                                <td>@campo.Value</td>
+                            </tr>
+                        }
+                    </table>
+                </div>
+            }
+        }
+        else if (!string.IsNullOrEmpty(Model.Addenda.XmlRaw))
+        {
+            <div class="addenda-section">
+                <pre style="font-size:8px;">@Model.Addenda.XmlRaw</pre>
+            </div>
+        }
+    }
+
+
     <!-- Sección Identificador Complemento Carta Porte -->
     @if (!string.IsNullOrEmpty(Model.CartaPorte.IdCCP))
     {
-    <div class="section" style="text-align: left; margin-top: 30px;">
-        <div class="section-title">Identificador del Complemento Carta Porte:</div>
-        <div style="border: 1px solid black; padding: 10px; margin-top: 5px; font-size: 12px;">
+        <div class="section" style="text-align: left; margin-top: 30px;">
+            <div class="section-title">Identificador del Complemento Carta Porte:</div>
+            <div style="border: 1px solid black; padding: 10px; margin-top: 5px; font-size: 12px;">
                 @Model.CartaPorte.IdCCP
+            </div>
         </div>
-    </div>
-}
+    }
 
     <!-- Carta Porte -->
     <div class="section">
@@ -242,7 +327,7 @@
                 <th>Entrada/Salida</th>
                 <td>@Model.CartaPorte.EntradaSalidaMercancia</td>
 
-                         
+
 
                 <th>País Origen/Destino</th>
                 <td>@Model.CartaPorte.PaisOrigenDestino</td>
@@ -456,22 +541,9 @@
         </div>
     }
     <!-- Footer: Información Fiscal Digital + Código QR -->
-     <div class="section footer-section">
+    <div class="section footer-section">
         <div class="section-title">Información Fiscal Digital</div>
-        <table>
-            <tr>
-                <th>Folio Fiscal (UUID)</th>
-                <td>@Model.UUID</td>
-                <th>No. Certificado SAT</th>
-                <td>@Model.NoCertificadoSAT</td>
-            </tr>
-            <tr>
-                <th>No. Certificado Emisor</th>
-                <td>@Model.NoCertificadoEmisor</td>
-                <th>Fecha de Timbrado</th>
-                <td>@Model.FechaCertificacion.ToString("yyyy-MM-dd'T'HH:mm:ss")</td>
-            </tr>
-        </table>
+
 
         <!-- Tabla de QR + Sellos -->
         <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
@@ -494,6 +566,6 @@
                 </td>
             </tr>
         </table>
-    </div> 
+    </div>
 </body>
 </html>
