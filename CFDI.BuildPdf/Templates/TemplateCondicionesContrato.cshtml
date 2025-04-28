@@ -1,0 +1,158 @@
+@model CFDI.BuildPdf.Models.CfdiCartaPorteViewModel
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Condiciones del Contrato de Transporte</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 10px;
+            margin: 30px;
+        }
+
+        .header {
+            font-weight: bold;
+            text-align: center;
+            font-size: 12px;
+            margin-bottom: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+        }
+
+        td {
+            border: 1px solid black;
+            vertical-align: top;
+            padding: 5px;
+            text-align: justify;
+            word-wrap: break-word;
+        }
+
+        .title {
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+
+    <div>
+        <div style="margin-bottom: 10px;">
+            <strong>RFC Emisor:</strong> @Model.EmisorRFC
+            <span style="float: right;"><strong>Folio Fiscal:</strong> @Model.UUID</span>
+        </div>
+
+        <div class="title" style="border: solid 1px; padding:5px;">
+            Condiciones del Contrato de Transporte que Ampara esta Carta Porte
+        </div>
+
+        <table>
+            <tr>
+               <td>
+					<!-- Primera mitad del texto legal aquí -->
+					PRIMERA.- Para los efectos del presente contrato de transporte se denomina
+					"Transportista" al que realiza el servicio de transportación y "Expedidor",
+					"Remitente" o "Usuario" al usuario que contrate el servicio o remite la mercancía.
+					SEGUNDA.- El "Expedidor", "Remitente" o "Usuario" es responsable de que la
+					información proporcionada al "Transportista" sea veraz y que la documentación
+					que entregue para efectos del transporte sea la correcta.
+					TERCERA.- El "Expedidor", "Remitente" o "Usuario" debe declarar al
+					"Transportista" el tipo de mercancía o efectos de que se trate, peso, medidas y/
+					o número de la carga que entrega para su transporte y, en su caso, el valor de la
+					misma. La carga que se entregue a granel podrá ser aforada en metros cúbicos
+					con la conformidad del "Expedidor", "Remitente" o "Usuario".
+					CUARTA.- Para efectos del transporte, el "Expedidor", "Remitente" o "Usuario"
+					deberá entregar al "Transportista" los documentos que las leyes y reglamentos
+					exijan para llevar a cabo el servicio, en caso de no cumplirse con estos requisitos
+					el "Transportista" está obligado a rehusar el transporte de las mercancías.
+					QUINTA.- Si por sospecha de falsedad en la declaración del contenido de un
+					bulto el "Transportista" deseare proceder a su reconocimiento, podrá hacerlo
+					ante testigos y con asistencia del "Expedidor", "Remitente" o "Usuario" o del
+					consignatario. Si este último no concurriere, se solicitará la presencia de un
+					inspector de la Secretaría de Comunicaciones y Transportes, y se levantará el
+					acta correspondiente. El "Transportista" tendrá en todo caso, la obligación de
+					dejar los bultos en el estado en que se encontraban antes del reconocimiento.
+					SEXTA.- El "Transportista" deberá recoger y entregar la carga precisamente en
+					los domicilios que señale el "Expedidor", "Remitente" o "Usuario", ajustándose
+					a los términos y condiciones convenidos. El "Transportista" sólo está obligado a
+					llevar la carga al domicilio del consignatario para su entrega una sola vez. Si ésta
+					no fuera recibida, se dejará aviso de que la mercancía queda a disposición del
+					interesado en las bodegas que indique el "Transportista".
+					SÉPTIMA.- Si la carga no fuere retirada dentro de los 30 días hábiles
+					siguientes a aquél en que hubiere sido puesta a disposición del consignatario,
+					el "Transportista" podrá solicitar la venta en subasta pública con arreglo a lo que
+					dispone el Código de Comercio.
+					OCTAVA.- El "Transportista" y el "Expedidor", "Remitente" o "Usuario"
+					negociarán libremente el precio del servicio, tomando en cuenta su tipo,
+					característica de los embarques, volumen, regularidad, clase de carga y sistema
+					de pago.
+					NOVENA.- Si el "Expedidor", "Remitente" o "Usuario" desea que el
+					"Transportista" asuma la responsabilidad por el valor de las mercancías o efectos
+					que él declare y que cubra toda clase de riesgos, inclusive los derivados de
+					caso fortuito o de fuerza mayor, las partes deberán convenir un cargo adicional,
+					equivalente al valor de la prima del seguro que se contrate, el cual se deberá
+					expresar en un CFDI con Complemento Carta Porte.
+				</td>
+
+				<td>
+					<!-- Segunda mitad del texto legal aquí -->
+					DÉCIMA.- Cuando el importe del flete no incluya el cargo adicional, la
+					responsabilidad del "Transportista" queda expresamente limitada a la cantidad
+					equivalente a 15 Unidades de Medida y Actualización (UMAS) por tonelada o
+					cuando se trate de embarques cuyo peso sea mayor de 200 kg, pero menor de
+					1000 kg; y 4 UMAS por remesa cuando se trate de embarques con peso hasta de
+					200 kg.
+					DÉCIMA PRIMERA.- El precio del transporte deberá pagarse en origen, salvo
+					convenio entre las partes de pago en destino. Cuando el transporte se hubiere
+					concertado "Flete por Cobrar", la entrega de las mercancías o efectos se hará
+					contra el pago del flete y el "Transportista" tendrá derecho a retenerlos mientras
+					no se le cubra el precio convenido.
+					DÉCIMA SEGUNDA.- Si al momento de la entrega resultare algún faltante
+					o avería, el consignatario podrá formular su reclamación por escrito al
+					"Transportista", dentro de las 24 horas siguientes.
+					DÉCIMA TERCERA.- El "Transportista" queda eximido de la obligación de recibir
+					mercancías o efectos para su transporte, en los siguientes casos:
+					a) Cuando se trate de carga que por su naturaleza, peso, volumen, embalaje
+					defectuoso o cualquier otra circunstancia no pueda transportarse sin destruirse o
+					sin causar daño a los demás artículos o al material rodante, salvo que la empresa
+					de que se trate tenga el equipo adecuado.
+					b) Las mercancías cuyo transporte haya sido prohibido por disposiciones
+					legales o reglamentarias. Cuando tales disposiciones no prohíban precisamente
+					el transporte de determinadas mercancías, pero sí ordenen la presentación
+					de ciertos documentos para que puedan ser transportadas, el "Expedidor",
+					"Remitente" o "Usuario" estará obligado a entregar al "Transportista" los
+					documentos correspondientes.
+					DÉCIMA CUARTA.- Los casos no previstos en las presentes condiciones y las
+					quejas derivadas de su aplicación se someterán por la vía administrativa a la
+					Secretaría de Comunicaciones y Transportes.
+					DÉCIMA QUINTA.- Para el caso de que el "Expedidor", "Remitente" o "Usuario"
+					contrate carro por entero, éste aceptará la responsabilidad solidaria para con
+					el "Transportista" mediante la figura de la corresponsabilidad que contempla
+					el artículo 10 del Reglamento Sobre el Peso, Dimensiones y Capacidad de
+					los Vehículos de Autotransporte que Transitan en los Caminos y Puentes de
+					Jurisdicción Federal, por lo que el "Expedidor", "Remitente" o "Usuario" queda
+					obligado a verificar que la carga y el vehículo que la transporta cumplan con el
+					peso y dimensiones máximas establecidos en la NOM-012-SCT-2-2017, o la que
+					la sustituya.
+					Para el caso de incumplimiento e inobservancia a las disposiciones que regulan
+					el peso y dimensiones, por parte del "Expedidor", "Remitente" o "Usuario",
+					éste será corresponsable de las infracciones y multas que la Secretaría de
+					Infraestructura, Comunicaciones y Transportes o la Guardia Nacional impongan
+					al "Transportista", por cargar las unidades con exceso de peso.
+				</td>
+
+            </tr>
+        </table>
+
+    </div>
+
+</body>
+</html>

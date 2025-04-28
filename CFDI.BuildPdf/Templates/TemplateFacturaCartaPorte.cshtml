@@ -1,0 +1,499 @@
+<!-- TemplateFacturaCartaPorte.cshtml - Actualizado para usar el CfdiCartaPorteViewModel completo del usuario -->
+@using CFDI.BuildPdf.Models
+@model CfdiCartaPorteViewModel
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>CFDI Carta Porte</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 10px;
+            margin: 20px;
+        }
+
+        .header, .section {
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        .header {
+            text-align: center;
+            font-weight: bold;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        .sub-header {
+            text-align: center;
+            font-size: 11px;
+            margin-bottom: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 10px;
+        }
+
+        th, td {
+            border: 1px solid black;
+            padding: 4px;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        .table-header {
+            background-color: #f0f0f0;
+            font-weight: bold;
+        }
+
+        .section-title {
+            font-weight: bold;
+            margin-top: 20px;
+            margin-bottom: 5px;
+            font-size: 12px;
+        }
+
+        .footer-section {
+            margin-top: 20px;
+            font-size: 9px;
+        }
+
+            .footer-section pre {
+                white-space: pre-wrap;
+                word-wrap: break-word;
+            }
+
+        .qr-code {
+            margin-top: 20px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">COMPROBANTE FISCAL DIGITAL POR INTERNET (CFDI)</div>
+    <div class="sub-header">Representación Impresa del CFDI Carta Porte 3.1</div>
+    <!-- Datos Generales del CFDI -->
+    <div class="section">
+        <div class="section-title">Datos del CFDI</div>
+        <table>
+            <tr>
+                <th>Versión</th>
+                <td>@Model.Version</td>
+                <th>Serie y folio</th>
+                <td>@Model.Folio</td>
+            </tr>
+            <tr>
+                <th>Fecha de Emisión</th>
+                <td>@Model.FechaEmision.ToString("yyyy-MM-dd'T'HH:mm:ss")</td>
+                <th>Fecha Certificación</th>
+                <td>@Model.FechaCertificacion.ToString("yyyy-MM-dd'T'HH:mm:ss")</td>
+            </tr>
+            <tr>
+                <th>Lugar de Expedición</th>
+                <td>@Model.LugarExpedicion</td>
+                <th>Tipo Cambio</th>
+                <td>@Model.TipoCambio</td>
+            </tr>
+            <tr>
+                <th>Moneda</th>
+                <td>@Model.Moneda</td>
+                <th>Forma de Pago</th>
+                <td>@Model.FormaPago</td>
+            </tr>
+            <tr>
+                <th>Método de Pago</th>
+                <td>@Model.MetodoPago</td>
+                <th>Tipo de Comprobante</th>
+                <td>@Model.TipoComprobante</td>
+            </tr>
+            <tr>
+                <th>Exportación</th>
+                <td>@Model.Exportacion</td>
+                <th>Condiciones de Pago</th>
+                <td>@Model.CondicionesPago</td>
+            </tr>
+        </table>
+    </div>
+    <!-- Emisor -->
+    <div class="section">
+        <div class="section-title">Datos del Emisor</div>
+        <table>
+            <tr>
+                <th>Nombre</th>
+                <td>@Model.EmisorNombre</td>
+                <th>RFC</th>
+                <td>@Model.EmisorRFC</td>
+                <th>Régimen Fiscal</th>
+                <td>@Model.EmisorRegimenFiscal</td>
+            </tr>
+        </table>
+    </div>
+    <!-- Receptor -->
+    <div class="section">
+        <div class="section-title">Datos del Receptor</div>
+        <table>
+            <tr>
+                <th>Nombre</th>
+                <td>@Model.ReceptorNombre</td>
+                <th>RFC</th>
+                <td>@Model.ReceptorRFC</td>
+            </tr>
+            <tr>
+                <th>Domicilio Fiscal</th>
+                <td>@Model.ReceptorDomicilioFiscal</td>
+                <th>Régimen Fiscal</th>
+                <td>@Model.ReceptorRegimenFiscal</td>
+            </tr>
+            <tr>
+                <th>Uso CFDI</th>
+                <td>@Model.UsoCFDI</td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- Conceptos -->
+    @if (Model.Conceptos != null && Model.Conceptos.Any())
+    {
+        <div class="section">
+            <div class="section-title">Conceptos Facturados</div>
+            <table>
+                <thead>
+                    <tr class="table-header">
+                        <th>Clave Producto/Servicio</th>
+                        <th>Número Identificación</th>
+                        <th>Cantidad</th>
+                        <th>Clave Unidad</th>
+                        <th>Unidad de Medida</th>
+                        <th>Descripción</th>
+                        <th>Precio Unitario</th>
+                        <th>Importe</th>
+                        <th>Descuento</th>
+                        <th>Objeto Impuestos</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var concepto in Model.Conceptos)
+                    {
+                        <tr>
+                            <td>@concepto.ClaveProductoServicio</td>
+                            <td>@concepto.NumeroIdentificacion</td>
+                            <td>@concepto.Cantidad</td>
+                            <td>@concepto.ClaveUnidad</td>
+                            <td>@concepto.Unidad</td>
+                            <td>@concepto.Descripcion</td>
+                            <td>@concepto.ValorUnitario.ToString("F6")</td>
+                            <td>@concepto.Importe.ToString("F6")</td>
+                            <td>@concepto.Descuento.ToString("F6")</td>
+                            <td>@concepto.ObjetoImpuesto</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+
+
+    <!-- Totales -->
+    <div class="section">
+        <div class="section-title">Totales</div>
+        <table>
+            <tr>
+                <th>Subtotal</th>
+                <td>@Model.SubTotal.ToString("C2")</td>
+                <th>Total Impuestos Trasladados</th>
+                <td>@Model.TotalImpuestosTrasladados.ToString("C2")</td>
+                <th>Total</th>
+                <td>@Model.Total.ToString("C2")</td>
+            </tr>
+            <tr>
+                <th>Cantidad en Letra</th>
+                <td colspan="5">@Model.CantidadConLetra</td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- Sección Identificador Complemento Carta Porte -->
+    @if (!string.IsNullOrEmpty(Model.CartaPorte.IdCCP))
+    {
+    <div class="section" style="text-align: left; margin-top: 30px;">
+        <div class="section-title">Identificador del Complemento Carta Porte:</div>
+        <div style="border: 1px solid black; padding: 10px; margin-top: 5px; font-size: 12px;">
+                @Model.CartaPorte.IdCCP
+        </div>
+    </div>
+}
+
+    <!-- Carta Porte -->
+    <div class="section">
+        <div class="section-title">Complemento Carta Porte</div>
+        <table>
+            <tr>
+                <th>Versión</th>
+                <td>@Model.CartaPorte.Version</td>
+                <th>Transporte Internacional</th>
+                <td>@Model.CartaPorte.TransporteInternacional</td>
+                <th>Via de entrada/salida</th>
+                <td>@Model.CartaPorte.ViaEntradaSalida</td>
+            </tr>
+            <tr>
+                <th>Entrada/Salida</th>
+                <td>@Model.CartaPorte.EntradaSalidaMercancia</td>
+
+                         
+
+                <th>País Origen/Destino</th>
+                <td>@Model.CartaPorte.PaisOrigenDestino</td>
+                <th>Distancia Recorrida</th>
+                <td>@Model.CartaPorte.DistanciaRecorrida</td>
+            </tr>
+        </table>
+    </div>
+
+    @if (Model.CartaPorte?.Ubicaciones != null && Model.CartaPorte.Ubicaciones.Any())
+    {
+        <div class="section">
+            <div class="section-title">Ubicaciones</div>
+            <table>
+                <thead>
+                    <tr class="table-header">
+                        <th>Tipo Ubicación</th>
+                        <th>ID Ubicación</th>
+                        <th>RFC</th>
+                        <th>Nombre</th>
+                        <th>Fecha/Hora Salida o Llegada</th>
+                        <th>Código Postal</th>
+                        <th>Municipio</th>
+                        <th>Localidad</th>
+                        <th>Estado</th>
+                        <th>País</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var ubicacion in Model.CartaPorte.Ubicaciones)
+                    {
+                        <tr>
+                            <td>@ubicacion.TipoUbicacion</td>
+                            <td>@ubicacion.IDUbicacion</td>
+                            <td>@ubicacion.RFCRemitenteDestinatario</td>
+                            <td>@ubicacion.NombreRemitenteDestinatario</td>
+                            <td>@ubicacion.FechaHoraSalidaLlegada?.ToString("yyyy-MM-dd'T'HH:mm:ss")</td>
+                            <td>@ubicacion.CodigoPostal</td>
+                            <td>@ubicacion.Municipio</td>
+                            <td>@ubicacion.Localidad</td>
+                            <td>@ubicacion.Estado</td>
+                            <td>@ubicacion.Pais</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+
+    <!-- Mercancías Detalle -->
+    @if (Model.CartaPorte?.MercanciasDetalle != null)
+    {
+        @if (ViewBag.MostrarMercancias == true)
+        {
+            <div class="section">
+                <div class="section-title">Mercancías</div>
+                <table>
+                    <thead>
+                        <tr class="table-header">
+                            <th>Descripción</th>
+                            <th>Cantidad</th>
+                            <th>Clave Unidad</th>
+                            <th>Peso en KG</th>
+                            <th>Valor Mercancía</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var mercancia in Model.CartaPorte.MercanciasDetalle)
+                        {
+                            <tr>
+                                <td>@mercancia.Descripcion</td>
+                                <td>@mercancia.Cantidad.ToString("F6")</td>
+                                <td>@mercancia.ClaveUnidad</td>
+                                <td>@mercancia.PesoEnKg.ToString("F6")</td>
+                                <td>@mercancia.ValorMercancia.ToString("F6")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="section">
+                <div class="section-title">Resumen de Mercancías</div>
+                <table>
+                    <thead>
+                        <tr class="table-header">
+                            <th>No. Total Mercancías</th>
+                            <th>Peso Bruto Total (KG)</th>
+                            <th>Unidad de Peso</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>@Model.CartaPorte.NumeroTotalMercancias</td>
+                            <td>@Model.CartaPorte.PesoBrutoTotal.ToString("F6")</td>
+                            <td>@Model.CartaPorte.UnidadPeso</td>
+                        </tr>
+
+                    </tbody>
+                </table>
+            </div>
+        }
+    }
+
+    <!-- Datos de Autotransporte -->
+    @if (Model.CartaPorte?.Autotransporte != null)
+    {
+        <div class="section">
+            <div class="section-title">Datos de Autotransporte</div>
+            <table>
+                <tr>
+                    <th>Permiso SCT</th>
+                    <td>@Model.CartaPorte.Autotransporte.PermisoSCT</td>
+                    <th>Número Permiso SCT</th>
+                    <td>@Model.CartaPorte.Autotransporte.NumeroPermisoSCT</td>
+                </tr>
+                <tr>
+                    <th>Configuración Vehicular</th>
+                    <td>@Model.CartaPorte.Autotransporte.ConfigVehicular</td>
+                    <th>Peso Bruto Vehicular</th>
+                    <td>@Model.CartaPorte.Autotransporte.PesoBrutoVehicular</td>
+                </tr>
+                <tr>
+                    <th>Placa Vehículo</th>
+                    <td>@Model.CartaPorte.Autotransporte.PlacaVM</td>
+                    <th>Año Modelo Vehículo</th>
+                    <td>@Model.CartaPorte.Autotransporte.AnioModeloVM</td>
+                </tr>
+            </table>
+        </div>
+    }
+    <!-- Datos de Seguro -->
+    @if (Model.CartaPorte?.Seguro != null && (
+    !string.IsNullOrEmpty(Model.CartaPorte.Seguro.AseguradoraResponsabilidadCivil) ||
+    !string.IsNullOrEmpty(Model.CartaPorte.Seguro.AseguradoraCarga) ||
+    !string.IsNullOrEmpty(Model.CartaPorte.Seguro.AseguradoraMedAmbiente)))
+    {
+        <div class="section">
+            <div class="section-title">Datos del Seguro</div>
+            <table>
+                @if (!string.IsNullOrEmpty(Model.CartaPorte.Seguro.AseguradoraResponsabilidadCivil))
+                {
+                    <tr>
+                        <th>Aseguradora Responsabilidad Civil</th>
+                        <td>@Model.CartaPorte.Seguro.AseguradoraResponsabilidadCivil</td>
+                        <th>Póliza Responsabilidad Civil</th>
+                        <td>@Model.CartaPorte.Seguro.PolizaResponsabilidadCivil</td>
+                    </tr>
+                }
+                @if (!string.IsNullOrEmpty(Model.CartaPorte.Seguro.AseguradoraCarga))
+                {
+                    <tr>
+                        <th>Aseguradora Carga</th>
+                        <td>@Model.CartaPorte.Seguro.AseguradoraCarga</td>
+                        <th>Póliza Carga</th>
+                        <td>@Model.CartaPorte.Seguro.PolizaCarga</td>
+                    </tr>
+                }
+                @if (!string.IsNullOrEmpty(Model.CartaPorte.Seguro.AseguradoraMedAmbiente))
+                {
+                    <tr>
+                        <th>Aseguradora Medio Ambiente</th>
+                        <td>@Model.CartaPorte.Seguro.AseguradoraMedAmbiente</td>
+                        <th>Póliza Medio Ambiente</th>
+                        <td>@Model.CartaPorte.Seguro.PolizaMedAmbiente</td>
+                    </tr>
+                }
+            </table>
+        </div>
+    }
+    <!-- Datos de Remolque -->
+    <div class="section">
+        <div class="section-title">Datos del Remolque</div>
+        <table>
+            <tr>
+                <th>SubTipo Remolque</th>
+                <td>@Model.CartaPorte.Remolque.SubTipoRemolque</td>
+                <th>Placa</th>
+                <td>@Model.CartaPorte.Remolque.Placa</td>
+            </tr>
+        </table>
+    </div>
+    <!-- Figura Transporte -->
+    @if (Model.CartaPorte?.FigurasTransporte != null && Model.CartaPorte.FigurasTransporte.Any())
+    {
+        <div class="section">
+            <div class="section-title">Figuras de Transporte</div>
+            <table>
+                <thead>
+                    <tr class="table-header">
+                        <th>Tipo Figura</th>
+                        <th>RFC Figura</th>
+                        <th>Nombre Figura</th>
+                        <th>Licencia</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var figura in Model.CartaPorte.FigurasTransporte)
+                    {
+                        <tr>
+                            <td>@figura.TipoFigura</td>
+                            <td>@figura.RFCFigura</td>
+                            <td>@figura.NombreFigura</td>
+                            <td>@figura.NumeroLicencia</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    <!-- Footer: Información Fiscal Digital + Código QR -->
+     <div class="section footer-section">
+        <div class="section-title">Información Fiscal Digital</div>
+        <table>
+            <tr>
+                <th>Folio Fiscal (UUID)</th>
+                <td>@Model.UUID</td>
+                <th>No. Certificado SAT</th>
+                <td>@Model.NoCertificadoSAT</td>
+            </tr>
+            <tr>
+                <th>No. Certificado Emisor</th>
+                <td>@Model.NoCertificadoEmisor</td>
+                <th>Fecha de Timbrado</th>
+                <td>@Model.FechaCertificacion.ToString("yyyy-MM-dd'T'HH:mm:ss")</td>
+            </tr>
+        </table>
+
+        <!-- Tabla de QR + Sellos -->
+        <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+            <tr>
+                <td style="width: 30%; text-align: center; vertical-align: middle; height: 180px;">
+                    @if (!string.IsNullOrEmpty(Model.QRCodeBase64))
+                    {
+                        <img src="data:image/png;base64,@Model.QRCodeBase64" alt="Código QR CFDI" style="width: 150px; height: 150px;" />
+                    }
+                </td>
+                <td style="width: 70%; vertical-align: top; font-size: 9px;">
+                    <div class="section-title" style="margin-top: 0;">Sello Digital del Emisor</div>
+                    <pre style="white-space: pre-wrap; word-break: break-all; overflow-wrap: break-word; font-size: 9px;">@Model.SelloEmisor</pre>
+
+                    <div class="section-title">Cadena Original del Complemento de Certificación Digital del SAT</div>
+                    <pre style="white-space: pre-wrap; word-break: break-all; overflow-wrap: break-word; font-size: 9px;">@Model.CadenaOriginalSAT</pre>
+
+                    <div class="section-title">Sello Digital del SAT</div>
+                    <pre style="white-space: pre-wrap; word-break: break-all; overflow-wrap: break-word; font-size: 9px;">@Model.SelloSAT</pre>
+                </td>
+            </tr>
+        </table>
+    </div> 
+</body>
+</html>

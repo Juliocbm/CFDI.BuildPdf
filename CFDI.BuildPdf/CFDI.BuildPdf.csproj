@@ -1,0 +1,29 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net6.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="DinkToPdf" Version="1.0.8" />
+		<PackageReference Include="QRCoder" Version="1.6.0" />
+		<PackageReference Include="RazorLight" Version="2.3.1" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<EmbeddedResource Include="Templates\**\*.cshtml" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Remove="NativeBinaries\libwkhtmltox.dll" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <EmbeddedResource Include="NativeBinaries\libwkhtmltox.dll" />
+	</ItemGroup>
+
+</Project>
