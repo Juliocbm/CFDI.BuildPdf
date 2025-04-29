@@ -105,6 +105,10 @@
             text-transform: uppercase;
             color: #333;
         }
+
+        table, th, td {
+            border: 1px solid #ccc !important; /* Gris suave */
+        }
     </style>
 </head>
 <body>
@@ -119,10 +123,10 @@
 
 
     <!-- Sección: Logo a la izquierda / UUID y certificados a la derecha, SIN NINGÚN BORDE -->
-    <table style="width: 100%; border: none; border-collapse: collapse; margin-top: 10px; font-size: 10px;">
-        <tr style="border: none;">
+    <table style="width: 100%; border: 1px solid white !important; border-collapse: collapse; margin-top: 10px; font-size: 10px;">
+        <tr style="border: 1px solid white !important;">
             <!-- Logo (Izquierda) -->
-            <td style="width: 30%; text-align: center; vertical-align: top; border: none;">
+            <td style="width: 30%; text-align: center; vertical-align: top; border: 1px solid white !important;">
                 @if (!string.IsNullOrEmpty(Model.LogoBase64))
                 {
                     <img src="data:image/png;base64,@Model.LogoBase64" alt="Logo Empresa" style="max-width: 150px; max-height: 100px;" />
@@ -130,7 +134,7 @@
             </td>
 
             <!-- UUID y Certificados (Derecha) -->
-            <td style="width: 70%; vertical-align: top; border: none;">
+            <td style="width: 70%; vertical-align: top; border: 1px solid white !important;">
                 <table style="width: 100%; border: none; border-collapse: collapse; table-layout: fixed;">
                     <tr style="border: none;">
                         <th style="width: 45%; text-align: left; padding: 2px; border: 1px solid black;">Folio Fiscal (UUID):</th>
@@ -188,16 +192,16 @@
 
 
     <!-- Comprobante y Pago usando tabla, sin bordes en ningún lado -->
-    <table style="width: 100%; border: none; border-collapse: collapse; margin-top: 10px; font-size: 10px;">
+    <table style="width: 100%; border: 1px solid white !important; border-collapse: collapse; margin-top: 10px; font-size: 10px;">
         <tr>
             <!-- Forma de Pago y Método de Pago -->
-            <td style="width: 50%; vertical-align: top; padding: 5px; border: none;">
+            <td style="width: 50%; vertical-align: top; padding: 5px; border: 1px solid white !important; ">
                 <strong>Forma de Pago:</strong> @Model.FormaPago<br />
                 <strong>Método de Pago:</strong> @Model.MetodoPago
             </td>
 
             <!-- Tipo de Comprobante y Condiciones de Pago -->
-            <td style="width: 50%; vertical-align: top; padding: 5px; border: none;">
+            <td style="width: 50%; vertical-align: top; padding: 5px; border: 1px solid white !important; ">
                 <strong>Tipo de Comprobante:</strong> @Model.TipoComprobante<br />
                 <strong>Condiciones de Pago:</strong> @Model.CondicionesPago
             </td>
@@ -215,16 +219,16 @@
             <table>
                 <thead>
                     <tr class="table-header">
-                        <th>Clave Producto/Servicio</th>
-                        <th>Número Identificación</th>
-                        <th>Cantidad</th>
-                        <th>Clave Unidad</th>
-                        <th>Unidad de Medida</th>
-                        <th>Descripción</th>
-                        <th>Precio Unitario</th>
-                        <th>Importe</th>
-                        <th>Descuento</th>
-                        <th>Objeto Impuestos</th>
+                        <th style="width: 8%; border: 1px solid black;">Clave Producto/Servicio</th>
+                        <th style="width: 8%; border: 1px solid black;">Número de Identificación</th>
+                        <th style="width: 5%; border: 1px solid black;">Cantidad</th>
+                        <th style="width: 5%; border: 1px solid black;">Clave Unidad</th>
+                        <th style="width: 7%; border: 1px solid black;">Unidad de Medida</th>
+                        <th style="width: 30%; border: 1px solid black;">Descripción</th> <!-- ✅ más ancha -->
+                        <th style="width: 8%; border: 1px solid black;">Precio Unitario</th>
+                        <th style="width: 8%; border: 1px solid black;">Importe</th>
+                        <th style="width: 8%; border: 1px solid black;">Descuento</th>
+                        <th style="width: 8%; border: 1px solid black;">Objeto Impuestos</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -236,11 +240,51 @@
                             <td>@concepto.Cantidad</td>
                             <td>@concepto.ClaveUnidad</td>
                             <td>@concepto.Unidad</td>
-                            <td>@concepto.Descripcion</td>
+
+                            <td>
+                                <div>
+                                    <div>@concepto.Descripcion</div>
+
+                                    @if (concepto.Traslados?.Any() == true)
+                                    {
+                                        <div style="margin-top: 5px; font-size: 9px;">
+                                            <strong>IMPUESTOS TRASLADADOS</strong>
+
+                                            <table style="width: 100%; border-collapse: collapse; font-size: 8px; table-layout: fixed;">
+                                                <thead>
+                                                    <tr>
+                                                        <th style="border: 1px solid white !important; white-space: normal;">Factor</th>
+                                                        <th style="border: 1px solid white !important; white-space: normal;">Impuesto</th>
+                                                        <th style="border: 1px solid white !important; white-space: normal;">Tasa/Cuota</th>
+                                                        <th style="border: 1px solid white !important; white-space: normal;">Base</th>
+                                                        <th style="border: 1px solid white !important; white-space: normal;">Importe</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach (var traslado in concepto.Traslados)
+                                                    {
+                                                        <tr>
+                                                            <td style="border: 1px solid white !important; white-space: normal;">@traslado.TipoFactor</td>
+                                                            <td style="border: 1px solid white !important; white-space: normal;">@traslado.Impuesto</td>
+                                                            <td style="border: 1px solid white !important; white-space: normal;">@traslado.TasaOCuota.ToString("0.000000")</td>
+                                                            <td style="border: 1px solid white !important; white-space: normal;">@traslado.Base.ToString("0.000000")</td>
+                                                            <td style="border: 1px solid white !important; white-space: normal;">@traslado.Importe.ToString("0.000000")</td>
+                                                        </tr>
+                                                    }
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    }
+                                </div>
+                            </td>
+
+
                             <td>@concepto.ValorUnitario.ToString("F6")</td>
                             <td>@concepto.Importe.ToString("F6")</td>
-                            <td>@concepto.Descuento.ToString("F6")</td>
-                            <td>@concepto.ObjetoImpuesto</td>
+                            <td>
+                                @(concepto.Descuento != 0 ? concepto.Descuento.ToString("F6") : "")
+                            </td>
+                            <td>@concepto.ObjetoImpuesto</td> 
                         </tr>
                     }
                 </tbody>
@@ -254,15 +298,15 @@
         <div class="section-title">Totales</div>
         <table>
             <tr>
-                <th>Subtotal</th>
+                <th class="table-header">Subtotal</th>
                 <td>@Model.SubTotal.ToString("C2")</td>
-                <th>Total Impuestos Trasladados</th>
+                <th class="table-header">Total Impuestos Trasladados</th>
                 <td>@Model.TotalImpuestosTrasladados.ToString("C2")</td>
-                <th>Total</th>
+                <th class="table-header">Total</th>
                 <td>@Model.Total.ToString("C2")</td>
             </tr>
             <tr>
-                <th>Cantidad en Letra</th>
+                <th class="table-header">Cantidad en Letra</th>
                 <td colspan="5">@Model.CantidadConLetra</td>
             </tr>
         </table>
@@ -305,7 +349,7 @@
     {
         <div class="section" style="text-align: left; margin-top: 30px;">
             <div class="section-title">Identificador del Complemento Carta Porte:</div>
-            <div style="border: 1px solid black; padding: 10px; margin-top: 5px; font-size: 12px;">
+            <div style="border: 1px solid #ccc; padding: 10px; margin-top: 5px; font-size: 12px;">
                 @Model.CartaPorte.IdCCP
             </div>
         </div>
@@ -316,22 +360,22 @@
         <div class="section-title">Complemento Carta Porte</div>
         <table>
             <tr>
-                <th>Versión</th>
+                <th class="table-header">Versión</th>
                 <td>@Model.CartaPorte.Version</td>
-                <th>Transporte Internacional</th>
+                <th class="table-header">Transporte Internacional</th>
                 <td>@Model.CartaPorte.TransporteInternacional</td>
-                <th>Via de entrada/salida</th>
+                <th class="table-header">Via de entrada/salida</th>
                 <td>@Model.CartaPorte.ViaEntradaSalida</td>
             </tr>
             <tr>
-                <th>Entrada/Salida</th>
+                <th class="table-header">Entrada/Salida</th>
                 <td>@Model.CartaPorte.EntradaSalidaMercancia</td>
 
 
 
-                <th>País Origen/Destino</th>
+                <th class="table-header">País Origen/Destino</th>
                 <td>@Model.CartaPorte.PaisOrigenDestino</td>
-                <th>Distancia Recorrida</th>
+                <th class="table-header">Distancia Recorrida</th>
                 <td>@Model.CartaPorte.DistanciaRecorrida</td>
             </tr>
         </table>
@@ -441,21 +485,21 @@
             <div class="section-title">Datos de Autotransporte</div>
             <table>
                 <tr>
-                    <th>Permiso SCT</th>
+                    <th class="table-header">Permiso SCT</th>
                     <td>@Model.CartaPorte.Autotransporte.PermisoSCT</td>
-                    <th>Número Permiso SCT</th>
+                    <th class="table-header">Número Permiso SCT</th>
                     <td>@Model.CartaPorte.Autotransporte.NumeroPermisoSCT</td>
                 </tr>
                 <tr>
-                    <th>Configuración Vehicular</th>
+                    <th class="table-header">Configuración Vehicular</th>
                     <td>@Model.CartaPorte.Autotransporte.ConfigVehicular</td>
-                    <th>Peso Bruto Vehicular</th>
+                    <th class="table-header">Peso Bruto Vehicular</th>
                     <td>@Model.CartaPorte.Autotransporte.PesoBrutoVehicular</td>
                 </tr>
                 <tr>
-                    <th>Placa Vehículo</th>
+                    <th class="table-header">Placa Vehículo</th>
                     <td>@Model.CartaPorte.Autotransporte.PlacaVM</td>
-                    <th>Año Modelo Vehículo</th>
+                    <th class="table-header">Año Modelo Vehículo</th>
                     <td>@Model.CartaPorte.Autotransporte.AnioModeloVM</td>
                 </tr>
             </table>
@@ -473,27 +517,27 @@
                 @if (!string.IsNullOrEmpty(Model.CartaPorte.Seguro.AseguradoraResponsabilidadCivil))
                 {
                     <tr>
-                        <th>Aseguradora Responsabilidad Civil</th>
+                        <th class="table-header">Aseguradora Responsabilidad Civil</th>
                         <td>@Model.CartaPorte.Seguro.AseguradoraResponsabilidadCivil</td>
-                        <th>Póliza Responsabilidad Civil</th>
+                        <th class="table-header">Póliza Responsabilidad Civil</th>
                         <td>@Model.CartaPorte.Seguro.PolizaResponsabilidadCivil</td>
                     </tr>
                 }
                 @if (!string.IsNullOrEmpty(Model.CartaPorte.Seguro.AseguradoraCarga))
                 {
                     <tr>
-                        <th>Aseguradora Carga</th>
+                        <th class="table-header">Aseguradora Carga</th>
                         <td>@Model.CartaPorte.Seguro.AseguradoraCarga</td>
-                        <th>Póliza Carga</th>
+                        <th class="table-header">Póliza Carga</th>
                         <td>@Model.CartaPorte.Seguro.PolizaCarga</td>
                     </tr>
                 }
                 @if (!string.IsNullOrEmpty(Model.CartaPorte.Seguro.AseguradoraMedAmbiente))
                 {
                     <tr>
-                        <th>Aseguradora Medio Ambiente</th>
+                        <th class="table-header">Aseguradora Medio Ambiente</th>
                         <td>@Model.CartaPorte.Seguro.AseguradoraMedAmbiente</td>
-                        <th>Póliza Medio Ambiente</th>
+                        <th class="table-header">Póliza Medio Ambiente</th>
                         <td>@Model.CartaPorte.Seguro.PolizaMedAmbiente</td>
                     </tr>
                 }
@@ -505,9 +549,9 @@
         <div class="section-title">Datos del Remolque</div>
         <table>
             <tr>
-                <th>SubTipo Remolque</th>
+                <th class="table-header">SubTipo Remolque</th>
                 <td>@Model.CartaPorte.Remolque.SubTipoRemolque</td>
-                <th>Placa</th>
+                <th class="table-header">Placa</th>
                 <td>@Model.CartaPorte.Remolque.Placa</td>
             </tr>
         </table>

@@ -54,6 +54,23 @@ namespace CFDI.BuildPdf.Mappers
                 UsoCFDI = comprobante.Element(cfdi + "Receptor")?.Attribute("UsoCFDI")?.Value,
 
                 // Conceptos
+                //Conceptos = comprobante
+                //    .Element(cfdi + "Conceptos")
+                //    ?.Elements(cfdi + "Concepto")
+                //    .Select(c => new ConceptoViewModel
+                //    {
+                //        ClaveProductoServicio = c.Attribute("ClaveProdServ")?.Value,
+                //        NumeroIdentificacion = c.Attribute("NoIdentificacion")?.Value,
+                //        Descripcion = c.Attribute("Descripcion")?.Value,
+                //        Cantidad = decimal.Parse(c.Attribute("Cantidad")?.Value ?? "0"),
+                //        ClaveUnidad = c.Attribute("ClaveUnidad")?.Value,
+                //        Unidad = c.Attribute("Unidad")?.Value,
+                //        ValorUnitario = decimal.Parse(c.Attribute("ValorUnitario")?.Value ?? "0"),
+                //        Importe = decimal.Parse(c.Attribute("Importe")?.Value ?? "0"),
+                //        Descuento = decimal.Parse(c.Attribute("Descuento")?.Value ?? "0"),
+                //        ObjetoImpuesto = c.Attribute("ObjetoImp")?.Value
+                //    }).ToList() ?? new(),
+
                 Conceptos = comprobante
                     .Element(cfdi + "Conceptos")
                     ?.Elements(cfdi + "Concepto")
@@ -68,8 +85,21 @@ namespace CFDI.BuildPdf.Mappers
                         ValorUnitario = decimal.Parse(c.Attribute("ValorUnitario")?.Value ?? "0"),
                         Importe = decimal.Parse(c.Attribute("Importe")?.Value ?? "0"),
                         Descuento = decimal.Parse(c.Attribute("Descuento")?.Value ?? "0"),
-                        ObjetoImpuesto = c.Attribute("ObjetoImp")?.Value
+                        ObjetoImpuesto = c.Attribute("ObjetoImp")?.Value,
+                        Traslados = c.Element(cfdi + "Impuestos")
+                             ?.Element(cfdi + "Traslados")
+                             ?.Elements(cfdi + "Traslado")
+                             .Select(t => new TrasladoImpuestoViewModel
+                             {
+                                 Impuesto = t.Attribute("Impuesto")?.Value,
+                                 TipoFactor = t.Attribute("TipoFactor")?.Value,
+                                 TasaOCuota = decimal.Parse(t.Attribute("TasaOCuota")?.Value ?? "0"),
+                                 Base = decimal.Parse(t.Attribute("Base")?.Value ?? "0"),
+                                 Importe = decimal.Parse(t.Attribute("Importe")?.Value ?? "0")
+                             }).ToList() ?? new List<TrasladoImpuestoViewModel>()
+
                     }).ToList() ?? new(),
+
 
                 // Totales
                 SubTotal = decimal.Parse(comprobante?.Attribute("SubTotal")?.Value ?? "0"),
@@ -171,67 +201,6 @@ namespace CFDI.BuildPdf.Mappers
 
             return model;
         }
-
-        //private static AddendaViewModel MapAddenda(XElement addendaNode)
-        //{
-        //    var result = new AddendaViewModel();
-
-        //    // Buscar InformacionAdicional
-        //    var informacionAdicional = addendaNode.Descendants()
-        //        .FirstOrDefault(x => x.Name.LocalName == "InformacionAdicional");
-
-        //    if (informacionAdicional != null && informacionAdicional.ToString().Contains("buzone.com.mx"))
-        //    {
-        //        result.IsParserGenerico = true;
-
-        //        // Hay 2 casos:
-        //        // 1. InformacionAdicional ya parseado (normal)
-        //        // 2. InformacionAdicional en CDATA
-        //        var cdata = informacionAdicional.Nodes().OfType<XCData>().FirstOrDefault();
-        //        string xmlContent;
-
-        //        if (cdata != null)
-        //        {
-        //            xmlContent = cdata.Value;
-        //        }
-        //        else
-        //        {
-        //            xmlContent = informacionAdicional.ToString();
-        //        }
-
-        //        try
-        //        {
-        //            var innerDoc = XDocument.Parse(xmlContent);
-
-        //            foreach (var seccion in innerDoc.Root.Elements())
-        //            {
-        //                var nuevaSeccion = new AddendaSeccionViewModel
-        //                {
-        //                    NombreSeccion = seccion.Name.LocalName
-        //                };
-
-        //                foreach (var attr in seccion.Attributes())
-        //                {
-        //                    nuevaSeccion.Campos.Add(new KeyValuePair<string, string>(attr.Name.LocalName, attr.Value));
-        //                }
-
-        //                result.Secciones.Add(nuevaSeccion);
-        //            }
-        //        }
-        //        catch
-        //        {
-        //            // Si fallamos parseando CDATA, fallback: guardar el texto crudo
-        //            result.XmlRaw = xmlContent;
-        //        }
-        //    }
-        //    else
-        //    {
-        //        // No es Parser Generico ➔ guardar Addenda como XML crudo
-        //        result.XmlRaw = addendaNode.ToString();
-        //    }
-
-        //    return result;
-        //}
 
         private static AddendaViewModel MapAddenda(XElement addendaNode)
         {

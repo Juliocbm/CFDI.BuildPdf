@@ -72,7 +72,6 @@ namespace CFDI.BuildPdf.Models
         public List<KeyValuePair<string, string>> Campos { get; set; } = new();
     }
 
-
     public class ConceptoViewModel
     {
         public string ClaveProductoServicio { get; set; }
@@ -85,7 +84,19 @@ namespace CFDI.BuildPdf.Models
         public decimal Importe { get; set; }
         public decimal Descuento { get; set; }
         public string ObjetoImpuesto { get; set; }
+
+        public List<TrasladoImpuestoViewModel> Traslados { get; set; } = new(); // 🚀 Aquí agregamos
     }
+
+    public class TrasladoImpuestoViewModel
+    {
+        public string Impuesto { get; set; }       // IVA, ISR, etc.
+        public string TipoFactor { get; set; }      // Tasa, Cuota, Exento
+        public decimal TasaOCuota { get; set; }
+        public decimal Base { get; set; }
+        public decimal Importe { get; set; }
+    }
+
 
     public class CartaPorteViewModel
     {
