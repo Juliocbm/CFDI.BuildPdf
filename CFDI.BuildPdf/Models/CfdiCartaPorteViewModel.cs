@@ -8,6 +8,7 @@ namespace CFDI.BuildPdf.Models
 {
     public class CfdiCartaPorteViewModel
     {
+
         // CFDI Principal
         public string Version { get; set; }
         public string Serie { get; set; }
@@ -61,6 +62,7 @@ namespace CFDI.BuildPdf.Models
     }
     public class AddendaViewModel
     {
+
         public bool IsParserGenerico { get; set; }
         public List<AddendaSeccionViewModel> Secciones { get; set; } = new();
         public string XmlRaw { get; set; }

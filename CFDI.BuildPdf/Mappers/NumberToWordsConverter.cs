@@ -25,19 +25,39 @@ namespace CFDI.BuildPdf.Mappers
         {
             if (numero == 0) return "CERO";
             if (numero > 999999) return ConvertirNumero(numero / 1000000) + " MILLONES " + ConvertirNumero(numero % 1000000);
-            if (numero > 999) return ConvertirNumero(numero / 1000) + " MIL " + ConvertirNumero(numero % 1000);
-            if (numero > 99) return centenas[numero / 100] + " " + ConvertirNumero(numero % 100);
-            if (numero > 29) return decenas[numero / 10] + (numero % 10 > 0 ? " Y " + unidades[numero % 10] : "");
+            if (numero > 999)
+            {
+                if ((numero / 1000) == 1)
+                    return "MIL " + ConvertirNumero(numero % 1000).Trim();
+                else
+                    return ConvertirNumero(numero / 1000) + " MIL " + ConvertirNumero(numero % 1000).Trim();
+            }
+            if (numero >= 100)
+            {
+                if (numero == 100) return "CIEN";
+                return centenas[numero / 100] + " " + ConvertirNumero(numero % 100).Trim();
+            }
+            if (numero >= 30)
+                return decenas[numero / 10] + (numero % 10 > 0 ? " Y " + unidades[numero % 10] : "");
             if (numero == 20) return "VEINTE";
-            if (numero > 15) return "DIECI" + unidades[numero - 10];
-            if (numero == 15) return "QUINCE";
-            if (numero == 14) return "CATORCE";
-            if (numero == 13) return "TRECE";
-            if (numero == 12) return "DOCE";
-            if (numero == 11) return "ONCE";
-            if (numero == 10) return "DIEZ";
-            return unidades[numero];
+            if (numero > 20 && numero < 30)
+                return "VEINTI" + unidades[numero % 10];
+            if (numero > 15 && numero < 20)
+                return "DIECI" + unidades[numero - 10];
+
+            switch (numero)
+            {
+                case 15: return "QUINCE";
+                case 14: return "CATORCE";
+                case 13: return "TRECE";
+                case 12: return "DOCE";
+                case 11: return "ONCE";
+                case 10: return "DIEZ";
+                default: return unidades[numero];
+            }
         }
+
+
         private static string GetTextoMoneda(string moneda)
         {
             switch (moneda?.ToUpper())

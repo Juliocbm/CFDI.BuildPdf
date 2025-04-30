@@ -4,7 +4,18 @@
 		<TargetFramework>net6.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
-		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+		<Version>1.0.2</Version>
+		<Authors>Julio Cesar Bautista Monsalvo</Authors>
+		<Company>JCBM</Company>
+		<Description>Librería para generar representación impres PDF desde un XML para CFDI 4.0 con complemento carta porte 3.1.</Description>
+		<PackageTags>AOP;Interceptor;Logging;Retry;Fallback;Audit;Validation</PackageTags>
+		<RepositoryType>git</RepositoryType>
+		<RepositoryUrl>https://github.com/Juliocbm/CFDI.BuildPdf</RepositoryUrl>
+		<PackageProjectUrl>https://github.com/Juliocbm/CFDI.BuildPdf</PackageProjectUrl>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<!-- Para permitir publicación pública -->
+		<IncludeSymbols>true</IncludeSymbols>
+		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 	</PropertyGroup>
 

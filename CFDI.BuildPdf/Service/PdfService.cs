@@ -58,35 +58,41 @@ namespace CFDI.BuildPdf.Service
         //}
 
         // Método principal: desde ruta física
-        public async Task<byte[]> GenerarPdfDesdeXmlAsync(string rutaXml, bool mostrarMercancias = true)
+        public async Task<byte[]> GenerarPdfDesdeXmlAsync(string rutaXml, bool mostrarMercancias = true, string? logoBase64 = null)
         {
             var xdoc = XDocument.Load(rutaXml);
-            return await RenderPdf(xdoc, mostrarMercancias);
+            return await RenderPdf(xdoc, mostrarMercancias, logoBase64);
         }
 
         // Desde byte[]
-        public async Task<byte[]> GenerarPdfDesdeXmlAsync(byte[] xmlBytes, bool mostrarMercancias = true)
+        public async Task<byte[]> GenerarPdfDesdeXmlAsync(byte[] xmlBytes, bool mostrarMercancias = true, string? logoBase64 = null)
         {
             using var ms = new MemoryStream(xmlBytes);
             var xdoc = XDocument.Load(ms);
-            return await RenderPdf(xdoc, mostrarMercancias);
+            return await RenderPdf(xdoc, mostrarMercancias, logoBase64);
         }
 
         // Desde string XML en memoria
-        public async Task<byte[]> GenerarPdfDesdeXmlAsync(string xmlContenido, bool esContenidoXml, bool mostrarMercancias = true)
+        public async Task<byte[]> GenerarPdfDesdeXmlAsync(string xmlContenido, bool esContenidoXml, bool mostrarMercancias = true, string? logoBase64 = null)
         {
             if (!esContenidoXml)
                 throw new ArgumentException("Si usas esta sobrecarga, 'esContenidoXml' debe ser true.");
 
             using var reader = new StringReader(xmlContenido);
             var xdoc = XDocument.Load(reader);
-            return await RenderPdf(xdoc, mostrarMercancias);
+            return await RenderPdf(xdoc, mostrarMercancias, logoBase64);
         }
 
         // Método central reutilizado por todas las sobrecargas
-        private async Task<byte[]> RenderPdf(XDocument xdoc, bool mostrarMercancias)
+        private async Task<byte[]> RenderPdf(XDocument xdoc, bool mostrarMercancias, string? logoBase64 = null)
         {
             var model = XmlToModelMapper.Map(xdoc);
+
+
+            if (!string.IsNullOrEmpty(logoBase64))
+            {
+                model.LogoBase64 = logoBase64;
+            }
 
             dynamic viewBag = new System.Dynamic.ExpandoObject();
             viewBag.MostrarMercancias = mostrarMercancias;

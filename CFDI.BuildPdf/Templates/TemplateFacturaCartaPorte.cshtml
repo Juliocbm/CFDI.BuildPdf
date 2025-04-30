@@ -116,8 +116,8 @@
     <!-- Encabezado General corregido para que esté PEGADO a la derecha -->
     <div style="width: 100%; text-align: right; margin-bottom: 20px; font-size: 12px;">
         <div style="display: inline-block; text-align: right;">
-            <strong>@Model.EmisorNombre</strong><br />
-            @Model.EmisorRFC
+            <strong>@Model?.EmisorNombre</strong><br />
+            @Model?.EmisorRFC
         </div>
     </div>
 
@@ -127,9 +127,9 @@
         <tr style="border: 1px solid white !important;">
             <!-- Logo (Izquierda) -->
             <td style="width: 30%; text-align: center; vertical-align: top; border: 1px solid white !important;">
-                @if (!string.IsNullOrEmpty(Model.LogoBase64))
+                @if (!string.IsNullOrEmpty(Model?.LogoBase64))
                 {
-                    <img src="data:image/png;base64,@Model.LogoBase64" alt="Logo Empresa" style="max-width: 150px; max-height: 100px;" />
+                    <img src="data:image/png;base64,@Model?.LogoBase64" alt="Logo Empresa" style="max-width: 150px; max-height: 100px;" />
                 }
             </td>
 
@@ -138,23 +138,23 @@
                 <table style="width: 100%; border: none; border-collapse: collapse; table-layout: fixed;">
                     <tr style="border: none;">
                         <th style="width: 45%; text-align: left; padding: 2px; border: 1px solid black;">Folio Fiscal (UUID):</th>
-                        <td style="padding: 2px; border: 1px solid black;">@Model.UUID</td>
+                        <td style="padding: 2px; border: 1px solid black;">@Model?.UUID</td>
                     </tr>
                     <tr style="border: border: none;">
                         <th style="text-align: left; padding: 2px; border: 1px solid black;">Fecha de Certificación:</th>
-                        <td style="padding: 2px; 1px solid black;">@Model.FechaCertificacion.ToString("yyyy-MM-dd'T'HH:mm:ss")</td>
+                        <td style="padding: 2px; 1px solid black;">@Model?.FechaCertificacion.ToString("yyyy-MM-dd'T'HH:mm:ss")</td>
                     </tr>
                     <tr style="border: none;">
                         <th style="text-align: left; padding: 2px; border: 1px solid black;;">No. Certificado SAT:</th>
-                        <td style="padding: 2px; 1px solid black;">@Model.NoCertificadoSAT</td>
+                        <td style="padding: 2px; 1px solid black;">@Model?.NoCertificadoSAT</td>
                     </tr>
                     <tr style="border: none;">
                         <th style="text-align: left; padding: 2px; border: 1px solid black;">No. Certificado Emisor:</th>
-                        <td style="padding: 2px; 1px solid black;">@Model.NoCertificadoEmisor</td>
+                        <td style="padding: 2px; 1px solid black;">@Model?.NoCertificadoEmisor</td>
                     </tr>
                     <tr style="border: none;">
                         <th style="text-align: left; padding: 2px; border: 1px solid black;">Versión:</th>
-                        <td style="padding: 2px; 1px solid black;">@Model.Version</td>
+                        <td style="padding: 2px; 1px solid black;">@Model?.Version</td>
                     </tr>
                 </table>
             </td>
@@ -170,21 +170,21 @@
             <!-- CLIENTE (Izquierda) -->
             <td style="width: 50%; border: 1px solid black; vertical-align: top; padding: 8px;">
                 <strong>CLIENTE</strong><br />
-                @Model.ReceptorNombre<br />
-                <strong>RFC:</strong> @Model.ReceptorRFC<br />
-                <strong>Domicilio Fiscal:</strong> @Model.ReceptorDomicilioFiscal<br />
-                <strong>Régimen Fiscal:</strong> @Model.ReceptorRegimenFiscal<br />
-                <strong>Uso del CFDI:</strong> @Model.UsoCFDI
+                @Model?.ReceptorNombre<br />
+                <strong>RFC:</strong> @Model?.ReceptorRFC<br />
+                <strong>Domicilio Fiscal:</strong> @Model?.ReceptorDomicilioFiscal<br />
+                <strong>Régimen Fiscal:</strong> @Model?.ReceptorRegimenFiscal<br />
+                <strong>Uso del CFDI:</strong> @Model?.UsoCFDI
             </td>
 
             <!-- EMISIÓN (Derecha) -->
             <td style="width: 50%; border: 1px solid black; vertical-align: top; padding: 8px;">
-                <strong>Fecha y Hora de Emisión:</strong> @Model.FechaEmision.ToString("yyyy-MM-dd'T'HH:mm:ss")<br />
-                <strong>Lugar de Expedición:</strong> @Model.LugarExpedicion<br />
-                <strong>Serie y Folio:</strong> @Model.Folio<br />
-                <strong>Tipo de Cambio:</strong> @Model.TipoCambio<br />
-                <strong>Moneda:</strong> @Model.Moneda<br />
-                <strong>Exportación:</strong> @Model.Exportacion
+                <strong>Fecha y Hora de Emisión:</strong> @Model?.FechaEmision.ToString("yyyy-MM-dd'T'HH:mm:ss")?? ""<br />
+                <strong>Lugar de Expedición:</strong> @Model?.LugarExpedicion<br />
+                <strong>Serie y Folio:</strong> @Model?.Folio<br />
+                <strong>Tipo de Cambio:</strong> @Model?.TipoCambio<br />
+                <strong>Moneda:</strong> @Model?.Moneda<br />
+                <strong>Exportación:</strong> @Model?.Exportacion
             </td>
         </tr>
     </table>
@@ -196,14 +196,14 @@
         <tr>
             <!-- Forma de Pago y Método de Pago -->
             <td style="width: 50%; vertical-align: top; padding: 5px; border: 1px solid white !important; ">
-                <strong>Forma de Pago:</strong> @Model.FormaPago<br />
-                <strong>Método de Pago:</strong> @Model.MetodoPago
+                <strong>Forma de Pago:</strong> @Model?.FormaPago<br />
+                <strong>Método de Pago:</strong> @Model?.MetodoPago
             </td>
 
             <!-- Tipo de Comprobante y Condiciones de Pago -->
             <td style="width: 50%; vertical-align: top; padding: 5px; border: 1px solid white !important; ">
-                <strong>Tipo de Comprobante:</strong> @Model.TipoComprobante<br />
-                <strong>Condiciones de Pago:</strong> @Model.CondicionesPago
+                <strong>Tipo de Comprobante:</strong> @Model?.TipoComprobante<br />
+                <strong>Condiciones de Pago:</strong> @Model?.CondicionesPago
             </td>
         </tr>
     </table>
@@ -212,7 +212,7 @@
 
 
     <!-- Conceptos -->
-    @if (Model.Conceptos != null && Model.Conceptos.Any())
+    @if (Model?.Conceptos != null && Model.Conceptos.Any())
     {
         <div class="section">
             <div class="section-title">Conceptos Facturados</div>
@@ -232,7 +232,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var concepto in Model.Conceptos)
+                    @foreach (var concepto in Model?.Conceptos)
                     {
                         <tr>
                             <td>@concepto.ClaveProductoServicio</td>
@@ -299,32 +299,32 @@
         <table>
             <tr>
                 <th class="table-header">Subtotal</th>
-                <td>@Model.SubTotal.ToString("C2")</td>
+                <td>@Model?.SubTotal.ToString("C2")</td>
                 <th class="table-header">Total Impuestos Trasladados</th>
-                <td>@Model.TotalImpuestosTrasladados.ToString("C2")</td>
+                <td>@Model?.TotalImpuestosTrasladados.ToString("C2")</td>
                 <th class="table-header">Total</th>
-                <td>@Model.Total.ToString("C2")</td>
+                <td>@Model?.Total.ToString("C2")</td>
             </tr>
             <tr>
                 <th class="table-header">Cantidad en Letra</th>
-                <td colspan="5">@Model.CantidadConLetra</td>
+                <td colspan="5">@Model?.CantidadConLetra</td>
             </tr>
         </table>
     </div>
 
     <!-- Addenda -->
-    @if (Model.Addenda != null)
+    @if (Model?.Addenda != null)
     {
         <div class="section-title">Addenda Genérica</div>
 
-        @if (Model.Addenda.IsParserGenerico && Model.Addenda.Secciones.Any())
+        @if (Model?.Addenda?.IsParserGenerico == true && Model.Addenda.Secciones?.Any() == true)
         {
-            @foreach (var seccion in Model.Addenda.Secciones.Where(s => s.Campos.Any(c => !string.IsNullOrWhiteSpace(c.Value))))
+            @foreach (var seccion in Model?.Addenda?.Secciones?.Where(s => s.Campos.Any(c => !string.IsNullOrWhiteSpace(c.Value))))
             {
                 <div class="addenda-section">
                     @* <div class="addenda-title">@seccion.NombreSeccion</div> *@
                     <table>
-                        @foreach (var campo in seccion.Campos.Where(c => !string.IsNullOrWhiteSpace(c.Value)))
+                        @foreach (var campo in seccion.Campos?.Where(c => !string.IsNullOrWhiteSpace(c.Value)))
                         {
                             <tr>
                                 <td>@campo.Key</td>
@@ -335,22 +335,22 @@
                 </div>
             }
         }
-        else if (!string.IsNullOrEmpty(Model.Addenda.XmlRaw))
+        else if (!string.IsNullOrEmpty(Model?.Addenda?.XmlRaw))
         {
             <div class="addenda-section">
-                <pre style="font-size:8px;">@Model.Addenda.XmlRaw</pre>
+                <pre style="font-size:8px;">@Model?.Addenda?.XmlRaw</pre>
             </div>
         }
     }
 
 
     <!-- Sección Identificador Complemento Carta Porte -->
-    @if (!string.IsNullOrEmpty(Model.CartaPorte.IdCCP))
+    @if (!string.IsNullOrEmpty(Model?.CartaPorte?.IdCCP))
     {
         <div class="section" style="text-align: left; margin-top: 30px;">
             <div class="section-title">Identificador del Complemento Carta Porte:</div>
             <div style="border: 1px solid #ccc; padding: 10px; margin-top: 5px; font-size: 12px;">
-                @Model.CartaPorte.IdCCP
+                @Model?.CartaPorte?.IdCCP
             </div>
         </div>
     }
@@ -361,27 +361,27 @@
         <table>
             <tr>
                 <th class="table-header">Versión</th>
-                <td>@Model.CartaPorte.Version</td>
+                <td>@Model?.CartaPorte?.Version</td>
                 <th class="table-header">Transporte Internacional</th>
-                <td>@Model.CartaPorte.TransporteInternacional</td>
+                <td>@Model?.CartaPorte?.TransporteInternacional</td>
                 <th class="table-header">Via de entrada/salida</th>
-                <td>@Model.CartaPorte.ViaEntradaSalida</td>
+                <td>@Model?.CartaPorte?.ViaEntradaSalida</td>
             </tr>
             <tr>
                 <th class="table-header">Entrada/Salida</th>
-                <td>@Model.CartaPorte.EntradaSalidaMercancia</td>
+                <td>@Model?.CartaPorte?.EntradaSalidaMercancia</td>
 
 
 
                 <th class="table-header">País Origen/Destino</th>
-                <td>@Model.CartaPorte.PaisOrigenDestino</td>
+                <td>@Model?.CartaPorte?.PaisOrigenDestino</td>
                 <th class="table-header">Distancia Recorrida</th>
-                <td>@Model.CartaPorte.DistanciaRecorrida</td>
+                <td>@Model?.CartaPorte?.DistanciaRecorrida</td>
             </tr>
         </table>
     </div>
 
-    @if (Model.CartaPorte?.Ubicaciones != null && Model.CartaPorte.Ubicaciones.Any())
+    @if (Model?.CartaPorte?.Ubicaciones != null && Model.CartaPorte.Ubicaciones.Any())
     {
         <div class="section">
             <div class="section-title">Ubicaciones</div>
@@ -401,14 +401,14 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var ubicacion in Model.CartaPorte.Ubicaciones)
+                    @foreach (var ubicacion in Model?.CartaPorte?.Ubicaciones)
                     {
                         <tr>
                             <td>@ubicacion.TipoUbicacion</td>
                             <td>@ubicacion.IDUbicacion</td>
                             <td>@ubicacion.RFCRemitenteDestinatario</td>
                             <td>@ubicacion.NombreRemitenteDestinatario</td>
-                            <td>@ubicacion.FechaHoraSalidaLlegada?.ToString("yyyy-MM-dd'T'HH:mm:ss")</td>
+                            <td>@ubicacion.FechaHoraSalidaLlegada?.ToString("yyyy-MM-dd'T'HH:mm:ss")?? ""</td>
                             <td>@ubicacion.CodigoPostal</td>
                             <td>@ubicacion.Municipio</td>
                             <td>@ubicacion.Localidad</td>
@@ -422,7 +422,7 @@
     }
 
     <!-- Mercancías Detalle -->
-    @if (Model.CartaPorte?.MercanciasDetalle != null)
+    @if (Model?.CartaPorte?.MercanciasDetalle != null)
     {
         @if (ViewBag.MostrarMercancias == true)
         {
@@ -439,7 +439,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var mercancia in Model.CartaPorte.MercanciasDetalle)
+                        @foreach (var mercancia in Model?.CartaPorte?.MercanciasDetalle)
                         {
                             <tr>
                                 <td>@mercancia.Descripcion</td>
@@ -467,9 +467,9 @@
                     </thead>
                     <tbody>
                         <tr>
-                            <td>@Model.CartaPorte.NumeroTotalMercancias</td>
-                            <td>@Model.CartaPorte.PesoBrutoTotal.ToString("F6")</td>
-                            <td>@Model.CartaPorte.UnidadPeso</td>
+                            <td>@Model?.CartaPorte?.NumeroTotalMercancias</td>
+                            <td>@Model?.CartaPorte?.PesoBrutoTotal.ToString("F6")</td>
+                            <td>@Model?.CartaPorte?.UnidadPeso</td>
                         </tr>
 
                     </tbody>
@@ -479,66 +479,66 @@
     }
 
     <!-- Datos de Autotransporte -->
-    @if (Model.CartaPorte?.Autotransporte != null)
+    @if (Model?.CartaPorte?.Autotransporte != null)
     {
         <div class="section">
             <div class="section-title">Datos de Autotransporte</div>
             <table>
                 <tr>
                     <th class="table-header">Permiso SCT</th>
-                    <td>@Model.CartaPorte.Autotransporte.PermisoSCT</td>
+                    <td>@Model?.CartaPorte?.Autotransporte?.PermisoSCT</td>
                     <th class="table-header">Número Permiso SCT</th>
-                    <td>@Model.CartaPorte.Autotransporte.NumeroPermisoSCT</td>
+                    <td>@Model?.CartaPorte?.Autotransporte?.NumeroPermisoSCT</td>
                 </tr>
                 <tr>
                     <th class="table-header">Configuración Vehicular</th>
-                    <td>@Model.CartaPorte.Autotransporte.ConfigVehicular</td>
+                    <td>@Model?.CartaPorte?.Autotransporte?.ConfigVehicular</td>
                     <th class="table-header">Peso Bruto Vehicular</th>
-                    <td>@Model.CartaPorte.Autotransporte.PesoBrutoVehicular</td>
+                    <td>@Model?.CartaPorte?.Autotransporte?.PesoBrutoVehicular</td>
                 </tr>
                 <tr>
                     <th class="table-header">Placa Vehículo</th>
-                    <td>@Model.CartaPorte.Autotransporte.PlacaVM</td>
+                    <td>@Model?.CartaPorte?.Autotransporte?.PlacaVM</td>
                     <th class="table-header">Año Modelo Vehículo</th>
-                    <td>@Model.CartaPorte.Autotransporte.AnioModeloVM</td>
+                    <td>@Model?.CartaPorte?.Autotransporte?.AnioModeloVM</td>
                 </tr>
             </table>
         </div>
     }
     <!-- Datos de Seguro -->
-    @if (Model.CartaPorte?.Seguro != null && (
-    !string.IsNullOrEmpty(Model.CartaPorte.Seguro.AseguradoraResponsabilidadCivil) ||
-    !string.IsNullOrEmpty(Model.CartaPorte.Seguro.AseguradoraCarga) ||
-    !string.IsNullOrEmpty(Model.CartaPorte.Seguro.AseguradoraMedAmbiente)))
+    @if (Model?.CartaPorte?.Seguro != null && (
+    !string.IsNullOrEmpty(Model?.CartaPorte?.Seguro?.AseguradoraResponsabilidadCivil) ||
+    !string.IsNullOrEmpty(Model?.CartaPorte?.Seguro?.AseguradoraCarga) ||
+    !string.IsNullOrEmpty(Model?.CartaPorte?.Seguro?.AseguradoraMedAmbiente)))
     {
         <div class="section">
             <div class="section-title">Datos del Seguro</div>
             <table>
-                @if (!string.IsNullOrEmpty(Model.CartaPorte.Seguro.AseguradoraResponsabilidadCivil))
+                @if (!string.IsNullOrEmpty(Model?.CartaPorte?.Seguro?.AseguradoraResponsabilidadCivil))
                 {
                     <tr>
                         <th class="table-header">Aseguradora Responsabilidad Civil</th>
-                        <td>@Model.CartaPorte.Seguro.AseguradoraResponsabilidadCivil</td>
+                        <td>@Model?.CartaPorte?.Seguro?.AseguradoraResponsabilidadCivil</td>
                         <th class="table-header">Póliza Responsabilidad Civil</th>
-                        <td>@Model.CartaPorte.Seguro.PolizaResponsabilidadCivil</td>
+                        <td>@Model?.CartaPorte?.Seguro?.PolizaResponsabilidadCivil</td>
                     </tr>
                 }
-                @if (!string.IsNullOrEmpty(Model.CartaPorte.Seguro.AseguradoraCarga))
+                @if (!string.IsNullOrEmpty(Model?.CartaPorte?.Seguro?.AseguradoraCarga))
                 {
                     <tr>
                         <th class="table-header">Aseguradora Carga</th>
-                        <td>@Model.CartaPorte.Seguro.AseguradoraCarga</td>
+                        <td>@Model?.CartaPorte?.Seguro?.AseguradoraCarga</td>
                         <th class="table-header">Póliza Carga</th>
-                        <td>@Model.CartaPorte.Seguro.PolizaCarga</td>
+                        <td>@Model?.CartaPorte?.Seguro?.PolizaCarga</td>
                     </tr>
                 }
-                @if (!string.IsNullOrEmpty(Model.CartaPorte.Seguro.AseguradoraMedAmbiente))
+                @if (!string.IsNullOrEmpty(Model?.CartaPorte?.Seguro?.AseguradoraMedAmbiente))
                 {
                     <tr>
                         <th class="table-header">Aseguradora Medio Ambiente</th>
-                        <td>@Model.CartaPorte.Seguro.AseguradoraMedAmbiente</td>
+                        <td>@Model?.CartaPorte?.Seguro?.AseguradoraMedAmbiente</td>
                         <th class="table-header">Póliza Medio Ambiente</th>
-                        <td>@Model.CartaPorte.Seguro.PolizaMedAmbiente</td>
+                        <td>@Model?.CartaPorte?.Seguro?.PolizaMedAmbiente</td>
                     </tr>
                 }
             </table>
@@ -550,14 +550,14 @@
         <table>
             <tr>
                 <th class="table-header">SubTipo Remolque</th>
-                <td>@Model.CartaPorte.Remolque.SubTipoRemolque</td>
+                <td>@Model?.CartaPorte?.Remolque?.SubTipoRemolque</td>
                 <th class="table-header">Placa</th>
-                <td>@Model.CartaPorte.Remolque.Placa</td>
+                <td>@Model?.CartaPorte?.Remolque?.Placa</td>
             </tr>
         </table>
     </div>
     <!-- Figura Transporte -->
-    @if (Model.CartaPorte?.FigurasTransporte != null && Model.CartaPorte.FigurasTransporte.Any())
+    @if (Model?.CartaPorte?.FigurasTransporte != null && Model.CartaPorte.FigurasTransporte.Any())
     {
         <div class="section">
             <div class="section-title">Figuras de Transporte</div>
@@ -571,7 +571,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var figura in Model.CartaPorte.FigurasTransporte)
+                    @foreach (var figura in Model?.CartaPorte?.FigurasTransporte)
                     {
                         <tr>
                             <td>@figura.TipoFigura</td>
@@ -593,20 +593,20 @@
         <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
             <tr>
                 <td style="width: 30%; text-align: center; vertical-align: middle; height: 180px;">
-                    @if (!string.IsNullOrEmpty(Model.QRCodeBase64))
+                    @if (!string.IsNullOrEmpty(Model?.QRCodeBase64))
                     {
-                        <img src="data:image/png;base64,@Model.QRCodeBase64" alt="Código QR CFDI" style="width: 150px; height: 150px;" />
+                        <img src="data:image/png;base64,@Model?.QRCodeBase64" alt="Código QR CFDI" style="width: 150px; height: 150px;" />
                     }
                 </td>
                 <td style="width: 70%; vertical-align: top; font-size: 9px;">
                     <div class="section-title" style="margin-top: 0;">Sello Digital del Emisor</div>
-                    <pre style="white-space: pre-wrap; word-break: break-all; overflow-wrap: break-word; font-size: 9px;">@Model.SelloEmisor</pre>
+                    <pre style="white-space: pre-wrap; word-break: break-all; overflow-wrap: break-word; font-size: 9px;">@Model?.SelloEmisor</pre>
 
                     <div class="section-title">Cadena Original del Complemento de Certificación Digital del SAT</div>
-                    <pre style="white-space: pre-wrap; word-break: break-all; overflow-wrap: break-word; font-size: 9px;">@Model.CadenaOriginalSAT</pre>
+                    <pre style="white-space: pre-wrap; word-break: break-all; overflow-wrap: break-word; font-size: 9px;">@Model?.CadenaOriginalSAT</pre>
 
                     <div class="section-title">Sello Digital del SAT</div>
-                    <pre style="white-space: pre-wrap; word-break: break-all; overflow-wrap: break-word; font-size: 9px;">@Model.SelloSAT</pre>
+                    <pre style="white-space: pre-wrap; word-break: break-all; overflow-wrap: break-word; font-size: 9px;">@Model?.SelloSAT</pre>
                 </td>
             </tr>
         </table>

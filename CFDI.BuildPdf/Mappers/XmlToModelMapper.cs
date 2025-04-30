@@ -24,54 +24,37 @@ namespace CFDI.BuildPdf.Mappers
                 : string.Empty;
 
 
-            var model = new CfdiCartaPorteViewModel
-            {
-                // CFDI
-                Version = comprobante?.Attribute("Version")?.Value,
-                Serie = comprobante?.Attribute("Serie")?.Value,
-                Folio = comprobante?.Attribute("Folio")?.Value,
-                LugarExpedicion = comprobante?.Attribute("LugarExpedicion")?.Value,
-                FechaEmision = DateTime.Parse(comprobante?.Attribute("Fecha")?.Value),
-                FechaCertificacion = tfdNode != null ? DateTime.Parse(tfdNode.Attribute("FechaTimbrado").Value) : DateTime.MinValue,
-                TipoCambio = comprobante?.Attribute("TipoCambio")?.Value,
-                Moneda = comprobante?.Attribute("Moneda")?.Value,
-                FormaPago = comprobante?.Attribute("FormaPago")?.Value,
-                MetodoPago = comprobante?.Attribute("MetodoPago")?.Value,
-                TipoComprobante = comprobante?.Attribute("TipoDeComprobante")?.Value,
-                Exportacion = comprobante?.Attribute("Exportacion")?.Value,
-                CondicionesPago = comprobante?.Attribute("CondicionesDePago")?.Value,
+            var model = new CfdiCartaPorteViewModel();
 
-                // Emisor
-                EmisorNombre = comprobante.Element(cfdi + "Emisor")?.Attribute("Nombre")?.Value,
-                EmisorRFC = comprobante.Element(cfdi + "Emisor")?.Attribute("Rfc")?.Value,
-                EmisorRegimenFiscal = comprobante.Element(cfdi + "Emisor")?.Attribute("RegimenFiscal")?.Value,
+            // CFDI
+            model.Version = comprobante?.Attribute("Version")?.Value;
+            model.Serie = comprobante?.Attribute("Serie")?.Value;
+            model.Folio = comprobante?.Attribute("Folio")?.Value;
+            model.LugarExpedicion = comprobante?.Attribute("LugarExpedicion")?.Value;
+            model.FechaEmision = DateTime.Parse(comprobante?.Attribute("Fecha")?.Value);
+            model.FechaCertificacion = tfdNode != null ? DateTime.Parse(tfdNode.Attribute("FechaTimbrado").Value) : DateTime.MinValue;
+            model.TipoCambio = comprobante?.Attribute("TipoCambio")?.Value;
+            model.Moneda = comprobante?.Attribute("Moneda")?.Value;
+            model.FormaPago = comprobante?.Attribute("FormaPago")?.Value;
+            model.MetodoPago = comprobante?.Attribute("MetodoPago")?.Value;
+            model.TipoComprobante = comprobante?.Attribute("TipoDeComprobante")?.Value;
+            model.Exportacion = comprobante?.Attribute("Exportacion")?.Value;
+            model.CondicionesPago = comprobante?.Attribute("CondicionesDePago")?.Value;
 
-                // Receptor
-                ReceptorNombre = comprobante.Element(cfdi + "Receptor")?.Attribute("Nombre")?.Value,
-                ReceptorRFC = comprobante.Element(cfdi + "Receptor")?.Attribute("Rfc")?.Value,
-                ReceptorDomicilioFiscal = comprobante.Element(cfdi + "Receptor")?.Attribute("DomicilioFiscalReceptor")?.Value,
-                ReceptorRegimenFiscal = comprobante.Element(cfdi + "Receptor")?.Attribute("RegimenFiscalReceptor")?.Value,
-                UsoCFDI = comprobante.Element(cfdi + "Receptor")?.Attribute("UsoCFDI")?.Value,
+            // Emisor
+            model.EmisorNombre = comprobante.Element(cfdi + "Emisor")?.Attribute("Nombre")?.Value;
+            model.EmisorRFC = comprobante.Element(cfdi + "Emisor")?.Attribute("Rfc")?.Value;
+            model.EmisorRegimenFiscal = comprobante.Element(cfdi + "Emisor")?.Attribute("RegimenFiscal")?.Value;
 
-                // Conceptos
-                //Conceptos = comprobante
-                //    .Element(cfdi + "Conceptos")
-                //    ?.Elements(cfdi + "Concepto")
-                //    .Select(c => new ConceptoViewModel
-                //    {
-                //        ClaveProductoServicio = c.Attribute("ClaveProdServ")?.Value,
-                //        NumeroIdentificacion = c.Attribute("NoIdentificacion")?.Value,
-                //        Descripcion = c.Attribute("Descripcion")?.Value,
-                //        Cantidad = decimal.Parse(c.Attribute("Cantidad")?.Value ?? "0"),
-                //        ClaveUnidad = c.Attribute("ClaveUnidad")?.Value,
-                //        Unidad = c.Attribute("Unidad")?.Value,
-                //        ValorUnitario = decimal.Parse(c.Attribute("ValorUnitario")?.Value ?? "0"),
-                //        Importe = decimal.Parse(c.Attribute("Importe")?.Value ?? "0"),
-                //        Descuento = decimal.Parse(c.Attribute("Descuento")?.Value ?? "0"),
-                //        ObjetoImpuesto = c.Attribute("ObjetoImp")?.Value
-                //    }).ToList() ?? new(),
+            // Receptor
+            model.ReceptorNombre = comprobante.Element(cfdi + "Receptor")?.Attribute("Nombre")?.Value;
+            model.ReceptorRFC = comprobante.Element(cfdi + "Receptor")?.Attribute("Rfc")?.Value;
+            model.ReceptorDomicilioFiscal = comprobante.Element(cfdi + "Receptor")?.Attribute("DomicilioFiscalReceptor")?.Value;
+            model.ReceptorRegimenFiscal = comprobante.Element(cfdi + "Receptor")?.Attribute("RegimenFiscalReceptor")?.Value;
+            model.UsoCFDI = comprobante.Element(cfdi + "Receptor")?.Attribute("UsoCFDI")?.Value;
 
-                Conceptos = comprobante
+
+            model.Conceptos = comprobante
                     .Element(cfdi + "Conceptos")
                     ?.Elements(cfdi + "Concepto")
                     .Select(c => new ConceptoViewModel
@@ -98,30 +81,28 @@ namespace CFDI.BuildPdf.Mappers
                                  Importe = decimal.Parse(t.Attribute("Importe")?.Value ?? "0")
                              }).ToList() ?? new List<TrasladoImpuestoViewModel>()
 
-                    }).ToList() ?? new(),
+                    }).ToList() ?? new();
 
 
-                // Totales
-                SubTotal = decimal.Parse(comprobante?.Attribute("SubTotal")?.Value ?? "0"),
-                Total = decimal.Parse(comprobante?.Attribute("Total")?.Value ?? "0"),
-
-                CantidadConLetra = NumberToWordsConverter.Convertir(decimal.Parse(comprobante?.Attribute("Total")?.Value ?? "0"), comprobante?.Attribute("Moneda")?.Value),
-
-                TotalImpuestosTrasladados = comprobante.Element(cfdi + "Impuestos")?.Attribute("TotalImpuestosTrasladados") != null
+            // Totales
+            model.SubTotal = decimal.Parse(comprobante?.Attribute("SubTotal")?.Value ?? "0");
+            model.Total = decimal.Parse(comprobante?.Attribute("Total")?.Value ?? "0");
+            model.CantidadConLetra = NumberToWordsConverter.Convertir(decimal.Parse(comprobante?.Attribute("Total")?.Value ?? "0"), comprobante?.Attribute("Moneda")?.Value);
+            model.TotalImpuestosTrasladados = comprobante.Element(cfdi + "Impuestos")?.Attribute("TotalImpuestosTrasladados") != null
                     ? decimal.Parse(comprobante.Element(cfdi + "Impuestos")?.Attribute("TotalImpuestosTrasladados")?.Value ?? "0")
-                    : 0,
+                    : 0;
 
-                // Sellos y Cadenas
-                SelloEmisor = comprobante?.Attribute("Sello")?.Value,
-                NoCertificadoEmisor = comprobante?.Attribute("NoCertificado")?.Value,
-                NoCertificadoSAT = tfdNode?.Attribute("NoCertificadoSAT")?.Value,
-                SelloSAT = tfdNode?.Attribute("SelloSAT")?.Value,
-                CadenaOriginalSAT = cadenaOriginal,
-                UUID = tfdNode?.Attribute("UUID")?.Value,
+            // Sellos y Cadenas
+            model.SelloEmisor = comprobante?.Attribute("Sello")?.Value;
+            model.NoCertificadoEmisor = comprobante?.Attribute("NoCertificado")?.Value;
+            model.NoCertificadoSAT = tfdNode?.Attribute("NoCertificadoSAT")?.Value;
+            model.SelloSAT = tfdNode?.Attribute("SelloSAT")?.Value;
+            model.CadenaOriginalSAT = cadenaOriginal;
+            model.UUID = tfdNode?.Attribute("UUID")?.Value;
 
-                // QR Code Base64 (queda pendiente que tú lo generes)
-                QRCodeBase64 = ""
-            };
+            // QR Code Base64 (queda pendiente que tú lo generes)
+            model.QRCodeBase64 = "";
+
 
             var addendaNode = comprobante.Element(cfdi + "Addenda");
 
@@ -136,31 +117,31 @@ namespace CFDI.BuildPdf.Mappers
             // Carta Porte
             if (cartaPorte != null)
             {
-                model.CartaPorte = new CartaPorteViewModel
-                {
-                    Version = cartaPorte?.Attribute("Version")?.Value,
-                    TransporteInternacional = cartaPorte?.Attribute("TranspInternac")?.Value,
-                    EntradaSalidaMercancia = cartaPorte?.Attribute("EntradaSalidaMerc")?.Value,
-                    ViaEntradaSalida = cartaPorte?.Attribute("ViaEntradaSalida")?.Value,
-                    PaisOrigenDestino = cartaPorte?.Attribute("PaisOrigenDestino")?.Value,
-                    DistanciaRecorrida = decimal.Parse(cartaPorte?.Attribute("TotalDistRec")?.Value ?? "0"),
+                model.CartaPorte = new CartaPorteViewModel();
 
-                    IdCCP = cartaPorte?.Attribute("IdCCP")?.Value,
+                model.CartaPorte.Version = cartaPorte?.Attribute("Version")?.Value;
+                model.CartaPorte.TransporteInternacional = cartaPorte?.Attribute("TranspInternac")?.Value;
+                model.CartaPorte.EntradaSalidaMercancia = cartaPorte?.Attribute("EntradaSalidaMerc")?.Value;
+                model.CartaPorte.ViaEntradaSalida = cartaPorte?.Attribute("ViaEntradaSalida")?.Value;
+                model.CartaPorte.PaisOrigenDestino = cartaPorte?.Attribute("PaisOrigenDestino")?.Value;
+                model.CartaPorte.DistanciaRecorrida = decimal.Parse(cartaPorte?.Attribute("TotalDistRec")?.Value ?? "0");
 
-                    // Ahora sí obtenemos PesoBrutoTotal, UnidadPeso, NumTotalMercancias
-                    PesoBrutoTotal = decimal.Parse(mercanciasNode?.Attribute("PesoBrutoTotal")?.Value ?? "0"),
-                    UnidadPeso = mercanciasNode?.Attribute("UnidadPeso")?.Value,
-                    NumeroTotalMercancias = int.Parse(mercanciasNode?.Attribute("NumTotalMercancias")?.Value ?? "0"),
+                model.CartaPorte.IdCCP = cartaPorte?.Attribute("IdCCP")?.Value;
+
+                // Ahora sí obtenemos PesoBrutoTotal, UnidadPeso, NumTotalMercancias
+                model.CartaPorte.PesoBrutoTotal = decimal.Parse(mercanciasNode?.Attribute("PesoBrutoTotal")?.Value ?? "0");
+                model.CartaPorte.UnidadPeso = mercanciasNode?.Attribute("UnidadPeso")?.Value;
+                model.CartaPorte.NumeroTotalMercancias = int.Parse(mercanciasNode?.Attribute("NumTotalMercancias")?.Value ?? "0");
 
 
-                    Ubicaciones = cartaPorte
+                model.CartaPorte.Ubicaciones = cartaPorte
                         .Element(cartaporte + "Ubicaciones")
                         ?.Elements(cartaporte + "Ubicacion")
                         .Select(u => MapUbicacion(u))
-                        .ToList() ?? new List<UbicacionViewModel>(),
+                        .ToList() ?? new List<UbicacionViewModel>();
 
 
-                    MercanciasDetalle = cartaPorte
+                model.CartaPorte.MercanciasDetalle = cartaPorte
                         .Element(cartaporte + "Mercancias")
                         ?.Elements(cartaporte + "Mercancia")
                         .Select(m => new MercanciaViewModel
@@ -170,21 +151,21 @@ namespace CFDI.BuildPdf.Mappers
                             ClaveUnidad = m.Attribute("ClaveUnidad")?.Value,
                             PesoEnKg = decimal.Parse(m.Attribute("PesoEnKg")?.Value ?? "0"),
                             ValorMercancia = decimal.Parse(m.Attribute("ValorMercancia")?.Value ?? "0"),
-                        }).ToList() ?? new(),
+                        }).ToList() ?? new();
 
-                    Autotransporte = MapAutotransporte(cartaPorte.Element(cartaporte + "Mercancias")?.Element(cartaporte + "Autotransporte")),
-                    Seguro = MapSeguro(cartaPorte.Element(cartaporte + "Mercancias")?.Element(cartaporte + "Autotransporte")?.Element(cartaporte + "Seguros")),
-                    Remolque = MapRemolque(cartaPorte.Element(cartaporte + "Mercancias")?.Element(cartaporte + "Autotransporte")?.Element(cartaporte + "Remolques")?.Element(cartaporte + "Remolque")),
-                    FigurasTransporte = cartaPorte.Element(cartaporte + "FiguraTransporte")?.Elements(cartaporte + "TiposFigura").Select(tf => new FiguraTransporteViewModel
-                        {
-                            TipoFigura = tf.Attribute("TipoFigura")?.Value,
-                            RFCFigura = tf.Attribute("RFCFigura")?.Value,
-                            NombreFigura = tf.Attribute("NombreFigura")?.Value,
-                            NumeroLicencia = tf.Attribute("NumLicencia")?.Value
-                        }).ToList() ?? new()
+                model.CartaPorte.Autotransporte = MapAutotransporte(cartaPorte.Element(cartaporte + "Mercancias")?.Element(cartaporte + "Autotransporte"));
+                model.CartaPorte.Seguro = MapSeguro(cartaPorte.Element(cartaporte + "Mercancias")?.Element(cartaporte + "Autotransporte")?.Element(cartaporte + "Seguros"));
+                model.CartaPorte.Remolque = MapRemolque(cartaPorte.Element(cartaporte + "Mercancias")?.Element(cartaporte + "Autotransporte")?.Element(cartaporte + "Remolques")?.Element(cartaporte + "Remolque"));
+                model.CartaPorte.FigurasTransporte = cartaPorte.Element(cartaporte + "FiguraTransporte")?.Elements(cartaporte + "TiposFigura").Select(tf => new FiguraTransporteViewModel
+                {
+                    TipoFigura = tf.Attribute("TipoFigura")?.Value,
+                    RFCFigura = tf.Attribute("RFCFigura")?.Value,
+                    NombreFigura = tf.Attribute("NombreFigura")?.Value,
+                    NumeroLicencia = tf.Attribute("NumLicencia")?.Value
+                }).ToList() ?? new();
 
 
-                };
+
             }
 
             // ⚡ Generar URL del QR
@@ -297,23 +278,24 @@ namespace CFDI.BuildPdf.Mappers
 
             var domicilio = ubicacion.Element(cartaporte + "Domicilio");
 
-            return new UbicacionViewModel
-            {
-                TipoUbicacion = ubicacion.Attribute("TipoUbicacion")?.Value,
-                IDUbicacion = ubicacion.Attribute("IDUbicacion")?.Value,
-                RFCRemitenteDestinatario = ubicacion.Attribute("RFCRemitenteDestinatario")?.Value,
-                NombreRemitenteDestinatario = ubicacion.Attribute("NombreRemitenteDestinatario")?.Value,
-                FechaHoraSalidaLlegada = ubicacion.Attribute("FechaHoraSalidaLlegada") != null
+            var ubicaciones = new UbicacionViewModel();
+
+            ubicaciones.TipoUbicacion = ubicacion.Attribute("TipoUbicacion")?.Value;
+            ubicaciones.IDUbicacion = ubicacion.Attribute("IDUbicacion")?.Value;
+            ubicaciones.RFCRemitenteDestinatario = ubicacion.Attribute("RFCRemitenteDestinatario")?.Value;
+            ubicaciones.NombreRemitenteDestinatario = ubicacion.Attribute("NombreRemitenteDestinatario")?.Value;
+            ubicaciones.FechaHoraSalidaLlegada = ubicacion.Attribute("FechaHoraSalidaLlegada") != null
                     ? DateTime.Parse(ubicacion.Attribute("FechaHoraSalidaLlegada").Value)
-                    : (DateTime?)null,
-                CodigoPostal = domicilio?.Attribute("CodigoPostal")?.Value,
-                Municipio = domicilio?.Attribute("Municipio")?.Value,
-                Localidad = domicilio?.Attribute("Localidad")?.Value,
-                Estado = domicilio?.Attribute("Estado")?.Value,
-                Pais = domicilio?.Attribute("Pais")?.Value,
-                NumRegIdTrib = ubicacion.Attribute("NumRegIdTrib")?.Value,
-                ResidenciaFiscal = ubicacion.Attribute("ResidenciaFiscal")?.Value
-            };
+                    : (DateTime?)null;
+            ubicaciones.CodigoPostal = domicilio?.Attribute("CodigoPostal")?.Value;
+            ubicaciones.Municipio = domicilio?.Attribute("Municipio")?.Value;
+            ubicaciones.Localidad = domicilio?.Attribute("Localidad")?.Value;
+            ubicaciones.Estado = domicilio?.Attribute("Estado")?.Value;
+            ubicaciones.Pais = domicilio?.Attribute("Pais")?.Value;
+            ubicaciones.NumRegIdTrib = ubicacion.Attribute("NumRegIdTrib")?.Value;
+            ubicaciones.ResidenciaFiscal = ubicacion.Attribute("ResidenciaFiscal")?.Value;
+
+            return ubicaciones;
         }
 
 
@@ -323,15 +305,17 @@ namespace CFDI.BuildPdf.Mappers
 
             var identificacionVehicular = autotransporte.Element(cartaporte + "IdentificacionVehicular");
 
-            return new AutotransporteViewModel
-            {
-                PermisoSCT = autotransporte.Attribute("PermSCT")?.Value,
-                NumeroPermisoSCT = autotransporte.Attribute("NumPermisoSCT")?.Value,
-                ConfigVehicular = identificacionVehicular?.Attribute("ConfigVehicular")?.Value,
-                PesoBrutoVehicular = decimal.Parse(identificacionVehicular?.Attribute("PesoBrutoVehicular")?.Value ?? "0"),
-                PlacaVM = identificacionVehicular?.Attribute("PlacaVM")?.Value,
-                AnioModeloVM = int.Parse(identificacionVehicular?.Attribute("AnioModeloVM")?.Value ?? "0")
-            };
+            var autoTrans = new AutotransporteViewModel();
+
+
+            autoTrans.PermisoSCT = autotransporte.Attribute("PermSCT")?.Value;
+            autoTrans.NumeroPermisoSCT = autotransporte.Attribute("NumPermisoSCT")?.Value;
+            autoTrans.ConfigVehicular = identificacionVehicular?.Attribute("ConfigVehicular")?.Value;
+            autoTrans.PesoBrutoVehicular = decimal.Parse(identificacionVehicular?.Attribute("PesoBrutoVehicular")?.Value ?? "0");
+            autoTrans.PlacaVM = identificacionVehicular?.Attribute("PlacaVM")?.Value;
+            autoTrans.AnioModeloVM = int.Parse(identificacionVehicular?.Attribute("AnioModeloVM")?.Value ?? "0");
+
+            return autoTrans;
         }
 
 
@@ -339,15 +323,16 @@ namespace CFDI.BuildPdf.Mappers
         {
             if (seguros == null) return null;
 
-            return new SeguroViewModel
-            {
-                AseguradoraResponsabilidadCivil = seguros.Attribute("AseguraRespCivil")?.Value,
-                PolizaResponsabilidadCivil = seguros.Attribute("PolizaRespCivil")?.Value,
-                AseguradoraCarga = seguros.Attribute("AseguraCarga")?.Value,
-                PolizaCarga = seguros.Attribute("PolizaCarga")?.Value,
-                AseguradoraMedAmbiente = seguros.Attribute("AseguraMedAmbiente")?.Value,
-                PolizaMedAmbiente = seguros.Attribute("PolizaMedAmbiente")?.Value
-            };
+            var segurosVm = new SeguroViewModel();
+
+            segurosVm.AseguradoraResponsabilidadCivil = seguros.Attribute("AseguraRespCivil")?.Value;
+            segurosVm.PolizaResponsabilidadCivil = seguros.Attribute("PolizaRespCivil")?.Value;
+            segurosVm.AseguradoraCarga = seguros.Attribute("AseguraCarga")?.Value;
+            segurosVm.PolizaCarga = seguros.Attribute("PolizaCarga")?.Value;
+            segurosVm.AseguradoraMedAmbiente = seguros.Attribute("AseguraMedAmbiente")?.Value;
+            segurosVm.PolizaMedAmbiente = seguros.Attribute("PolizaMedAmbiente")?.Value;
+
+            return segurosVm;
         }
 
 
@@ -356,11 +341,14 @@ namespace CFDI.BuildPdf.Mappers
         {
             if (remolque == null) return null;
 
-            return new RemolqueViewModel
-            {
-                SubTipoRemolque = remolque.Attribute("SubTipoRem")?.Value,
-                Placa = remolque.Attribute("Placa")?.Value
-            };
+            var remolqueVm = new RemolqueViewModel();
+
+            remolqueVm.SubTipoRemolque = remolque.Attribute("SubTipoRem")?.Value;
+            remolqueVm.Placa = remolque.Attribute("Placa")?.Value;
+
+            return remolqueVm;
+
+
         }
 
         private static string ConstruirUrlQr(string uuid, string rfcEmisor, string rfcReceptor, decimal total, string selloEmisor)
