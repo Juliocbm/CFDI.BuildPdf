@@ -2,11 +2,8 @@
 # 📦 CFDI.BuildPdf
 
 [![NuGet](https://img.shields.io/nuget/v/CFDI.BuildPdf.svg?style=flat-square)](https://www.nuget.org/packages/CFDI.BuildPdf/)
-
 [![NuGet Downloads](https://img.shields.io/nuget/dt/CFDI.BuildPdf.svg?style=flat-square)](https://www.nuget.org/packages/CFDI.BuildPdf/)
-
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](https://opensource.org/licenses/MIT)
-
 [![GitHub stars](https://img.shields.io/github/stars/Juliocbm/CFDI.BuildPdf?style=flat-square)](https://github.com/Juliocbm/CFDI.BuildPdf/stargazers)
 
 
