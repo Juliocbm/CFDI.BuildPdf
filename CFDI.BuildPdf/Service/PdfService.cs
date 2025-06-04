@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Razor.Language;
 using System.Dynamic;
 using System.Text;
 using System;
+using System.Globalization; // Added for consistency, though not directly in new methods
 
 namespace CFDI.BuildPdf.Service
 {
@@ -102,6 +103,59 @@ namespace CFDI.BuildPdf.Service
 
             string htmlFinal = htmlCfdi + "<div style='page-break-before: always;'></div>" + htmlCondiciones;
             return ConvertHtmlToPdf(htmlFinal);
+        }
+
+        // New private method to render Nomina PDF
+        private async Task<byte[]> RenderNominaPdf(XDocument xdoc, string? logoBase64 = null)
+        {
+            var model = XmlToModelMapper.MapNomina(xdoc); // Use the new MapNomina method
+
+            if (!string.IsNullOrEmpty(logoBase64))
+            {
+                model.LogoBase64 = logoBase64;
+            }
+
+            // No ViewBag needed for Nomina template as per current design, but can be added if necessary
+            // dynamic viewBag = new System.Dynamic.ExpandoObject();
+
+            var htmlCfdi = await _razorEngine.CompileRenderAsync("TemplateFacturaNomina", model); // Use the new Nomina template
+
+            // For Nomina, we might not need the 'TemplateCondicionesContrato.cshtml'.
+            // If it's specific to Carta Porte, we'll omit it here.
+            // If it's generic, it could be included, or a different one for Nomina.
+            // For this implementation, we'll assume it's not needed for Nomina.
+
+            string htmlFinal = "<!DOCTYPE html>\n" + htmlCfdi; // Ensure DOCTYPE for proper rendering
+
+            return ConvertHtmlToPdf(htmlFinal);
+        }
+
+        // New public methods for Nomina PDF generation
+
+        // From physical XML file path
+        public async Task<byte[]> GenerarPdfNominaDesdeXmlAsync(string rutaXml, string? logoBase64 = null)
+        {
+            var xdoc = XDocument.Load(rutaXml, LoadOptions.PreserveWhitespace); // Added LoadOptions for potentially better XML parsing
+            return await RenderNominaPdf(xdoc, logoBase64);
+        }
+
+        // From XML content as byte array
+        public async Task<byte[]> GenerarPdfNominaDesdeXmlAsync(byte[] xmlBytes, string? logoBase64 = null)
+        {
+            using var ms = new MemoryStream(xmlBytes);
+            var xdoc = XDocument.Load(ms, LoadOptions.PreserveWhitespace);
+            return await RenderNominaPdf(xdoc, logoBase64);
+        }
+
+        // From XML content as string
+        public async Task<byte[]> GenerarPdfNominaDesdeXmlAsync(string xmlContenido, bool esContenidoXml, string? logoBase64 = null)
+        {
+            if (!esContenidoXml)
+                throw new ArgumentException("Si usas esta sobrecarga para contenido XML, 'esContenidoXml' debe ser true.", nameof(esContenidoXml));
+
+            using var reader = new StringReader(xmlContenido);
+            var xdoc = XDocument.Load(reader, LoadOptions.PreserveWhitespace);
+            return await RenderNominaPdf(xdoc, logoBase64);
         }
 
         private byte[] ConvertHtmlToPdf(string html)

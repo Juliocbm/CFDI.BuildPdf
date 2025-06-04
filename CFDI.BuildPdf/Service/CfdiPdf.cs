@@ -50,5 +50,40 @@ namespace CFDI.BuildPdf.Service
         {
             return _pdfService.GenerarPdfDesdeXmlAsync(xmlBytes, mostrarMercancias, logoBase64);
         }
+
+        /// <summary>
+        /// Genera un PDF de Nómina a partir de un archivo XML en una ruta física.
+        /// </summary>
+        /// <param name="rutaXml">Ruta completa del archivo XML de Nómina.</param>
+        /// <param name="logoBase64">Cadena base64 del logo de la empresa (opcional).</param>
+        /// <returns>PDF de Nómina generado en forma de arreglo de bytes.</returns>
+        public static Task<byte[]> NominaDesdeRutaAsync(string rutaXml, string? logoBase64 = null)
+        {
+            return _pdfService.GenerarPdfNominaDesdeXmlAsync(rutaXml, logoBase64);
+        }
+
+        /// <summary>
+        /// Genera un PDF de Nómina a partir de una cadena XML.
+        /// </summary>
+        /// <param name="xmlContent">Contenido del XML de Nómina en texto plano.</param>
+        /// <param name="esContenidoXml">Debe ser true, indicando que xmlContent es el contenido XML.</param>
+        /// <param name="logoBase64">Cadena base64 del logo de la empresa (opcional).</param>
+        /// <returns>PDF de Nómina generado en forma de arreglo de bytes.</returns>
+        public static Task<byte[]> NominaDesdeXmlStringAsync(string xmlContent, bool esContenidoXml = true, string? logoBase64 = null)
+        {
+            // El parámetro esContenidoXml se pasa directamente al servicio, que ya tiene la validación.
+            return _pdfService.GenerarPdfNominaDesdeXmlAsync(xmlContent, esContenidoXml, logoBase64);
+        }
+
+        /// <summary>
+        /// Genera un PDF de Nómina a partir de un archivo XML como arreglo de bytes.
+        /// </summary>
+        /// <param name="xmlBytes">Contenido del archivo XML de Nómina en bytes.</param>
+        /// <param name="logoBase64">Cadena base64 del logo de la empresa (opcional).</param>
+        /// <returns>PDF de Nómina generado en forma de arreglo de bytes.</returns>
+        public static Task<byte[]> NominaDesdeXmlBytesAsync(byte[] xmlBytes, string? logoBase64 = null)
+        {
+            return _pdfService.GenerarPdfNominaDesdeXmlAsync(xmlBytes, logoBase64);
+        }
     }
 }
