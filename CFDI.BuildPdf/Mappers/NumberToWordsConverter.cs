@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace CFDI.BuildPdf.Mappers
 {
-    public static class NumberToWordsConverter
+    internal static class NumberToWordsConverter
     {
         private static string[] unidades = { "", "UN", "DOS", "TRES", "CUATRO", "CINCO", "SEIS", "SIETE", "OCHO", "NUEVE" };
         private static string[] decenas = { "", "DIEZ", "VEINTE", "TREINTA", "CUARENTA", "CINCUENTA", "SESENTA", "SETENTA", "OCHENTA", "NOVENTA" };

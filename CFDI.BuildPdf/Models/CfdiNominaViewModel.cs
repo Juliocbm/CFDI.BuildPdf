@@ -1,58 +1,22 @@
-// CFDI.BuildPdf/Models/CfdiNominaViewModel.cs
 using System;
 using System.Collections.Generic;
-using System.Globalization; // Required for CultureInfo
 
 namespace CFDI.BuildPdf.Models
 {
-    public class CfdiNominaViewModel
+    /// <summary>
+    /// ViewModel para CFDI 4.0 con complemento Nómina 1.2.
+    /// Hereda propiedades comunes de <see cref="CfdiViewModelBase"/>.
+    /// </summary>
+    public class CfdiNominaViewModel : CfdiViewModelBase
     {
-        // CFDI Principal
-        public string Version { get; set; }
-        public string Serie { get; set; }
-        public string Folio { get; set; }
-        public string LugarExpedicion { get; set; }
-        public DateTime FechaEmision { get; set; }
-        public DateTime FechaCertificacion { get; set; }
-        public string EmisorNombre { get; set; }
-        public string EmisorRFC { get; set; }
-        public string EmisorRegimenFiscal { get; set; }
-        public string ReceptorNombre { get; set; }
-        public string ReceptorRFC { get; set; }
-        public string ReceptorDomicilioFiscal { get; set; }
-        public string ReceptorRegimenFiscal { get; set; }
-        public string UsoCFDI { get; set; } // For Nomina, usually "CN01" (Nómina)
-        public string TipoCambio { get; set; }
-        public string Moneda { get; set; }
-        public string FormaPago { get; set; } // Usually not applicable or "99" for Nomina
-        public string MetodoPago { get; set; } // Usually "PUE" for Nomina
-        public string TipoComprobante { get; set; } // "N" for Nómina
-        public string Exportacion { get; set; }
-        public string UUID { get; set; }
-        public string LogoBase64 { get; set; }
-
-        // Conceptos (usually one for Nomina, representing the total payment)
+        // Conceptos
         public List<ConceptoNominaViewModel> Conceptos { get; set; } = new();
 
-        // Totales
-        public decimal SubTotal { get; set; }
-        public decimal Total { get; set; }
-        public decimal Descuento { get; set; } // From Nomina:TotalDeducciones
-        public string CantidadConLetra { get; set; }
+        // Totales específicos
+        public decimal Descuento { get; set; }
 
-        // Nomina Complement
+        // Complemento Nómina
         public NominaViewModel Nomina { get; set; }
-
-        // Sellos
-        public string SelloEmisor { get; set; }
-        public string SelloSAT { get; set; }
-        public string CadenaOriginalSAT { get; set; }
-        public string NoCertificadoSAT { get; set; }
-        public string NoCertificadoEmisor { get; set; }
-
-        //QR
-        public string UrlQr { get; set; }
-        public string QRCodeBase64 { get; set; }
     }
 
     public class ConceptoNominaViewModel

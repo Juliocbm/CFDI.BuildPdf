@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cfdi:Comprobante xmlns:cfdi="http://www.sat.gob.mx/cfd/4"
+                  xmlns:nomina12="http://www.sat.gob.mx/nomina12"
+                  xmlns:tfd="http://www.sat.gob.mx/TimbreFiscalDigital"
+                  Version="4.0" Serie="N" Folio="456" Fecha="2024-02-15T12:00:00"
+                  LugarExpedicion="06600" Moneda="MXN"
+                  FormaPago="99" MetodoPago="PUE" TipoDeComprobante="N"
+                  Exportacion="01"
+                  SubTotal="15000.00" Descuento="3500.00" Total="11500.00"
+                  Sello="XYZsello1234567890abcdefghijklmnop"
+                  NoCertificado="00001000000504465028">
+  <cfdi:Emisor Nombre="EMPRESA NOMINA SA DE CV" Rfc="ENO030303CCC" RegimenFiscal="601" />
+  <cfdi:Receptor Nombre="EMPLEADO PRUEBA LOPEZ" Rfc="EPL040404DDD"
+                 DomicilioFiscalReceptor="44100" RegimenFiscalReceptor="605" UsoCFDI="CN01" />
+  <cfdi:Conceptos>
+    <cfdi:Concepto ClaveProdServ="84111505" NoIdentificacion="EMP001"
+                   Descripcion="Pago de nómina" Cantidad="1"
+                   ClaveUnidad="ACT" Unidad="Actividad"
+                   ValorUnitario="15000.00" Importe="15000.00" Descuento="3500.00" ObjetoImp="01" />
+  </cfdi:Conceptos>
+  <cfdi:Complemento>
+    <tfd:TimbreFiscalDigital Version="1.1" UUID="BBB98765-DCBA-4321-HGFE-987654321098"
+                             FechaTimbrado="2024-02-15T12:05:00" RfcProvCertif="SAT970701NN3"
+                             SelloCFD="XYZsello1234567890abcdefghijklmnop"
+                             NoCertificadoSAT="00001000000504465028"
+                             SelloSAT="SelloSATNomina12345678" />
+    <nomina12:Nomina Version="1.2" TipoNomina="O"
+                     FechaPago="2024-02-15" FechaInicialPago="2024-02-01" FechaFinalPago="2024-02-15"
+                     NumDiasPagados="15" TotalPercepciones="15000.00" TotalDeducciones="3500.00" TotalOtrosPagos="0.00">
+      <nomina12:Emisor RegistroPatronal="A1234567890" />
+      <nomina12:Receptor Curp="XAXX010101HDFABC01" NumSeguridadSocial="12345678901"
+                         FechaInicioRelLaboral="2020-06-01" Antiguedad="P3Y8M14D"
+                         TipoContrato="01" TipoRegimen="02" NumEmpleado="EMP001"
+                         Departamento="Sistemas" Puesto="Desarrollador"
+                         PeriodicidadPago="04" SalarioBaseCotApor="500.00"
+                         SalarioDiarioIntegrado="520.00" ClaveEntFed="JAL" />
+      <nomina12:Percepciones TotalSueldos="15000.00" TotalGravado="12000.00" TotalExento="3000.00">
+        <nomina12:Percepcion TipoPercepcion="001" Clave="001" Concepto="Sueldo" ImporteGravado="10000.00" ImporteExento="0.00" />
+        <nomina12:Percepcion TipoPercepcion="005" Clave="005" Concepto="Prima vacacional" ImporteGravado="2000.00" ImporteExento="3000.00" />
+      </nomina12:Percepciones>
+      <nomina12:Deducciones TotalOtrasDeducciones="1500.00" TotalImpuestosRetenidos="2000.00">
+        <nomina12:Deduccion TipoDeduccion="002" Clave="002" Concepto="ISR" Importe="2000.00" />
+        <nomina12:Deduccion TipoDeduccion="001" Clave="001" Concepto="Seguridad social" Importe="1500.00" />
+      </nomina12:Deducciones>
+      <nomina12:OtrosPagos>
+        <nomina12:OtroPago TipoOtroPago="002" Clave="002" Concepto="Subsidio al empleo" Importe="0.00">
+          <nomina12:SubsidioAlEmpleo SubsidioCausado="407.02" />
+        </nomina12:OtroPago>
+      </nomina12:OtrosPagos>
+    </nomina12:Nomina>
+  </cfdi:Complemento>
+</cfdi:Comprobante>

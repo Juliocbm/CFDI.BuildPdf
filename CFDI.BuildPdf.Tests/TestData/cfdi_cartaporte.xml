@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cfdi:Comprobante xmlns:cfdi="http://www.sat.gob.mx/cfd/4"
+                  xmlns:cartaporte31="http://www.sat.gob.mx/CartaPorte31"
+                  xmlns:tfd="http://www.sat.gob.mx/TimbreFiscalDigital"
+                  Version="4.0" Serie="A" Folio="123" Fecha="2024-01-15T10:30:00"
+                  LugarExpedicion="06600" TipoCambio="1" Moneda="MXN"
+                  FormaPago="99" MetodoPago="PPD" TipoDeComprobante="T"
+                  Exportacion="01" CondicionesDePago="CONTADO"
+                  SubTotal="0.00" Total="0.00"
+                  Sello="ABCDEFGHIJKLMNOP1234567890abcdef"
+                  NoCertificado="00001000000504465028">
+  <cfdi:Emisor Nombre="EMPRESA DEMO SA DE CV" Rfc="EDE010101AAA" RegimenFiscal="601" />
+  <cfdi:Receptor Nombre="CLIENTE PRUEBA SA DE CV" Rfc="CPR020202BBB"
+                 DomicilioFiscalReceptor="44100" RegimenFiscalReceptor="601" UsoCFDI="S01" />
+  <cfdi:Conceptos>
+    <cfdi:Concepto ClaveProdServ="78101800" NoIdentificacion="SRV001"
+                   Descripcion="Servicio de transporte" Cantidad="1.00"
+                   ClaveUnidad="E48" Unidad="Servicio"
+                   ValorUnitario="0.00" Importe="0.00" Descuento="0.00" ObjetoImp="01">
+      <cfdi:Impuestos>
+        <cfdi:Traslados>
+          <cfdi:Traslado Impuesto="002" TipoFactor="Tasa" TasaOCuota="0.160000" Base="100.00" Importe="16.00" />
+        </cfdi:Traslados>
+      </cfdi:Impuestos>
+    </cfdi:Concepto>
+  </cfdi:Conceptos>
+  <cfdi:Impuestos TotalImpuestosTrasladados="16.00" />
+  <cfdi:Complemento>
+    <tfd:TimbreFiscalDigital Version="1.1" UUID="AAB12345-ABCD-1234-EFGH-123456789012"
+                             FechaTimbrado="2024-01-15T10:35:00" RfcProvCertif="SAT970701NN3"
+                             SelloCFD="ABCDEFGHIJKLMNOP1234567890abcdef"
+                             NoCertificadoSAT="00001000000504465028"
+                             SelloSAT="SelloSATDePrueba12345678" />
+    <cartaporte31:CartaPorte Version="3.1" TranspInternac="No" TotalDistRec="150.50" IdCCP="CCC-00001">
+      <cartaporte31:Ubicaciones>
+        <cartaporte31:Ubicacion TipoUbicacion="Origen" IDUbicacion="OR000001"
+                                RFCRemitenteDestinatario="EDE010101AAA"
+                                NombreRemitenteDestinatario="EMPRESA DEMO SA DE CV"
+                                FechaHoraSalidaLlegada="2024-01-15T08:00:00">
+          <cartaporte31:Domicilio CodigoPostal="06600" Municipio="015" Estado="CMX" Pais="MEX" />
+        </cartaporte31:Ubicacion>
+        <cartaporte31:Ubicacion TipoUbicacion="Destino" IDUbicacion="DE000001"
+                                RFCRemitenteDestinatario="CPR020202BBB"
+                                NombreRemitenteDestinatario="CLIENTE PRUEBA SA DE CV"
+                                FechaHoraSalidaLlegada="2024-01-15T18:00:00">
+          <cartaporte31:Domicilio CodigoPostal="44100" Municipio="039" Estado="JAL" Pais="MEX" />
+        </cartaporte31:Ubicacion>
+      </cartaporte31:Ubicaciones>
+      <cartaporte31:Mercancias PesoBrutoTotal="500.00" UnidadPeso="KGM" NumTotalMercancias="2">
+        <cartaporte31:Mercancia Descripcion="Producto A" Cantidad="10" ClaveUnidad="H87" PesoEnKg="250.00" ValorMercancia="5000.00" />
+        <cartaporte31:Mercancia Descripcion="Producto B" Cantidad="5" ClaveUnidad="H87" PesoEnKg="250.00" ValorMercancia="3000.00" />
+        <cartaporte31:Autotransporte PermSCT="TPAF01" NumPermisoSCT="PERM123456">
+          <cartaporte31:IdentificacionVehicular ConfigVehicular="C2" PesoBrutoVehicular="15000.00" PlacaVM="ABC1234" AnioModeloVM="2022" />
+          <cartaporte31:Seguros AseguraRespCivil="Seguros Ejemplo" PolizaRespCivil="POL-RC-001" AseguraCarga="Seguros Carga" PolizaCarga="POL-C-001" />
+          <cartaporte31:Remolques>
+            <cartaporte31:Remolque SubTipoRem="CTR001" Placa="REM9876" />
+          </cartaporte31:Remolques>
+        </cartaporte31:Autotransporte>
+      </cartaporte31:Mercancias>
+      <cartaporte31:FiguraTransporte>
+        <cartaporte31:TiposFigura TipoFigura="01" RFCFigura="XAXX010101000" NombreFigura="JUAN PEREZ" NumLicencia="LIC123456" />
+      </cartaporte31:FiguraTransporte>
+    </cartaporte31:CartaPorte>
+  </cfdi:Complemento>
+</cfdi:Comprobante>
