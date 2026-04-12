@@ -17,6 +17,19 @@ namespace CFDI.BuildPdf.Models
 
         // Totales específicos
         public decimal TotalImpuestosTrasladados { get; set; }
+        public decimal TotalImpuestosRetenidos { get; set; }
+
+        /// <summary>
+        /// Desglose agrupado de impuestos trasladados a nivel comprobante
+        /// (ej. IVA 16.00% → 867.97). Se usa para renderizar el panel de totales.
+        /// </summary>
+        public List<TrasladoImpuestoViewModel> TrasladosResumen { get; set; } = new();
+
+        /// <summary>
+        /// Desglose agrupado de impuestos retenidos a nivel comprobante
+        /// (ej. IVA → 216.99). Se usa para renderizar el panel de totales.
+        /// </summary>
+        public List<RetencionImpuestoViewModel> RetencionesResumen { get; set; } = new();
 
         // Carta Porte
         public CartaPorteViewModel CartaPorte { get; set; }
@@ -57,6 +70,12 @@ namespace CFDI.BuildPdf.Models
         public string TipoFactor { get; set; }      // Tasa, Cuota, Exento
         public decimal TasaOCuota { get; set; }
         public decimal Base { get; set; }
+        public decimal Importe { get; set; }
+    }
+
+    public class RetencionImpuestoViewModel
+    {
+        public string Impuesto { get; set; }       // IVA, ISR, etc.
         public decimal Importe { get; set; }
     }
 

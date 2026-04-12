@@ -6,6 +6,7 @@ using System.Xml.Linq;
 using CFDI.BuildPdf.Abstractions;
 using CFDI.BuildPdf.Mappers.Common;
 using CFDI.BuildPdf.Models;
+using Microsoft.Extensions.Logging;
 
 namespace CFDI.BuildPdf.Mappers.CartaPorte
 {
@@ -17,7 +18,8 @@ namespace CFDI.BuildPdf.Mappers.CartaPorte
     {
         private static readonly XNamespace Cp = "http://www.sat.gob.mx/CartaPorte31";
 
-        public CartaPorteMapper(IQrGenerator qrGenerator) : base(qrGenerator) { }
+        public CartaPorteMapper(IQrGenerator qrGenerator, ILogger<CartaPorteMapper>? logger = null)
+            : base(qrGenerator, logger) { }
 
         /// <inheritdoc />
         public override bool CanMap(XDocument xdoc)
@@ -65,10 +67,50 @@ namespace CFDI.BuildPdf.Mappers.CartaPorte
                         }).ToList() ?? new List<TrasladoImpuestoViewModel>()
                 }).ToList() ?? new();
 
-            // Total impuestos trasladados
-            model.TotalImpuestosTrasladados = comprobante.Element(Cfdi + "Impuestos")?.Attribute("TotalImpuestosTrasladados") != null
-                ? decimal.Parse(comprobante.Element(Cfdi + "Impuestos")?.Attribute("TotalImpuestosTrasladados")?.Value ?? "0", CultureInfo.InvariantCulture)
-                : 0;
+            // Impuestos globales a nivel Comprobante: totales + desglose agrupado
+            var impuestosNode = comprobante.Element(Cfdi + "Impuestos");
+            model.TotalImpuestosTrasladados = ParseDecimalAttr(impuestosNode?.Attribute("TotalImpuestosTrasladados"));
+            model.TotalImpuestosRetenidos = ParseDecimalAttr(impuestosNode?.Attribute("TotalImpuestosRetenidos"));
+
+            model.TrasladosResumen = impuestosNode
+                ?.Element(Cfdi + "Traslados")
+                ?.Elements(Cfdi + "Traslado")
+                .Select(t => new TrasladoImpuestoViewModel
+                {
+                    Impuesto = t.Attribute("Impuesto")?.Value,
+                    TipoFactor = t.Attribute("TipoFactor")?.Value,
+                    TasaOCuota = ParseDecimalAttr(t.Attribute("TasaOCuota")),
+                    Base = ParseDecimalAttr(t.Attribute("Base")),
+                    Importe = ParseDecimalAttr(t.Attribute("Importe"))
+                }).ToList() ?? new List<TrasladoImpuestoViewModel>();
+
+            model.RetencionesResumen = impuestosNode
+                ?.Element(Cfdi + "Retenciones")
+                ?.Elements(Cfdi + "Retencion")
+                .Select(r => new RetencionImpuestoViewModel
+                {
+                    Impuesto = r.Attribute("Impuesto")?.Value,
+                    Importe = ParseDecimalAttr(r.Attribute("Importe"))
+                }).ToList() ?? new List<RetencionImpuestoViewModel>();
+
+            // Fallback: si el CFDI no trae nodo global de Traslados, agrupa los de cada Concepto
+            if (model.TrasladosResumen.Count == 0)
+            {
+                model.TrasladosResumen = model.Conceptos
+                    .SelectMany(c => c.Traslados)
+                    .GroupBy(t => new { t.Impuesto, t.TipoFactor, t.TasaOCuota })
+                    .Select(g => new TrasladoImpuestoViewModel
+                    {
+                        Impuesto = g.Key.Impuesto,
+                        TipoFactor = g.Key.TipoFactor,
+                        TasaOCuota = g.Key.TasaOCuota,
+                        Base = g.Sum(x => x.Base),
+                        Importe = g.Sum(x => x.Importe)
+                    }).ToList();
+
+                if (model.TotalImpuestosTrasladados == 0)
+                    model.TotalImpuestosTrasladados = model.TrasladosResumen.Sum(t => t.Importe);
+            }
 
             // Addenda
             var addendaNode = comprobante.Element(Cfdi + "Addenda");
@@ -135,7 +177,7 @@ namespace CFDI.BuildPdf.Mappers.CartaPorte
 
         #region Addenda
 
-        private static AddendaViewModel MapAddenda(XElement addendaNode)
+        private AddendaViewModel MapAddenda(XElement addendaNode)
         {
             var result = new AddendaViewModel();
 
@@ -192,7 +234,7 @@ namespace CFDI.BuildPdf.Mappers.CartaPorte
                 catch (Exception ex)
                 {
                     result.XmlRaw = xmlContent;
-                    System.Diagnostics.Debug.WriteLine($"Error al parsear addenda: {ex.Message}");
+                    Logger.LogWarning(ex, "No se pudo parsear el contenido de la addenda; se usará XmlRaw como fallback.");
                 }
             }
             else
@@ -206,6 +248,15 @@ namespace CFDI.BuildPdf.Mappers.CartaPorte
         #endregion
 
         #region Helpers Carta Porte
+
+        private static decimal ParseDecimalAttr(XAttribute? attribute)
+        {
+            if (attribute == null || string.IsNullOrWhiteSpace(attribute.Value))
+                return 0m;
+            return decimal.TryParse(attribute.Value, NumberStyles.Any, CultureInfo.InvariantCulture, out var v)
+                ? v
+                : 0m;
+        }
 
         private static UbicacionViewModel MapUbicacion(XElement ubicacion)
         {

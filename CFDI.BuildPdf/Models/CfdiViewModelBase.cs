@@ -48,6 +48,9 @@ namespace CFDI.BuildPdf.Models
         public string NoCertificadoSAT { get; set; }
         public string NoCertificadoEmisor { get; set; }
 
+        // PAC que timbró el comprobante
+        public string RfcProvCertif { get; set; }
+
         // QR
         public string UrlQr { get; set; }
         public string QRCodeBase64 { get; set; }

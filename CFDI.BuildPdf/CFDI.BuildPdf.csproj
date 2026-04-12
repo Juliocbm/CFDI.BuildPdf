@@ -4,7 +4,7 @@
 		<TargetFramework>net6.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
-		<Version>2.0.0</Version>
+		<Version>2.0.4</Version>
 		<Authors>Julio Cesar Bautista Monsalvo</Authors>
 		<Company>JCBM</Company>
 		<Description>Librería para generar representación impresa PDF desde un XML para CFDI 4.0 con complementos Carta Porte 3.1 y Nómina 1.2. Cross-platform, sin dependencias nativas.</Description>
@@ -25,10 +25,11 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="QuestPDF" Version="2024.3.5" PrivateAssets="all" />
-		<PackageReference Include="QRCoder" Version="1.6.0" PrivateAssets="all" />
+		<PackageReference Include="QuestPDF" Version="2024.3.5" />
+		<PackageReference Include="QRCoder" Version="1.6.0" />
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="6.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Options" Version="6.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.4" />
 	</ItemGroup>
 
 	<ItemGroup>

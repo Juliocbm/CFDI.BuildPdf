@@ -6,9 +6,9 @@ using CFDI.BuildPdf.Mappers.Nomina;
 using CFDI.BuildPdf.Models;
 using CFDI.BuildPdf.PdfBuilders.CartaPorte;
 using CFDI.BuildPdf.PdfBuilders.Nomina;
+using CFDI.BuildPdf.Service;
 using CFDI.BuildPdf.Services;
 using Microsoft.Extensions.DependencyInjection;
-using QuestPDF.Infrastructure;
 
 namespace CFDI.BuildPdf.Configuration
 {
@@ -18,16 +18,25 @@ namespace CFDI.BuildPdf.Configuration
     public static class ServiceCollectionExtensions
     {
         /// <summary>
-        /// Registra todos los servicios necesarios para la generación de PDFs CFDI.
+        /// Registra todos los servicios necesarios para la generación de PDFs CFDI
+        /// y establece la licencia QuestPDF a aplicar en el proceso.
         /// </summary>
         /// <param name="services">Colección de servicios del contenedor.</param>
         /// <param name="configure">Acción opcional para configurar <see cref="CfdiPdfOptions"/>.</param>
+        /// <param name="licenseType">
+        /// Tipo de licencia QuestPDF (Community por defecto). El consumidor es responsable
+        /// de cumplir los términos comerciales de QuestPDF; consulta https://www.questpdf.com/license/.
+        /// </param>
         /// <returns>La misma colección de servicios para encadenamiento.</returns>
         public static IServiceCollection AddCfdiPdfServices(
             this IServiceCollection services,
-            Action<CfdiPdfOptions>? configure = null)
+            Action<CfdiPdfOptions>? configure = null,
+            CfdiPdfLicenseType licenseType = CfdiPdfLicenseType.Community)
         {
-            QuestPDF.Settings.License = LicenseType.Community;
+            if (services is null)
+                throw new ArgumentNullException(nameof(services));
+
+            QuestPDF.Settings.License = CfdiPdf.MapLicense(licenseType);
 
             if (configure != null)
                 services.Configure(configure);

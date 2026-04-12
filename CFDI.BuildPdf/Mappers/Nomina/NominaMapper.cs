@@ -6,6 +6,7 @@ using System.Xml.Linq;
 using CFDI.BuildPdf.Abstractions;
 using CFDI.BuildPdf.Mappers.Common;
 using CFDI.BuildPdf.Models;
+using Microsoft.Extensions.Logging;
 
 namespace CFDI.BuildPdf.Mappers.Nomina
 {
@@ -17,7 +18,8 @@ namespace CFDI.BuildPdf.Mappers.Nomina
     {
         private static readonly XNamespace Nom = "http://www.sat.gob.mx/nomina12";
 
-        public NominaMapper(IQrGenerator qrGenerator) : base(qrGenerator) { }
+        public NominaMapper(IQrGenerator qrGenerator, ILogger<NominaMapper>? logger = null)
+            : base(qrGenerator, logger) { }
 
         /// <inheritdoc />
         public override bool CanMap(XDocument xdoc)

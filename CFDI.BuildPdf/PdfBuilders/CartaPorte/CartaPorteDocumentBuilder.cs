@@ -4,6 +4,8 @@ using System.Linq;
 using CFDI.BuildPdf.Abstractions;
 using CFDI.BuildPdf.Models;
 using CFDI.BuildPdf.PdfBuilders.Common;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
@@ -16,6 +18,13 @@ namespace CFDI.BuildPdf.PdfBuilders.CartaPorte
     /// </summary>
     internal class CartaPorteDocumentBuilder : IPdfDocumentBuilder<CfdiCartaPorteViewModel>
     {
+        private readonly ILogger<CartaPorteDocumentBuilder> _logger;
+
+        public CartaPorteDocumentBuilder(ILogger<CartaPorteDocumentBuilder>? logger = null)
+        {
+            _logger = logger ?? NullLogger<CartaPorteDocumentBuilder>.Instance;
+        }
+
         /// <inheritdoc />
         public byte[] Build(CfdiCartaPorteViewModel model, CfdiPdfOptions options)
         {
@@ -90,53 +99,88 @@ namespace CFDI.BuildPdf.PdfBuilders.CartaPorte
 
         private static void ComposeEncabezado(ColumnDescriptor col, CfdiCartaPorteViewModel model)
         {
-            col.Item().AlignRight().Column(right =>
-            {
-                right.Item().AlignRight().Text(model.EmisorNombre ?? "").Bold().FontSize(PdfStyleConstants.FontSizeHeader);
-                right.Item().AlignRight().Text(model.EmisorRFC ?? "").FontSize(PdfStyleConstants.FontSizeDefault);
-            });
+            // Bloque unificado: la renderización real ocurre en ComposeLogoYCertificados.
+            // Se mantiene el método como punto de extensión futuro.
         }
 
-        private static void ComposeLogoYCertificados(ColumnDescriptor col, CfdiCartaPorteViewModel model)
+        private void ComposeLogoYCertificados(ColumnDescriptor col, CfdiCartaPorteViewModel model)
         {
-            col.Item().PaddingTop(8).Table(table =>
+            col.Item().BorderBottom(1f).BorderColor(PdfStyleConstants.ColorBorder).PaddingBottom(6)
+                .Table(table =>
             {
                 table.ColumnsDefinition(c =>
                 {
-                    c.RelativeColumn(3);
-                    c.RelativeColumn(7);
+                    c.RelativeColumn(30); // Logo
+                    c.RelativeColumn(35); // Emisor
+                    c.RelativeColumn(35); // Datos fiscales
                 });
 
                 // Logo
-                table.Cell().Row(1).Column(1).AlignCenter().AlignTop()
+                table.Cell().Row(1).Column(1).AlignLeft().AlignMiddle()
                     .Element(cell =>
                     {
                         if (!string.IsNullOrEmpty(model.LogoBase64))
                         {
-                            try
-                            {
-                                var logoBytes = Convert.FromBase64String(model.LogoBase64);
-                                cell.Width(150).Image(logoBytes);
-                            }
-                            catch { /* Logo inválido, se omite */ }
+                            if (TryDecodeLogo(model.LogoBase64, _logger, out var logoBytes))
+                                cell.Width(150).Image(logoBytes!);
                         }
                     });
 
-                // UUID y Certificados
-                table.Cell().Row(1).Column(2).Table(certTable =>
+                // Emisor: nombre + RFC + régimen
+                table.Cell().Row(1).Column(2).PaddingHorizontal(6).AlignMiddle().Column(c =>
                 {
-                    certTable.ColumnsDefinition(c =>
+                    c.Item().Text(model.EmisorNombre ?? "")
+                        .Bold()
+                        .FontSize(PdfStyleConstants.FontSizeEmisorName)
+                        .FontColor(PdfStyleConstants.ColorAccent);
+                    c.Item().PaddingTop(2).Text(t =>
                     {
-                        c.RelativeColumn(45);
-                        c.RelativeColumn(55);
+                        t.Span("RFC: ").Bold().FontSize(PdfStyleConstants.FontSizeLabel).FontColor(PdfStyleConstants.ColorText);
+                        t.Span(model.EmisorRFC ?? "").FontSize(PdfStyleConstants.FontSizeLabel).FontColor(PdfStyleConstants.ColorText);
                     });
-
-                    CfdiPdfSections.HeaderValueRow(certTable, 1, 1, "Folio Fiscal (UUID):", model.UUID);
-                    CfdiPdfSections.HeaderValueRow(certTable, 2, 1, "Fecha de Certificación:", model.FechaCertificacion.ToString("yyyy-MM-dd'T'HH:mm:ss"));
-                    CfdiPdfSections.HeaderValueRow(certTable, 3, 1, "No. Certificado SAT:", model.NoCertificadoSAT);
-                    CfdiPdfSections.HeaderValueRow(certTable, 4, 1, "No. Certificado Emisor:", model.NoCertificadoEmisor);
-                    CfdiPdfSections.HeaderValueRow(certTable, 5, 1, "Versión:", model.Version);
+                    c.Item().PaddingTop(1).Text(t =>
+                    {
+                        t.Span("RÉGIMEN FISCAL: ").Bold().FontSize(PdfStyleConstants.FontSizeLabel).FontColor(PdfStyleConstants.ColorText);
+                        t.Span($"{model.EmisorRegimenFiscal} - {CfdiPdfSections.NombreRegimenFiscal(model.EmisorRegimenFiscal)}").FontSize(PdfStyleConstants.FontSizeLabel).FontColor(PdfStyleConstants.ColorText);
+                    });
+                    c.Item().PaddingTop(1).Text(t =>
+                    {
+                        t.Span("LUGAR DE EXPEDICIÓN: ").Bold().FontSize(PdfStyleConstants.FontSizeLabel).FontColor(PdfStyleConstants.ColorText);
+                        t.Span(model.LugarExpedicion ?? "").FontSize(PdfStyleConstants.FontSizeLabel).FontColor(PdfStyleConstants.ColorText);
+                    });
                 });
+
+                // Datos fiscales a la derecha
+                table.Cell().Row(1).Column(3).AlignMiddle().Column(c =>
+                {
+                    c.Item().Text(t =>
+                    {
+                        t.Span("UUID: ").Bold()
+                            .FontSize(PdfStyleConstants.FontSizeSmall)
+                            .FontColor(PdfStyleConstants.ColorAccent);
+                        t.Span(model.UUID ?? "")
+                            .FontSize(PdfStyleConstants.FontSizeVerySmall)
+                            .FontColor(PdfStyleConstants.ColorText);
+                    });
+                    FiscalRow(c, "FECHA CERTIFICACIÓN:", model.FechaCertificacion.ToString("dd/MM/yyyy HH:mm:ss"));
+                    FiscalRow(c, "NO. CERTIFICADO SAT:", model.NoCertificadoSAT);
+                    FiscalRow(c, "NO. CERTIFICADO EMISOR:", model.NoCertificadoEmisor);
+                    FiscalRow(c, "PAC QUE TIMBRÓ:", $"{CfdiPdfSections.NombrePac(model.RfcProvCertif)} ({model.RfcProvCertif})");
+                    FiscalRow(c, "VERSIÓN CFDI:", model.Version);
+                });
+            });
+        }
+
+        private static void FiscalRow(ColumnDescriptor col, string label, string? value)
+        {
+            col.Item().Text(t =>
+            {
+                t.Span(label + " ").Bold()
+                    .FontSize(PdfStyleConstants.FontSizeSmall)
+                    .FontColor(PdfStyleConstants.ColorAccent);
+                t.Span(value ?? "")
+                    .FontSize(PdfStyleConstants.FontSizeSmall)
+                    .FontColor(PdfStyleConstants.ColorText);
             });
         }
 
@@ -147,38 +191,71 @@ namespace CFDI.BuildPdf.PdfBuilders.CartaPorte
                 table.ColumnsDefinition(c =>
                 {
                     c.RelativeColumn();
+                    c.ConstantColumn(6);
                     c.RelativeColumn();
                 });
 
                 // Cliente
-                table.Cell().Row(1).Column(1).Border(0.5f).BorderColor(PdfStyleConstants.ColorBorder)
-                    .Padding(6).Column(c =>
+                table.Cell().Row(1).Column(1).Border(0.75f).BorderColor(PdfStyleConstants.ColorBorder)
+                    .Column(c =>
                     {
-                        c.Item().Text("CLIENTE").Bold();
-                        c.Item().Text(model.ReceptorNombre ?? "");
-                        c.Item().Text(t => { t.Span("RFC: ").Bold(); t.Span(model.ReceptorRFC ?? ""); });
-                        c.Item().Text(t => { t.Span("Domicilio Fiscal: ").Bold(); t.Span(model.ReceptorDomicilioFiscal ?? ""); });
-                        c.Item().Text(t => { t.Span("Régimen Fiscal: ").Bold(); t.Span(model.ReceptorRegimenFiscal ?? ""); });
-                        c.Item().Text(t => { t.Span("Uso del CFDI: ").Bold(); t.Span(model.UsoCFDI ?? ""); });
+                        c.Item().Background(PdfStyleConstants.ColorHeaderBg)
+                            .PaddingVertical(3).PaddingHorizontal(6)
+                            .Text("CLIENTE").Bold()
+                            .FontSize(PdfStyleConstants.FontSizeSectionTitle)
+                            .FontColor(PdfStyleConstants.ColorHeaderText);
+
+                        c.Item().Padding(6).Column(cc =>
+                        {
+                            cc.Item().Text(model.ReceptorNombre ?? "").Bold()
+                                .FontSize(PdfStyleConstants.FontSizeDefault)
+                                .FontColor(PdfStyleConstants.ColorText);
+                            cc.Item().PaddingTop(2).Text(t => { LabelValueSpans(t, "RFC:", model.ReceptorRFC); });
+                            cc.Item().Text(t => { LabelValueSpans(t, "Domicilio Fiscal:", model.ReceptorDomicilioFiscal); });
+                            cc.Item().Text(t => { LabelValueSpans(t, "Régimen Fiscal:", $"{model.ReceptorRegimenFiscal} - {CfdiPdfSections.NombreRegimenFiscal(model.ReceptorRegimenFiscal)}"); });
+                            cc.Item().Text(t => { LabelValueSpans(t, "Uso del CFDI:", $"{model.UsoCFDI} - {CfdiPdfSections.NombreUsoCFDI(model.UsoCFDI)}"); });
+                        });
                     });
 
+                // separador
+                table.Cell().Row(1).Column(2);
+
                 // Emisión
-                table.Cell().Row(1).Column(2).Border(0.5f).BorderColor(PdfStyleConstants.ColorBorder)
-                    .Padding(6).Column(c =>
+                table.Cell().Row(1).Column(3).Border(0.75f).BorderColor(PdfStyleConstants.ColorBorder)
+                    .Column(c =>
                     {
-                        c.Item().Text(t => { t.Span("Fecha y Hora de Emisión: ").Bold(); t.Span(model.FechaEmision.ToString("yyyy-MM-dd'T'HH:mm:ss")); });
-                        c.Item().Text(t => { t.Span("Lugar de Expedición: ").Bold(); t.Span(model.LugarExpedicion ?? ""); });
-                        c.Item().Text(t => { t.Span("Serie y Folio: ").Bold(); t.Span(model.Folio ?? ""); });
-                        c.Item().Text(t => { t.Span("Tipo de Cambio: ").Bold(); t.Span(model.TipoCambio ?? ""); });
-                        c.Item().Text(t => { t.Span("Moneda: ").Bold(); t.Span(model.Moneda ?? ""); });
-                        c.Item().Text(t => { t.Span("Exportación: ").Bold(); t.Span(model.Exportacion ?? ""); });
+                        c.Item().Background(PdfStyleConstants.ColorHeaderBg)
+                            .PaddingVertical(3).PaddingHorizontal(6)
+                            .Text("DATOS DE EMISIÓN").Bold()
+                            .FontSize(PdfStyleConstants.FontSizeSectionTitle)
+                            .FontColor(PdfStyleConstants.ColorHeaderText);
+
+                        c.Item().Padding(6).Column(cc =>
+                        {
+                            cc.Item().Text(t => { LabelValueSpans(t, "Fecha y Hora:", model.FechaEmision.ToString("dd/MM/yyyy HH:mm:ss")); });
+                            cc.Item().Text(t => { LabelValueSpans(t, "Serie y Folio:", model.Folio); });
+                            cc.Item().Text(t => { LabelValueSpans(t, "Moneda:", model.Moneda); });
+                            cc.Item().Text(t => { LabelValueSpans(t, "Tipo de Cambio:", model.TipoCambio); });
+                            cc.Item().Text(t => { LabelValueSpans(t, "Lugar de Expedición:", model.LugarExpedicion); });
+                            cc.Item().Text(t => { LabelValueSpans(t, "Exportación:", $"{model.Exportacion} - {CfdiPdfSections.NombreExportacion(model.Exportacion)}"); });
+                        });
                     });
             });
         }
 
+        private static void LabelValueSpans(TextDescriptor t, string label, string? value)
+        {
+            t.Span(label + " ").Bold()
+                .FontSize(PdfStyleConstants.FontSizeLabel)
+                .FontColor(PdfStyleConstants.ColorText);
+            t.Span(value ?? "")
+                .FontSize(PdfStyleConstants.FontSizeLabel)
+                .FontColor(PdfStyleConstants.ColorSecondaryText);
+        }
+
         private static void ComposeFormaPago(ColumnDescriptor col, CfdiCartaPorteViewModel model)
         {
-            col.Item().PaddingTop(5).Table(table =>
+            col.Item().PaddingTop(6).Table(table =>
             {
                 table.ColumnsDefinition(c =>
                 {
@@ -186,16 +263,16 @@ namespace CFDI.BuildPdf.PdfBuilders.CartaPorte
                     c.RelativeColumn();
                 });
 
-                table.Cell().Row(1).Column(1).Padding(4).Column(c =>
+                table.Cell().Row(1).Column(1).PaddingRight(6).Column(c =>
                 {
-                    c.Item().Text(t => { t.Span("Forma de Pago: ").Bold(); t.Span(model.FormaPago ?? ""); });
-                    c.Item().Text(t => { t.Span("Método de Pago: ").Bold(); t.Span(model.MetodoPago ?? ""); });
+                    c.Item().Text(t => { LabelValueSpans(t, "Forma de Pago:", $"{model.FormaPago} - {CfdiPdfSections.NombreFormaPago(model.FormaPago)}"); });
+                    c.Item().Text(t => { LabelValueSpans(t, "Método de Pago:", $"{model.MetodoPago} - {CfdiPdfSections.NombreMetodoPago(model.MetodoPago)}"); });
                 });
 
-                table.Cell().Row(1).Column(2).Padding(4).Column(c =>
+                table.Cell().Row(1).Column(2).PaddingLeft(6).Column(c =>
                 {
-                    c.Item().Text(t => { t.Span("Tipo de Comprobante: ").Bold(); t.Span(model.TipoComprobante ?? ""); });
-                    c.Item().Text(t => { t.Span("Condiciones de Pago: ").Bold(); t.Span(model.CondicionesPago ?? ""); });
+                    c.Item().Text(t => { LabelValueSpans(t, "Tipo de Comprobante:", model.TipoComprobante); });
+                    c.Item().Text(t => { LabelValueSpans(t, "Condiciones de Pago:", model.CondicionesPago); });
                 });
             });
         }
@@ -211,75 +288,84 @@ namespace CFDI.BuildPdf.PdfBuilders.CartaPorte
                 table.ColumnsDefinition(c =>
                 {
                     c.RelativeColumn(8);  // ClaveProdServ
-                    c.RelativeColumn(8);  // NoIdent
-                    c.RelativeColumn(5);  // Cantidad
-                    c.RelativeColumn(5);  // ClaveUnidad
-                    c.RelativeColumn(7);  // Unidad
-                    c.RelativeColumn(30); // Descripcion
+                    c.RelativeColumn(6);  // NoIdent
+                    c.RelativeColumn(6);  // Cantidad
+                    c.RelativeColumn(6);  // ClaveUnidad
+                    c.RelativeColumn(6);  // Unidad
+                    c.RelativeColumn(22); // Descripcion
                     c.RelativeColumn(8);  // PrecioUnit
-                    c.RelativeColumn(8);  // Importe
-                    c.RelativeColumn(8);  // Descuento
-                    c.RelativeColumn(8);  // ObjetoImp
+                    c.RelativeColumn(7);  // Importe
+                    c.RelativeColumn(9);  // Descuento
+                    c.RelativeColumn(10); // ObjetoImp
                 });
 
-                // Header
+                // Header con fondo oscuro y texto blanco
                 var headers = new[] { "Clave Prod/Serv", "No. Ident.", "Cantidad", "Clave Unidad", "Unidad", "Descripción", "Precio Unitario", "Importe", "Descuento", "Objeto Imp." };
                 for (uint i = 0; i < headers.Length; i++)
                 {
                     table.Cell().Row(1).Column(i + 1)
-                        .Border(0.5f).BorderColor(PdfStyleConstants.ColorBorder)
-                        .Background(PdfStyleConstants.ColorHeaderBg)
-                        .Padding(3).Text(headers[i]).Bold().FontSize(PdfStyleConstants.FontSizeSmall);
+                        .Element(c => CfdiPdfSections.TableHeaderCell(c, headers[i]));
                 }
 
+                bool useZebra = model.Conceptos.Count >= 4;
                 uint row = 2;
                 foreach (var concepto in model.Conceptos)
                 {
                     var r = row;
-                    table.Cell().Row(r).Column(1).Border(0.5f).BorderColor(PdfStyleConstants.ColorBorder).Padding(2).Text(concepto.ClaveProductoServicio ?? "").FontSize(PdfStyleConstants.FontSizeSmall);
-                    table.Cell().Row(r).Column(2).Border(0.5f).BorderColor(PdfStyleConstants.ColorBorder).Padding(2).Text(concepto.NumeroIdentificacion ?? "").FontSize(PdfStyleConstants.FontSizeSmall);
-                    table.Cell().Row(r).Column(3).Border(0.5f).BorderColor(PdfStyleConstants.ColorBorder).Padding(2).Text(concepto.Cantidad.ToString(CultureInfo.InvariantCulture)).FontSize(PdfStyleConstants.FontSizeSmall);
-                    table.Cell().Row(r).Column(4).Border(0.5f).BorderColor(PdfStyleConstants.ColorBorder).Padding(2).Text(concepto.ClaveUnidad ?? "").FontSize(PdfStyleConstants.FontSizeSmall);
-                    table.Cell().Row(r).Column(5).Border(0.5f).BorderColor(PdfStyleConstants.ColorBorder).Padding(2).Text(concepto.Unidad ?? "").FontSize(PdfStyleConstants.FontSizeSmall);
+                    bool zebra = useZebra && (r % 2 == 0);
+                    IContainer BodyCell(uint column)
+                    {
+                        var cell = table.Cell().Row(r).Column(column)
+                            .Border(0.3f).BorderColor(PdfStyleConstants.ColorBorderSoft);
+                        if (zebra) cell = cell.Background(PdfStyleConstants.ColorZebra);
+                        return cell.Padding(2);
+                    }
+
+                    BodyCell(1).Text(concepto.ClaveProductoServicio ?? "").FontSize(PdfStyleConstants.FontSizeSmall);
+                    BodyCell(2).Text(concepto.NumeroIdentificacion ?? "").FontSize(PdfStyleConstants.FontSizeSmall);
+                    BodyCell(3).AlignCenter().Text(concepto.Cantidad.ToString(CultureInfo.InvariantCulture)).FontSize(PdfStyleConstants.FontSizeSmall);
+                    BodyCell(4).Text(CfdiPdfSections.NombreClaveUnidad(concepto.ClaveUnidad)).FontSize(PdfStyleConstants.FontSizeSmall);
+                    BodyCell(5).Text(concepto.Unidad ?? "").FontSize(PdfStyleConstants.FontSizeSmall);
 
                     // Descripción + traslados
-                    table.Cell().Row(r).Column(6).Border(0.5f).BorderColor(PdfStyleConstants.ColorBorder).Padding(2)
-                        .Column(descCol =>
+                    BodyCell(6).Column(descCol =>
+                    {
+                        descCol.Item().Text(concepto.Descripcion ?? "").FontSize(PdfStyleConstants.FontSizeSmall);
+
+                        if (concepto.Traslados?.Any() == true)
                         {
-                            descCol.Item().Text(concepto.Descripcion ?? "").FontSize(PdfStyleConstants.FontSizeSmall);
-
-                            if (concepto.Traslados?.Any() == true)
+                            descCol.Item().PaddingTop(3).Text("IMPUESTOS TRASLADADOS").Bold()
+                                .FontSize(PdfStyleConstants.FontSizeVerySmall)
+                                .FontColor(PdfStyleConstants.ColorAccent);
+                            descCol.Item().Table(impTable =>
                             {
-                                descCol.Item().PaddingTop(3).Text("IMPUESTOS TRASLADADOS").Bold().FontSize(PdfStyleConstants.FontSizeVerySmall);
-                                descCol.Item().Table(impTable =>
+                                impTable.ColumnsDefinition(ic =>
                                 {
-                                    impTable.ColumnsDefinition(ic =>
-                                    {
-                                        ic.RelativeColumn(); ic.RelativeColumn(); ic.RelativeColumn(); ic.RelativeColumn(); ic.RelativeColumn();
-                                    });
-                                    var impHeaders = new[] { "Factor", "Impuesto", "Tasa/Cuota", "Base", "Importe" };
-                                    for (uint ih = 0; ih < impHeaders.Length; ih++)
-                                        impTable.Cell().Row(1).Column(ih + 1).Padding(1).Text(impHeaders[ih]).Bold().FontSize(PdfStyleConstants.FontSizeVerySmall);
-
-                                    uint impRow = 2;
-                                    foreach (var t in concepto.Traslados)
-                                    {
-                                        var ir = impRow;
-                                        impTable.Cell().Row(ir).Column(1).Padding(1).Text(t.TipoFactor ?? "").FontSize(PdfStyleConstants.FontSizeVerySmall);
-                                        impTable.Cell().Row(ir).Column(2).Padding(1).Text(t.Impuesto ?? "").FontSize(PdfStyleConstants.FontSizeVerySmall);
-                                        impTable.Cell().Row(ir).Column(3).Padding(1).Text(t.TasaOCuota.ToString("0.000000")).FontSize(PdfStyleConstants.FontSizeVerySmall);
-                                        impTable.Cell().Row(ir).Column(4).Padding(1).Text(t.Base.ToString("0.000000")).FontSize(PdfStyleConstants.FontSizeVerySmall);
-                                        impTable.Cell().Row(ir).Column(5).Padding(1).Text(t.Importe.ToString("0.000000")).FontSize(PdfStyleConstants.FontSizeVerySmall);
-                                        impRow++;
-                                    }
+                                    ic.RelativeColumn(); ic.RelativeColumn(); ic.RelativeColumn(); ic.RelativeColumn(); ic.RelativeColumn();
                                 });
-                            }
-                        });
+                                var impHeaders = new[] { "Factor", "Impuesto", "Tasa/Cuota", "Base", "Importe" };
+                                for (uint ih = 0; ih < impHeaders.Length; ih++)
+                                    impTable.Cell().Row(1).Column(ih + 1).Padding(1).Text(impHeaders[ih]).Bold().FontSize(PdfStyleConstants.FontSizeVerySmall);
 
-                    table.Cell().Row(r).Column(7).Border(0.5f).BorderColor(PdfStyleConstants.ColorBorder).Padding(2).Text(CfdiPdfSections.Format6(concepto.ValorUnitario)).FontSize(PdfStyleConstants.FontSizeSmall);
-                    table.Cell().Row(r).Column(8).Border(0.5f).BorderColor(PdfStyleConstants.ColorBorder).Padding(2).Text(CfdiPdfSections.Format6(concepto.Importe)).FontSize(PdfStyleConstants.FontSizeSmall);
-                    table.Cell().Row(r).Column(9).Border(0.5f).BorderColor(PdfStyleConstants.ColorBorder).Padding(2).Text(concepto.Descuento != 0 ? CfdiPdfSections.Format6(concepto.Descuento) : "").FontSize(PdfStyleConstants.FontSizeSmall);
-                    table.Cell().Row(r).Column(10).Border(0.5f).BorderColor(PdfStyleConstants.ColorBorder).Padding(2).Text(concepto.ObjetoImpuesto ?? "").FontSize(PdfStyleConstants.FontSizeSmall);
+                                uint impRow = 2;
+                                foreach (var t in concepto.Traslados)
+                                {
+                                    var ir = impRow;
+                                    impTable.Cell().Row(ir).Column(1).Padding(1).Text(t.TipoFactor ?? "").FontSize(PdfStyleConstants.FontSizeVerySmall);
+                                    impTable.Cell().Row(ir).Column(2).Padding(1).Text(CfdiPdfSections.NombreImpuesto(t.Impuesto)).FontSize(PdfStyleConstants.FontSizeVerySmall);
+                                    impTable.Cell().Row(ir).Column(3).Padding(1).AlignRight().Text(CfdiPdfSections.FormatTasaOCuota(t.TasaOCuota, t.TipoFactor)).FontSize(PdfStyleConstants.FontSizeVerySmall);
+                                    impTable.Cell().Row(ir).Column(4).Padding(1).AlignRight().Text(CfdiPdfSections.Format2(t.Base)).FontSize(PdfStyleConstants.FontSizeVerySmall);
+                                    impTable.Cell().Row(ir).Column(5).Padding(1).AlignRight().Text(CfdiPdfSections.Format2(t.Importe)).FontSize(PdfStyleConstants.FontSizeVerySmall);
+                                    impRow++;
+                                }
+                            });
+                        }
+                    });
+
+                    BodyCell(7).AlignRight().Text(CfdiPdfSections.Format2(concepto.ValorUnitario)).FontSize(PdfStyleConstants.FontSizeSmall);
+                    BodyCell(8).AlignRight().Text(CfdiPdfSections.Format2(concepto.Importe)).FontSize(PdfStyleConstants.FontSizeSmall);
+                    BodyCell(9).AlignRight().Text(concepto.Descuento != 0 ? CfdiPdfSections.Format2(concepto.Descuento) : "").FontSize(PdfStyleConstants.FontSizeSmall);
+                    BodyCell(10).AlignCenter().Text(CfdiPdfSections.NombreObjetoImp(concepto.ObjetoImpuesto)).FontSize(PdfStyleConstants.FontSizeSmall);
 
                     row++;
                 }
@@ -288,26 +374,101 @@ namespace CFDI.BuildPdf.PdfBuilders.CartaPorte
 
         private static void ComposeTotales(ColumnDescriptor col, CfdiCartaPorteViewModel model)
         {
-            col.Item().Element(c => CfdiPdfSections.SectionTitle(c, "Totales"));
-
-            col.Item().Table(table =>
+            // Layout 2 columnas: izquierda "Cantidad con letra"; derecha panel de totales desglosado.
+            col.Item().PaddingTop(6).Table(table =>
             {
                 table.ColumnsDefinition(c =>
                 {
-                    c.RelativeColumn(); c.RelativeColumn(); c.RelativeColumn(); c.RelativeColumn(); c.RelativeColumn(); c.RelativeColumn();
+                    c.RelativeColumn(6);
+                    c.RelativeColumn(4);
                 });
 
-                CfdiPdfSections.HeaderValueRow(table, 1, 1, "Subtotal", CfdiPdfSections.FormatCurrency(model.SubTotal));
-                CfdiPdfSections.HeaderValueRow(table, 1, 3, "Total Imp. Trasladados", CfdiPdfSections.FormatCurrency(model.TotalImpuestosTrasladados));
-                CfdiPdfSections.HeaderValueRow(table, 1, 5, "Total", CfdiPdfSections.FormatCurrency(model.Total));
+                // Columna izquierda: etiqueta + cantidad en letra
+                table.Cell().Row(1).Column(1).PaddingRight(8).Column(left =>
+                {
+                    left.Item().Text("CANTIDAD CON LETRA").Bold().FontSize(PdfStyleConstants.FontSizeSmall);
+                    left.Item().PaddingTop(2).Border(0.5f).BorderColor(PdfStyleConstants.ColorBorder)
+                        .Padding(4).Text(model.CantidadConLetra ?? "").FontSize(PdfStyleConstants.FontSizeSmall);
+                });
 
-                table.Cell().Row(2).Column(1)
-                    .Border(0.5f).BorderColor(PdfStyleConstants.ColorBorder)
-                    .Background(PdfStyleConstants.ColorHeaderBg)
-                    .Padding(3).Text("Cantidad en Letra").Bold();
-                table.Cell().Row(2).Column(2).ColumnSpan(5)
-                    .Border(0.5f).BorderColor(PdfStyleConstants.ColorBorder)
-                    .Padding(3).Text(model.CantidadConLetra ?? "");
+                // Columna derecha: panel de totales
+                table.Cell().Row(1).Column(2).Element(c => ComposePanelTotales(c, model));
+            });
+        }
+
+        private static void ComposePanelTotales(IContainer container, CfdiCartaPorteViewModel model)
+        {
+            container.Border(0.75f).BorderColor(PdfStyleConstants.ColorBorder).Column(panel =>
+            {
+                panel.Item().Background(PdfStyleConstants.ColorHeaderBg)
+                    .PaddingVertical(3).PaddingHorizontal(6)
+                    .Text("RESUMEN DE TOTALES").Bold()
+                    .FontSize(PdfStyleConstants.FontSizeSectionTitle)
+                    .FontColor(PdfStyleConstants.ColorHeaderText);
+
+                panel.Item().Padding(6).Column(inner =>
+                {
+                    // Subtotal
+                    TotalRow(inner, "SUBTOTAL", CfdiPdfSections.FormatCurrency(model.SubTotal), bold: true);
+
+                    // Impuestos Trasladados
+                    if (model.TrasladosResumen.Any() || model.TotalImpuestosTrasladados > 0)
+                    {
+                        inner.Item().PaddingTop(3).Text("IMPUESTOS TRASLADADOS")
+                            .Bold().FontSize(PdfStyleConstants.FontSizeSmall)
+                            .FontColor(PdfStyleConstants.ColorAccent);
+
+                        foreach (var t in model.TrasladosResumen)
+                        {
+                            var etiqueta = $"   {CfdiPdfSections.NombreImpuesto(t.Impuesto)} {CfdiPdfSections.FormatTasaOCuota(t.TasaOCuota, t.TipoFactor)}";
+                            TotalRow(inner, etiqueta, CfdiPdfSections.FormatCurrency(t.Importe));
+                        }
+
+                        TotalRow(inner, "TOTAL TRASLADADOS", CfdiPdfSections.FormatCurrency(model.TotalImpuestosTrasladados), bold: true);
+                    }
+
+                    // Impuestos Retenidos
+                    if (model.RetencionesResumen.Any() || model.TotalImpuestosRetenidos > 0)
+                    {
+                        inner.Item().PaddingTop(3).Text("IMPUESTOS RETENIDOS")
+                            .Bold().FontSize(PdfStyleConstants.FontSizeSmall)
+                            .FontColor(PdfStyleConstants.ColorAccent);
+
+                        foreach (var r in model.RetencionesResumen)
+                        {
+                            var etiqueta = $"   {CfdiPdfSections.NombreImpuesto(r.Impuesto)}";
+                            TotalRow(inner, etiqueta, CfdiPdfSections.FormatCurrency(r.Importe));
+                        }
+
+                        TotalRow(inner, "TOTAL RETENIDOS", CfdiPdfSections.FormatCurrency(model.TotalImpuestosRetenidos), bold: true);
+                    }
+
+                    // Total final
+                    inner.Item().PaddingTop(4).BorderTop(1.5f).BorderColor(PdfStyleConstants.ColorBorder).PaddingTop(3)
+                        .Row(row =>
+                        {
+                            row.RelativeItem(5).Text("TOTAL").Bold()
+                                .FontSize(PdfStyleConstants.FontSizeTitle)
+                                .FontColor(PdfStyleConstants.ColorAccent);
+                            row.RelativeItem(5).AlignRight().Text(CfdiPdfSections.FormatCurrency(model.Total)).Bold()
+                                .FontSize(PdfStyleConstants.FontSizeTitle)
+                                .FontColor(PdfStyleConstants.ColorAccent);
+                        });
+                });
+            });
+        }
+
+        private static void TotalRow(ColumnDescriptor col, string label, string value, bool bold = false)
+        {
+            col.Item().Row(row =>
+            {
+                var labelCell = row.RelativeItem(6).Text(label).FontSize(PdfStyleConstants.FontSizeSmall);
+                var valueCell = row.RelativeItem(4).AlignRight().Text(value).FontSize(PdfStyleConstants.FontSizeSmall);
+                if (bold)
+                {
+                    labelCell.Bold();
+                    valueCell.Bold();
+                }
             });
         }
 
@@ -345,9 +506,16 @@ namespace CFDI.BuildPdf.PdfBuilders.CartaPorte
         {
             if (string.IsNullOrEmpty(model.CartaPorte?.IdCCP)) return;
 
-            col.Item().PaddingTop(15).Element(c => CfdiPdfSections.SectionTitle(c, "Identificador del Complemento Carta Porte:"));
-            col.Item().Border(0.5f).BorderColor(PdfStyleConstants.ColorBorder)
-                .Padding(8).Text(model.CartaPorte!.IdCCP).FontSize(PdfStyleConstants.FontSizeHeader);
+            col.Item().PaddingTop(6).Border(0.5f).BorderColor(PdfStyleConstants.ColorBorderSoft)
+                .PaddingVertical(3).PaddingHorizontal(6).AlignCenter().Text(t =>
+                {
+                    t.Span("ID CCP: ")
+                        .Bold().FontSize(PdfStyleConstants.FontSizeSmall)
+                        .FontColor(PdfStyleConstants.ColorAccent);
+                    t.Span(model.CartaPorte!.IdCCP)
+                        .FontSize(PdfStyleConstants.FontSizeSmall)
+                        .FontColor(PdfStyleConstants.ColorText);
+                });
         }
 
         private static void ComposeComplementoCartaPorte(ColumnDescriptor col, CfdiCartaPorteViewModel model)
@@ -366,7 +534,7 @@ namespace CFDI.BuildPdf.PdfBuilders.CartaPorte
 
                 CfdiPdfSections.HeaderValueRow(table, 1, 1, "Versión", cp.Version);
                 CfdiPdfSections.HeaderValueRow(table, 1, 3, "Transporte Internacional", cp.TransporteInternacional);
-                CfdiPdfSections.HeaderValueRow(table, 1, 5, "Vía de entrada/salida", cp.ViaEntradaSalida);
+                CfdiPdfSections.HeaderValueRow(table, 1, 5, "Vía de entrada/salida", CfdiPdfSections.NombreCveTransporte(cp.ViaEntradaSalida));
 
                 CfdiPdfSections.HeaderValueRow(table, 2, 1, "Entrada/Salida", cp.EntradaSalidaMercancia);
                 CfdiPdfSections.HeaderValueRow(table, 2, 3, "País Origen/Destino", cp.PaisOrigenDestino);
@@ -391,23 +559,26 @@ namespace CFDI.BuildPdf.PdfBuilders.CartaPorte
 
                 var headers = new[] { "Tipo", "ID Ubicación", "RFC", "Nombre", "Fecha/Hora", "C.P.", "Municipio", "Localidad", "Estado", "País" };
                 for (uint i = 0; i < headers.Length; i++)
-                    table.Cell().Row(1).Column(i + 1).Border(0.5f).BorderColor(PdfStyleConstants.ColorBorder)
-                        .Background(PdfStyleConstants.ColorHeaderBg).Padding(2).Text(headers[i]).Bold().FontSize(PdfStyleConstants.FontSizeSmall);
+                    table.Cell().Row(1).Column(i + 1)
+                        .Element(c => CfdiPdfSections.TableHeaderCell(c, headers[i]));
 
                 uint row = 2;
                 foreach (var u in model.CartaPorte.Ubicaciones)
                 {
                     var r = row;
-                    table.Cell().Row(r).Column(1).Border(0.5f).BorderColor(PdfStyleConstants.ColorBorder).Padding(2).Text(u.TipoUbicacion ?? "").FontSize(PdfStyleConstants.FontSizeSmall);
-                    table.Cell().Row(r).Column(2).Border(0.5f).BorderColor(PdfStyleConstants.ColorBorder).Padding(2).Text(u.IDUbicacion ?? "").FontSize(PdfStyleConstants.FontSizeSmall);
-                    table.Cell().Row(r).Column(3).Border(0.5f).BorderColor(PdfStyleConstants.ColorBorder).Padding(2).Text(u.RFCRemitenteDestinatario ?? "").FontSize(PdfStyleConstants.FontSizeSmall);
-                    table.Cell().Row(r).Column(4).Border(0.5f).BorderColor(PdfStyleConstants.ColorBorder).Padding(2).Text(u.NombreRemitenteDestinatario ?? "").FontSize(PdfStyleConstants.FontSizeSmall);
-                    table.Cell().Row(r).Column(5).Border(0.5f).BorderColor(PdfStyleConstants.ColorBorder).Padding(2).Text(u.FechaHoraSalidaLlegada?.ToString("yyyy-MM-dd'T'HH:mm:ss") ?? "").FontSize(PdfStyleConstants.FontSizeSmall);
-                    table.Cell().Row(r).Column(6).Border(0.5f).BorderColor(PdfStyleConstants.ColorBorder).Padding(2).Text(u.CodigoPostal ?? "").FontSize(PdfStyleConstants.FontSizeSmall);
-                    table.Cell().Row(r).Column(7).Border(0.5f).BorderColor(PdfStyleConstants.ColorBorder).Padding(2).Text(u.Municipio ?? "").FontSize(PdfStyleConstants.FontSizeSmall);
-                    table.Cell().Row(r).Column(8).Border(0.5f).BorderColor(PdfStyleConstants.ColorBorder).Padding(2).Text(u.Localidad ?? "").FontSize(PdfStyleConstants.FontSizeSmall);
-                    table.Cell().Row(r).Column(9).Border(0.5f).BorderColor(PdfStyleConstants.ColorBorder).Padding(2).Text(u.Estado ?? "").FontSize(PdfStyleConstants.FontSizeSmall);
-                    table.Cell().Row(r).Column(10).Border(0.5f).BorderColor(PdfStyleConstants.ColorBorder).Padding(2).Text(u.Pais ?? "").FontSize(PdfStyleConstants.FontSizeSmall);
+                    IContainer BCell(uint column) => table.Cell().Row(r).Column(column)
+                        .Border(0.3f).BorderColor(PdfStyleConstants.ColorBorderSoft).Padding(2);
+
+                    BCell(1).Text(u.TipoUbicacion ?? "").FontSize(PdfStyleConstants.FontSizeSmall);
+                    BCell(2).Text(u.IDUbicacion ?? "").FontSize(PdfStyleConstants.FontSizeSmall);
+                    BCell(3).Text(u.RFCRemitenteDestinatario ?? "").FontSize(PdfStyleConstants.FontSizeSmall);
+                    BCell(4).Text(u.NombreRemitenteDestinatario ?? "").FontSize(PdfStyleConstants.FontSizeSmall);
+                    BCell(5).Text(u.FechaHoraSalidaLlegada?.ToString("dd/MM/yyyy HH:mm") ?? "").FontSize(PdfStyleConstants.FontSizeSmall);
+                    BCell(6).Text(u.CodigoPostal ?? "").FontSize(PdfStyleConstants.FontSizeSmall);
+                    BCell(7).Text(u.Municipio ?? "").FontSize(PdfStyleConstants.FontSizeSmall);
+                    BCell(8).Text(u.Localidad ?? "").FontSize(PdfStyleConstants.FontSizeSmall);
+                    BCell(9).Text(u.Estado ?? "").FontSize(PdfStyleConstants.FontSizeSmall);
+                    BCell(10).Text(u.Pais ?? "").FontSize(PdfStyleConstants.FontSizeSmall);
                     row++;
                 }
             });
@@ -429,18 +600,21 @@ namespace CFDI.BuildPdf.PdfBuilders.CartaPorte
 
                     var headers = new[] { "Descripción", "Cantidad", "Clave Unidad", "Peso en KG", "Valor Mercancía" };
                     for (uint i = 0; i < headers.Length; i++)
-                        table.Cell().Row(1).Column(i + 1).Border(0.5f).BorderColor(PdfStyleConstants.ColorBorder)
-                            .Background(PdfStyleConstants.ColorHeaderBg).Padding(3).Text(headers[i]).Bold().FontSize(PdfStyleConstants.FontSizeSmall);
+                        table.Cell().Row(1).Column(i + 1)
+                            .Element(c => CfdiPdfSections.TableHeaderCell(c, headers[i]));
 
                     uint row = 2;
                     foreach (var m in model.CartaPorte.MercanciasDetalle)
                     {
                         var r = row;
-                        table.Cell().Row(r).Column(1).Border(0.5f).BorderColor(PdfStyleConstants.ColorBorder).Padding(2).Text(m.Descripcion ?? "").FontSize(PdfStyleConstants.FontSizeSmall);
-                        table.Cell().Row(r).Column(2).Border(0.5f).BorderColor(PdfStyleConstants.ColorBorder).Padding(2).Text(CfdiPdfSections.Format6(m.Cantidad)).FontSize(PdfStyleConstants.FontSizeSmall);
-                        table.Cell().Row(r).Column(3).Border(0.5f).BorderColor(PdfStyleConstants.ColorBorder).Padding(2).Text(m.ClaveUnidad ?? "").FontSize(PdfStyleConstants.FontSizeSmall);
-                        table.Cell().Row(r).Column(4).Border(0.5f).BorderColor(PdfStyleConstants.ColorBorder).Padding(2).Text(CfdiPdfSections.Format6(m.PesoEnKg)).FontSize(PdfStyleConstants.FontSizeSmall);
-                        table.Cell().Row(r).Column(5).Border(0.5f).BorderColor(PdfStyleConstants.ColorBorder).Padding(2).Text(CfdiPdfSections.Format6(m.ValorMercancia)).FontSize(PdfStyleConstants.FontSizeSmall);
+                        IContainer BCell(uint column) => table.Cell().Row(r).Column(column)
+                            .Border(0.3f).BorderColor(PdfStyleConstants.ColorBorderSoft).Padding(2);
+
+                        BCell(1).Text(m.Descripcion ?? "").FontSize(PdfStyleConstants.FontSizeSmall);
+                        BCell(2).AlignRight().Text(CfdiPdfSections.Format6(m.Cantidad)).FontSize(PdfStyleConstants.FontSizeSmall);
+                        BCell(3).Text(CfdiPdfSections.NombreClaveUnidad(m.ClaveUnidad)).FontSize(PdfStyleConstants.FontSizeSmall);
+                        BCell(4).AlignRight().Text(CfdiPdfSections.Format6(m.PesoEnKg)).FontSize(PdfStyleConstants.FontSizeSmall);
+                        BCell(5).AlignRight().Text(CfdiPdfSections.Format6(m.ValorMercancia)).FontSize(PdfStyleConstants.FontSizeSmall);
                         row++;
                     }
                 });
@@ -454,12 +628,14 @@ namespace CFDI.BuildPdf.PdfBuilders.CartaPorte
 
                     var headers = new[] { "No. Total Mercancías", "Peso Bruto Total (KG)", "Unidad de Peso" };
                     for (uint i = 0; i < headers.Length; i++)
-                        table.Cell().Row(1).Column(i + 1).Border(0.5f).BorderColor(PdfStyleConstants.ColorBorder)
-                            .Background(PdfStyleConstants.ColorHeaderBg).Padding(3).Text(headers[i]).Bold();
+                        table.Cell().Row(1).Column(i + 1)
+                            .Element(c => CfdiPdfSections.TableHeaderCell(c, headers[i]));
 
-                    table.Cell().Row(2).Column(1).Border(0.5f).BorderColor(PdfStyleConstants.ColorBorder).Padding(3).Text(model.CartaPorte.NumeroTotalMercancias.ToString());
-                    table.Cell().Row(2).Column(2).Border(0.5f).BorderColor(PdfStyleConstants.ColorBorder).Padding(3).Text(CfdiPdfSections.Format6(model.CartaPorte.PesoBrutoTotal));
-                    table.Cell().Row(2).Column(3).Border(0.5f).BorderColor(PdfStyleConstants.ColorBorder).Padding(3).Text(model.CartaPorte.UnidadPeso ?? "");
+                    IContainer SCell(uint column) => table.Cell().Row(2).Column(column)
+                        .Border(0.3f).BorderColor(PdfStyleConstants.ColorBorderSoft).Padding(3);
+                    SCell(1).AlignCenter().Text(model.CartaPorte.NumeroTotalMercancias.ToString()).FontSize(PdfStyleConstants.FontSizeDefault);
+                    SCell(2).AlignRight().Text(CfdiPdfSections.Format6(model.CartaPorte.PesoBrutoTotal)).FontSize(PdfStyleConstants.FontSizeDefault);
+                    SCell(3).AlignCenter().Text(model.CartaPorte.UnidadPeso ?? "").FontSize(PdfStyleConstants.FontSizeDefault);
                 });
             }
         }
@@ -474,9 +650,9 @@ namespace CFDI.BuildPdf.PdfBuilders.CartaPorte
             {
                 table.ColumnsDefinition(c => { c.RelativeColumn(); c.RelativeColumn(); c.RelativeColumn(); c.RelativeColumn(); });
 
-                CfdiPdfSections.HeaderValueRow(table, 1, 1, "Permiso SCT", at.PermisoSCT);
+                CfdiPdfSections.HeaderValueRow(table, 1, 1, "Permiso SCT", CfdiPdfSections.NombrePermisoSCT(at.PermisoSCT));
                 CfdiPdfSections.HeaderValueRow(table, 1, 3, "Número Permiso SCT", at.NumeroPermisoSCT);
-                CfdiPdfSections.HeaderValueRow(table, 2, 1, "Configuración Vehicular", at.ConfigVehicular);
+                CfdiPdfSections.HeaderValueRow(table, 2, 1, "Configuración Vehicular", CfdiPdfSections.NombreConfigVehicular(at.ConfigVehicular));
                 CfdiPdfSections.HeaderValueRow(table, 2, 3, "Peso Bruto Vehicular", at.PesoBrutoVehicular.ToString(CultureInfo.InvariantCulture));
                 CfdiPdfSections.HeaderValueRow(table, 3, 1, "Placa Vehículo", at.PlacaVM);
                 CfdiPdfSections.HeaderValueRow(table, 3, 3, "Año Modelo Vehículo", at.AnioModeloVM.ToString());
@@ -524,7 +700,7 @@ namespace CFDI.BuildPdf.PdfBuilders.CartaPorte
             col.Item().Table(table =>
             {
                 table.ColumnsDefinition(c => { c.RelativeColumn(); c.RelativeColumn(); c.RelativeColumn(); c.RelativeColumn(); });
-                CfdiPdfSections.HeaderValueRow(table, 1, 1, "SubTipo Remolque", model.CartaPorte.Remolque.SubTipoRemolque);
+                CfdiPdfSections.HeaderValueRow(table, 1, 1, "SubTipo Remolque", CfdiPdfSections.NombreSubTipoRemolque(model.CartaPorte.Remolque.SubTipoRemolque));
                 CfdiPdfSections.HeaderValueRow(table, 1, 3, "Placa", model.CartaPorte.Remolque.Placa);
             });
         }
@@ -540,17 +716,20 @@ namespace CFDI.BuildPdf.PdfBuilders.CartaPorte
 
                 var headers = new[] { "Tipo Figura", "RFC Figura", "Nombre Figura", "Licencia" };
                 for (uint i = 0; i < headers.Length; i++)
-                    table.Cell().Row(1).Column(i + 1).Border(0.5f).BorderColor(PdfStyleConstants.ColorBorder)
-                        .Background(PdfStyleConstants.ColorHeaderBg).Padding(3).Text(headers[i]).Bold();
+                    table.Cell().Row(1).Column(i + 1)
+                        .Element(c => CfdiPdfSections.TableHeaderCell(c, headers[i]));
 
                 uint row = 2;
                 foreach (var f in model.CartaPorte.FigurasTransporte)
                 {
                     var r = row;
-                    table.Cell().Row(r).Column(1).Border(0.5f).BorderColor(PdfStyleConstants.ColorBorder).Padding(3).Text(f.TipoFigura ?? "");
-                    table.Cell().Row(r).Column(2).Border(0.5f).BorderColor(PdfStyleConstants.ColorBorder).Padding(3).Text(f.RFCFigura ?? "");
-                    table.Cell().Row(r).Column(3).Border(0.5f).BorderColor(PdfStyleConstants.ColorBorder).Padding(3).Text(f.NombreFigura ?? "");
-                    table.Cell().Row(r).Column(4).Border(0.5f).BorderColor(PdfStyleConstants.ColorBorder).Padding(3).Text(f.NumeroLicencia ?? "");
+                    IContainer BCell(uint column) => table.Cell().Row(r).Column(column)
+                        .Border(0.3f).BorderColor(PdfStyleConstants.ColorBorderSoft).Padding(3);
+
+                    BCell(1).Text(CfdiPdfSections.NombreTipoFigura(f.TipoFigura)).FontSize(PdfStyleConstants.FontSizeSmall);
+                    BCell(2).Text(f.RFCFigura ?? "").FontSize(PdfStyleConstants.FontSizeSmall);
+                    BCell(3).Text(f.NombreFigura ?? "").FontSize(PdfStyleConstants.FontSizeSmall);
+                    BCell(4).Text(f.NumeroLicencia ?? "").FontSize(PdfStyleConstants.FontSizeSmall);
                     row++;
                 }
             });
@@ -558,31 +737,47 @@ namespace CFDI.BuildPdf.PdfBuilders.CartaPorte
 
         private static void ComposeCondicionesContrato(ColumnDescriptor col, CfdiCartaPorteViewModel model)
         {
-            col.Item().Column(c =>
+            col.Item().Row(row =>
             {
-                c.Item().Text(t =>
+                row.RelativeItem().Text(t =>
                 {
-                    t.Span("RFC Emisor: ").Bold();
-                    t.Span(model.EmisorRFC ?? "");
+                    t.Span("RFC Emisor: ").Bold()
+                        .FontSize(PdfStyleConstants.FontSizeLabel)
+                        .FontColor(PdfStyleConstants.ColorAccent);
+                    t.Span(model.EmisorRFC ?? "")
+                        .FontSize(PdfStyleConstants.FontSizeLabel)
+                        .FontColor(PdfStyleConstants.ColorText);
                 });
-                c.Item().AlignRight().Text(t =>
+                row.RelativeItem().AlignRight().Text(t =>
                 {
-                    t.Span("Folio Fiscal: ").Bold();
-                    t.Span(model.UUID ?? "");
+                    t.Span("Folio Fiscal: ").Bold()
+                        .FontSize(PdfStyleConstants.FontSizeLabel)
+                        .FontColor(PdfStyleConstants.ColorAccent);
+                    t.Span(model.UUID ?? "")
+                        .FontSize(PdfStyleConstants.FontSizeLabel)
+                        .FontColor(PdfStyleConstants.ColorText);
                 });
             });
 
-            col.Item().PaddingTop(8).AlignCenter()
-                .Border(0.5f).BorderColor(PdfStyleConstants.ColorBorder).Padding(5)
-                .Text("Condiciones del Contrato de Transporte que Ampara esta Carta Porte")
-                .Bold().FontSize(PdfStyleConstants.FontSizeHeader);
+            col.Item().PaddingTop(8)
+                .Background(PdfStyleConstants.ColorHeaderBg)
+                .PaddingVertical(5).PaddingHorizontal(6)
+                .AlignCenter()
+                .Text("CONDICIONES DEL CONTRATO DE TRANSPORTE QUE AMPARA ESTA CARTA PORTE")
+                .Bold()
+                .FontSize(PdfStyleConstants.FontSizeSectionTitle)
+                .FontColor(PdfStyleConstants.ColorHeaderText);
 
-            col.Item().PaddingTop(8).Table(table =>
+            col.Item().PaddingTop(6).Row(row =>
             {
-                table.ColumnsDefinition(c => { c.RelativeColumn(); c.RelativeColumn(); });
-
-                table.Cell().Row(1).Column(1).Border(0.5f).Padding(5).Text(TextoCondicionesCol1).FontSize(PdfStyleConstants.FontSizeDefault).LineHeight(1.3f);
-                table.Cell().Row(1).Column(2).Border(0.5f).Padding(5).Text(TextoCondicionesCol2).FontSize(PdfStyleConstants.FontSizeDefault).LineHeight(1.3f);
+                row.RelativeItem().PaddingRight(6).Text(TextoCondicionesCol1)
+                    .FontSize(PdfStyleConstants.FontSizeSmall)
+                    .FontColor(PdfStyleConstants.ColorSecondaryText)
+                    .LineHeight(1.35f);
+                row.RelativeItem().PaddingLeft(6).Text(TextoCondicionesCol2)
+                    .FontSize(PdfStyleConstants.FontSizeSmall)
+                    .FontColor(PdfStyleConstants.ColorSecondaryText)
+                    .LineHeight(1.35f);
             });
         }
 
@@ -607,5 +802,20 @@ namespace CFDI.BuildPdf.PdfBuilders.CartaPorte
             "DÉCIMA CUARTA.- Los casos no previstos en las presentes condiciones y las quejas derivadas de su aplicación se someterán por la vía administrativa a la Secretaría de Comunicaciones y Transportes.\n" +
             "DÉCIMA QUINTA.- Para el caso de que el \"Expedidor\", \"Remitente\" o \"Usuario\" contrate carro por entero, éste aceptará la responsabilidad solidaria para con el \"Transportista\" mediante la figura de la corresponsabilidad que contempla el artículo 10 del Reglamento Sobre el Peso, Dimensiones y Capacidad de los Vehículos de Autotransporte que Transitan en los Caminos y Puentes de Jurisdicción Federal, por lo que el \"Expedidor\", \"Remitente\" o \"Usuario\" queda obligado a verificar que la carga y el vehículo que la transporta cumplan con el peso y dimensiones máximas establecidos en la NOM-012-SCT-2-2017, o la que la sustituya.\n" +
             "Para el caso de incumplimiento e inobservancia a las disposiciones que regulan el peso y dimensiones, por parte del \"Expedidor\", \"Remitente\" o \"Usuario\", éste será corresponsable de las infracciones y multas que la Secretaría de Infraestructura, Comunicaciones y Transportes o la Guardia Nacional impongan al \"Transportista\", por cargar las unidades con exceso de peso.";
+
+        private static bool TryDecodeLogo(string logoBase64, ILogger logger, out byte[]? logoBytes)
+        {
+            try
+            {
+                logoBytes = Convert.FromBase64String(logoBase64);
+                return true;
+            }
+            catch (FormatException ex)
+            {
+                logger.LogWarning(ex, "No se pudo decodificar el logo en Base64 proporcionado por opciones; se omitirá del PDF.");
+                logoBytes = null;
+                return false;
+            }
+        }
     }
 }

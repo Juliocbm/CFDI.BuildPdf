@@ -1,3 +1,4 @@
+using System.Xml.Linq;
 using CFDI.BuildPdf.Mappers.CartaPorte;
 using CFDI.BuildPdf.Tests.Helpers;
 
@@ -229,6 +230,65 @@ namespace CFDI.BuildPdf.Tests
             Assert.Equal("01", figura.TipoFigura);
             Assert.Equal("JUAN PEREZ", figura.NombreFigura);
             Assert.Equal("LIC123456", figura.NumeroLicencia);
+        }
+
+        [Fact]
+        public void Map_ImpuestosGlobales_ParseaTrasladosYRetenciones()
+        {
+            // CFDI con desglose global de Traslados y Retenciones (como el ejemplo del proveedor).
+            var xml = @"<?xml version=""1.0"" encoding=""utf-8""?>
+<cfdi:Comprobante xmlns:cfdi=""http://www.sat.gob.mx/cfd/4""
+                  xmlns:cartaporte31=""http://www.sat.gob.mx/CartaPorte31""
+                  xmlns:tfd=""http://www.sat.gob.mx/TimbreFiscalDigital""
+                  Version=""4.0"" Serie=""HGAP"" Folio=""0220999"" Fecha=""2026-03-27T11:20:45""
+                  LugarExpedicion=""66633"" Moneda=""MXN"" TipoCambio=""1""
+                  FormaPago=""99"" MetodoPago=""PPD"" TipoDeComprobante=""I""
+                  Exportacion=""01"" SubTotal=""5424.80"" Total=""6075.78""
+                  Sello=""X"" NoCertificado=""00001000000704840299"">
+  <cfdi:Emisor Nombre=""H G TRANSPORTACIONES"" Rfc=""HGT9312179LA"" RegimenFiscal=""624"" />
+  <cfdi:Receptor Nombre=""R. L TRANSPORTACIONES"" Rfc=""RLT070302NR7""
+                 DomicilioFiscalReceptor=""65556"" RegimenFiscalReceptor=""624"" UsoCFDI=""G03"" />
+  <cfdi:Conceptos>
+    <cfdi:Concepto ClaveProdServ=""78101802"" NoIdentificacion="""" Descripcion=""FLETE""
+                   Cantidad=""1"" ClaveUnidad=""E48"" Unidad=""SERVICIO""
+                   ValorUnitario=""5424.80"" Importe=""5424.80"" ObjetoImp=""02"" />
+  </cfdi:Conceptos>
+  <cfdi:Impuestos TotalImpuestosRetenidos=""216.99"" TotalImpuestosTrasladados=""867.97"">
+    <cfdi:Retenciones>
+      <cfdi:Retencion Impuesto=""002"" Importe=""216.99"" />
+    </cfdi:Retenciones>
+    <cfdi:Traslados>
+      <cfdi:Traslado Base=""5424.80"" Impuesto=""002"" TipoFactor=""Tasa"" TasaOCuota=""0.160000"" Importe=""867.97"" />
+    </cfdi:Traslados>
+  </cfdi:Impuestos>
+  <cfdi:Complemento>
+    <tfd:TimbreFiscalDigital Version=""1.1"" UUID=""CFE72775-B579-4D53-BE83-574097F62211""
+                             FechaTimbrado=""2026-03-27T11:20:46"" RfcProvCertif=""SAT970701NN3""
+                             SelloCFD=""X"" NoCertificadoSAT=""00001000000711914678"" SelloSAT=""X"" />
+    <cartaporte31:CartaPorte Version=""3.1"" TranspInternac=""No"" TotalDistRec=""10"" IdCCP=""CCC"">
+      <cartaporte31:Mercancias PesoBrutoTotal=""100"" UnidadPeso=""KGM"" NumTotalMercancias=""1"" />
+    </cartaporte31:CartaPorte>
+  </cfdi:Complemento>
+</cfdi:Comprobante>";
+            var xdoc = XDocument.Parse(xml);
+
+            var model = _mapper.Map(xdoc);
+
+            Assert.Equal(867.97m, model.TotalImpuestosTrasladados);
+            Assert.Equal(216.99m, model.TotalImpuestosRetenidos);
+
+            Assert.Single(model.TrasladosResumen);
+            var traslado = model.TrasladosResumen[0];
+            Assert.Equal("002", traslado.Impuesto);
+            Assert.Equal("Tasa", traslado.TipoFactor);
+            Assert.Equal(0.16m, traslado.TasaOCuota);
+            Assert.Equal(5424.80m, traslado.Base);
+            Assert.Equal(867.97m, traslado.Importe);
+
+            Assert.Single(model.RetencionesResumen);
+            var retencion = model.RetencionesResumen[0];
+            Assert.Equal("002", retencion.Impuesto);
+            Assert.Equal(216.99m, retencion.Importe);
         }
     }
 }

@@ -4,6 +4,8 @@ using System.Linq;
 using System.Xml.Linq;
 using CFDI.BuildPdf.Abstractions;
 using CFDI.BuildPdf.Models;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace CFDI.BuildPdf.Mappers.Common
 {
@@ -19,10 +21,12 @@ namespace CFDI.BuildPdf.Mappers.Common
         protected static readonly XNamespace Tfd = "http://www.sat.gob.mx/TimbreFiscalDigital";
 
         private readonly IQrGenerator _qrGenerator;
+        protected readonly ILogger Logger;
 
-        protected BaseCfdiMapper(IQrGenerator qrGenerator)
+        protected BaseCfdiMapper(IQrGenerator qrGenerator, ILogger? logger = null)
         {
-            _qrGenerator = qrGenerator;
+            _qrGenerator = qrGenerator ?? throw new ArgumentNullException(nameof(qrGenerator));
+            Logger = logger ?? NullLogger.Instance;
         }
 
         /// <inheritdoc />
@@ -67,10 +71,8 @@ namespace CFDI.BuildPdf.Mappers.Common
             model.Serie = comprobante?.Attribute("Serie")?.Value;
             model.Folio = comprobante?.Attribute("Folio")?.Value;
             model.LugarExpedicion = comprobante?.Attribute("LugarExpedicion")?.Value;
-            model.FechaEmision = DateTime.Parse(comprobante?.Attribute("Fecha")?.Value ?? DateTime.MinValue.ToString(CultureInfo.InvariantCulture), CultureInfo.InvariantCulture);
-            model.FechaCertificacion = tfdNode != null && tfdNode.Attribute("FechaTimbrado") != null
-                ? DateTime.Parse(tfdNode.Attribute("FechaTimbrado").Value, CultureInfo.InvariantCulture)
-                : DateTime.MinValue;
+            model.FechaEmision = ParseDateOrMin(comprobante?.Attribute("Fecha")?.Value, "Comprobante.Fecha");
+            model.FechaCertificacion = ParseDateOrMin(tfdNode?.Attribute("FechaTimbrado")?.Value, "TimbreFiscalDigital.FechaTimbrado");
             model.TipoCambio = comprobante?.Attribute("TipoCambio")?.Value;
             model.Moneda = comprobante?.Attribute("Moneda")?.Value;
             model.FormaPago = comprobante?.Attribute("FormaPago")?.Value;
@@ -103,6 +105,7 @@ namespace CFDI.BuildPdf.Mappers.Common
             model.UUID = tfdNode?.Attribute("UUID")?.Value;
             model.NoCertificadoSAT = tfdNode?.Attribute("NoCertificadoSAT")?.Value;
             model.SelloSAT = tfdNode?.Attribute("SelloSAT")?.Value;
+            model.RfcProvCertif = tfdNode?.Attribute("RfcProvCertif")?.Value;
         }
 
         /// <summary>
@@ -121,6 +124,18 @@ namespace CFDI.BuildPdf.Mappers.Common
         }
 
         #region Helpers compartidos
+
+        private DateTime ParseDateOrMin(string? value, string fieldName)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+                return DateTime.MinValue;
+
+            if (DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.None, out var result))
+                return result;
+
+            Logger.LogWarning("No se pudo parsear la fecha del campo {Field} con valor '{Value}'. Se usará DateTime.MinValue.", fieldName, value);
+            return DateTime.MinValue;
+        }
 
         protected static decimal? GetDecimalOrNull(string value)
         {

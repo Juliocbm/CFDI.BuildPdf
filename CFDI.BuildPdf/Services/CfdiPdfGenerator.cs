@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Threading.Tasks;
+using System.Xml;
 using System.Xml.Linq;
 using CFDI.BuildPdf.Abstractions;
 using CFDI.BuildPdf.Models;
@@ -27,41 +28,80 @@ namespace CFDI.BuildPdf.Services
             IPdfDocumentBuilder<CfdiCartaPorteViewModel> cartaPorteBuilder,
             IPdfDocumentBuilder<CfdiNominaViewModel> nominaBuilder)
         {
-            _typeDetector = typeDetector;
-            _cartaPorteMapper = cartaPorteMapper;
-            _nominaMapper = nominaMapper;
-            _cartaPorteBuilder = cartaPorteBuilder;
-            _nominaBuilder = nominaBuilder;
+            _typeDetector = typeDetector ?? throw new ArgumentNullException(nameof(typeDetector));
+            _cartaPorteMapper = cartaPorteMapper ?? throw new ArgumentNullException(nameof(cartaPorteMapper));
+            _nominaMapper = nominaMapper ?? throw new ArgumentNullException(nameof(nominaMapper));
+            _cartaPorteBuilder = cartaPorteBuilder ?? throw new ArgumentNullException(nameof(cartaPorteBuilder));
+            _nominaBuilder = nominaBuilder ?? throw new ArgumentNullException(nameof(nominaBuilder));
         }
 
         /// <inheritdoc />
         public Task<byte[]> GenerarDesdeRutaAsync(string rutaXml, CfdiPdfOptions? options = null)
         {
-            var xdoc = XDocument.Load(rutaXml);
+            if (string.IsNullOrWhiteSpace(rutaXml))
+                throw new ArgumentException("La ruta del XML no puede ser nula ni vacía.", nameof(rutaXml));
+            if (!File.Exists(rutaXml))
+                throw new FileNotFoundException($"No se encontró el archivo XML en la ruta especificada: {rutaXml}", rutaXml);
+
+            var xdoc = LoadXDocument(() => XDocument.Load(rutaXml), $"archivo '{rutaXml}'");
             return Task.FromResult(GenerarPdfInterno(xdoc, options));
         }
 
         /// <inheritdoc />
         public Task<byte[]> GenerarDesdeXmlStringAsync(string xmlContent, CfdiPdfOptions? options = null)
         {
-            using var reader = new StringReader(xmlContent);
-            var xdoc = XDocument.Load(reader);
+            if (string.IsNullOrWhiteSpace(xmlContent))
+                throw new ArgumentException("El contenido XML no puede ser nulo ni vacío.", nameof(xmlContent));
+
+            var xdoc = LoadXDocument(() =>
+            {
+                using var reader = new StringReader(xmlContent);
+                return XDocument.Load(reader);
+            }, "cadena XML");
+
             return Task.FromResult(GenerarPdfInterno(xdoc, options));
         }
 
         /// <inheritdoc />
         public Task<byte[]> GenerarDesdeXmlBytesAsync(byte[] xmlBytes, CfdiPdfOptions? options = null)
         {
-            using var ms = new MemoryStream(xmlBytes);
-            var xdoc = XDocument.Load(ms);
+            if (xmlBytes is null)
+                throw new ArgumentNullException(nameof(xmlBytes));
+            if (xmlBytes.Length == 0)
+                throw new ArgumentException("El arreglo de bytes del XML está vacío.", nameof(xmlBytes));
+
+            var xdoc = LoadXDocument(() =>
+            {
+                using var ms = new MemoryStream(xmlBytes);
+                return XDocument.Load(ms);
+            }, "arreglo de bytes XML");
+
             return Task.FromResult(GenerarPdfInterno(xdoc, options));
         }
 
         /// <inheritdoc />
         public Task<byte[]> GenerarDesdeStreamAsync(Stream xmlStream, CfdiPdfOptions? options = null)
         {
-            var xdoc = XDocument.Load(xmlStream);
+            if (xmlStream is null)
+                throw new ArgumentNullException(nameof(xmlStream));
+            if (!xmlStream.CanRead)
+                throw new ArgumentException("El Stream proporcionado no es legible.", nameof(xmlStream));
+
+            var xdoc = LoadXDocument(() => XDocument.Load(xmlStream), "Stream XML");
             return Task.FromResult(GenerarPdfInterno(xdoc, options));
+        }
+
+        private static XDocument LoadXDocument(Func<XDocument> loader, string origen)
+        {
+            try
+            {
+                return loader();
+            }
+            catch (XmlException ex)
+            {
+                throw new CfdiXmlInvalidoException(
+                    $"El {origen} no contiene un XML válido: {ex.Message}", ex);
+            }
         }
 
         /// <summary>
@@ -76,7 +116,8 @@ namespace CFDI.BuildPdf.Services
             {
                 CfdiType.CartaPorte => GenerarCartaPortePdf(xdoc, opts),
                 CfdiType.Nomina => GenerarNominaPdf(xdoc, opts),
-                _ => throw new NotSupportedException($"Tipo de CFDI no soportado: {tipo}")
+                _ => throw new CfdiComplementoNoSoportadoException(
+                    $"Tipo de CFDI no soportado: {tipo}. Actualmente la librería solo soporta Carta Porte 3.1 y Nómina 1.2.")
             };
         }
 
