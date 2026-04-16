@@ -10,7 +10,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="CFDI.BuildPdf" Version="2.0.4" />
+		<ProjectReference Include="..\CFDI.BuildPdf\CFDI.BuildPdf.csproj" />
 	</ItemGroup>
 
 </Project>

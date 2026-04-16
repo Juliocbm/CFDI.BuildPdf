@@ -238,6 +238,21 @@ namespace CFDI.BuildPdf.PdfBuilders.CartaPorte
                             cc.Item().Text(t => { LabelValueSpans(t, "Tipo de Cambio:", model.TipoCambio); });
                             cc.Item().Text(t => { LabelValueSpans(t, "Lugar de Expedición:", model.LugarExpedicion); });
                             cc.Item().Text(t => { LabelValueSpans(t, "Exportación:", $"{model.Exportacion} - {CfdiPdfSections.NombreExportacion(model.Exportacion)}"); });
+
+                            if (!string.IsNullOrWhiteSpace(model.TipoRelacion) || (model.RelacionadosUuids?.Count > 0))
+                            {
+                                cc.Item().PaddingTop(4).BorderTop(0.5f).BorderColor(PdfStyleConstants.ColorBorderSoft)
+                                    .PaddingTop(3).Text("CFDI RELACIONADOS").Bold()
+                                    .FontSize(PdfStyleConstants.FontSizeLabel)
+                                    .FontColor(PdfStyleConstants.ColorAccent);
+
+                                cc.Item().Text(t => { LabelValueSpans(t, "Tipo Relación:", $"{model.TipoRelacion} - {CfdiPdfSections.NombreTipoRelacion(model.TipoRelacion)}"); });
+
+                                foreach (var uuid in model.RelacionadosUuids ?? Enumerable.Empty<string>())
+                                {
+                                    cc.Item().Text(t => { LabelValueSpans(t, "UUID:", uuid); });
+                                }
+                            }
                         });
                     });
             });

@@ -124,6 +124,13 @@ namespace CFDI.BuildPdf.PdfBuilders.Nomina
                 CfdiPdfSections.HeaderValueRow(table, 4, 3, "Tipo de Comprobante", $"{model.TipoComprobante} ({tipoDesc})");
 
                 CfdiPdfSections.HeaderValueRow(table, 5, 1, "PAC que timbró", $"{CfdiPdfSections.NombrePac(model.RfcProvCertif)} ({model.RfcProvCertif})");
+
+                if (!string.IsNullOrWhiteSpace(model.TipoRelacion) || (model.RelacionadosUuids?.Count > 0))
+                {
+                    var uuidsTexto = string.Join(", ", model.RelacionadosUuids ?? new System.Collections.Generic.List<string>());
+                    CfdiPdfSections.HeaderValueRow(table, 6, 1, "Tipo Relación", $"{model.TipoRelacion} - {CfdiPdfSections.NombreTipoRelacion(model.TipoRelacion)}");
+                    CfdiPdfSections.HeaderValueRow(table, 6, 3, "UUID(s) Relacionado(s)", uuidsTexto);
+                }
             });
         }
 

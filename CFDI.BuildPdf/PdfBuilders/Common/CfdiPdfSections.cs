@@ -145,6 +145,25 @@ namespace CFDI.BuildPdf.PdfBuilders.Common
             return value.ToString("N2", CultureInfo.GetCultureInfo("es-MX"));
         }
 
+        /// <summary>
+        /// Traduce la clave SAT del catálogo c_TipoRelacion a su descripción.
+        /// Si la clave no corresponde a un valor conocido, se devuelve tal cual.
+        /// </summary>
+        public static string NombreTipoRelacion(string? clave)
+        {
+            return clave switch
+            {
+                "01" => "Nota de crédito de los documentos relacionados",
+                "02" => "Nota de débito de los documentos relacionados",
+                "03" => "Devolución de mercancía sobre facturas o traslados previos",
+                "04" => "Sustitución de los CFDI previos",
+                "05" => "Traslados de mercancías facturados previamente",
+                "06" => "Factura generada por los traslados previos",
+                "07" => "CFDI por aplicación de anticipo",
+                _ => clave ?? ""
+            };
+        }
+
         public static string NombreUsoCFDI(string? clave)
         {
             return clave switch

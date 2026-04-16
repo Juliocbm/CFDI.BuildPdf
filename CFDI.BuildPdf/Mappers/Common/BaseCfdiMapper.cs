@@ -106,6 +106,18 @@ namespace CFDI.BuildPdf.Mappers.Common
             model.NoCertificadoSAT = tfdNode?.Attribute("NoCertificadoSAT")?.Value;
             model.SelloSAT = tfdNode?.Attribute("SelloSAT")?.Value;
             model.RfcProvCertif = tfdNode?.Attribute("RfcProvCertif")?.Value;
+
+            // CFDI Relacionados (nodo opcional)
+            var relacionadosNode = comprobante?.Element(Cfdi + "CfdiRelacionados");
+            if (relacionadosNode != null)
+            {
+                model.TipoRelacion = relacionadosNode.Attribute("TipoRelacion")?.Value;
+                model.RelacionadosUuids = relacionadosNode
+                    .Elements(Cfdi + "CfdiRelacionado")
+                    .Select(r => r.Attribute("UUID")?.Value)
+                    .Where(u => !string.IsNullOrWhiteSpace(u))
+                    .ToList();
+            }
         }
 
         /// <summary>

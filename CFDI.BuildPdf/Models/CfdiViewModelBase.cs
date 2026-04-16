@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace CFDI.BuildPdf.Models
 {
@@ -50,6 +51,10 @@ namespace CFDI.BuildPdf.Models
 
         // PAC que timbró el comprobante
         public string RfcProvCertif { get; set; }
+
+        // CFDI Relacionados (opcional — sólo presente cuando el XML incluye el nodo)
+        public string TipoRelacion { get; set; }
+        public List<string> RelacionadosUuids { get; set; } = new List<string>();
 
         // QR
         public string UrlQr { get; set; }
