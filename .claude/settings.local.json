@@ -2,7 +2,11 @@
   "permissions": {
     "allow": [
       "Bash(dotnet build *)",
-      "Bash(dotnet run *)"
+      "Bash(dotnet run *)",
+      "Bash(dotnet pack *)",
+      "Bash(dotnet nuget *)",
+      "Bash(curl -s https://api.nuget.org/v3-flatcontainer/cfdi.buildpdf/index.json)",
+      "Bash(dotnet restore *)"
     ]
   }
 }
