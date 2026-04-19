@@ -25,6 +25,9 @@ dotnet add package CFDI.BuildPdf
 
 - ✔️ Soporte para **CFDI 4.0** con complementos **Carta Porte 3.1** y **Nómina 1.2**.
 - ✔️ Detección automática del tipo de complemento.
+- ✔️ **Traducción automática de claves SAT** (`c_FormaPago`, `c_RegimenFiscal`, `c_UsoCFDI`, `c_TipoDeComprobante`, `c_TipoRelacion`, etc.): el PDF muestra `clave - descripción` legible en lugar de códigos crudos. Ver [CATALOGOS_SAT_MAPEADOS.md](CATALOGOS_SAT_MAPEADOS.md).
+- ✔️ Soporte para `<cfdi:CfdiRelacionados>`: render condicional de los UUIDs relacionados con su `TipoRelacion` descrito.
+- ✔️ Identificación del **PAC timbrador** por RFC (Buzón E, InvoiceOne, SAT pruebas; ampliable).
 - ✔️ Múltiples formatos de entrada: ruta de archivo, `string`, `byte[]` y `Stream`.
 - ✔️ Escritura directa a archivo o `Stream` de salida (ideal para respuestas HTTP).
 - ✔️ Opciones configurables: mostrar/ocultar mercancías, condiciones del contrato, addenda; logotipo en Base64; orientación portrait/landscape.
@@ -34,13 +37,16 @@ dotnet add package CFDI.BuildPdf
 
 ## 📁 Estructura del PDF generado
 
-- Datos del emisor y receptor.
-- UUID, fecha de certificación y certificados.
-- Totales e impuestos del CFDI.
-- Addenda genérica (si aplica).
-- Complemento Carta Porte: ubicaciones, mercancías (detalle o resumen), autotransporte, seguros, remolques, figuras de transporte, página de condiciones del contrato.
-- Complemento Nómina: datos del empleado, percepciones, deducciones, otros pagos, incapacidades, totales.
-- QR y sellos digitales.
+- Datos del emisor y receptor (con `Régimen Fiscal` traducido).
+- **Datos de Emisión**: fecha, serie/folio, moneda, tipo de cambio, lugar de expedición, `Exportación` (traducida) y sub-bloque **CFDI Relacionados** cuando el XML lo incluye.
+- **Forma / Método de Pago**: con `FormaPago`, `MetodoPago` y `TipoDeComprobante` traducidos.
+- Conceptos facturados: clave producto/servicio, `ClaveUnidad` traducida, descripción, importes formateados (`N2` es-MX), descuentos y `ObjetoImp` descrito.
+- Totales e impuestos (`c_Impuesto`: 001 ISR, 002 IVA, 003 IEPS).
+- Addenda genérica (opcional).
+- **Complemento Carta Porte**: ubicaciones, mercancías (detalle o resumen), autotransporte (`c_TipoPermiso`, `c_ConfigAutotransporte` descritos), seguros, remolques (`c_SubTipoRem` descrito), figuras de transporte (`c_FiguraTransporte` descrito), página de condiciones del contrato.
+- **Complemento Nómina**: datos del empleado, percepciones, deducciones, otros pagos, incapacidades, totales.
+- Bloque fiscal: UUID, fechas, certificados, **PAC que timbró** identificado por RFC.
+- QR y sellos digitales (sello CFDI, sello SAT, cadena original del complemento de certificación).
 
 ## ⚠️ Licencia QuestPDF (léeme antes de producción)
 
@@ -126,6 +132,29 @@ public async Task<IActionResult> GenerarPdf(IFormFile xml)
     return new EmptyResult();
 }
 ```
+
+## 🗂️ Traducción automática de catálogos SAT
+
+El PDF traduce las claves del SAT a su descripción legible en tiempo de render — no necesitas pre-procesar el XML. Ejemplos del output:
+
+| Campo | Valor en el XML | Valor en el PDF |
+|---|---|---|
+| Régimen Fiscal | `624` | `624 - Coordinados` |
+| Forma de Pago | `99` | `99 - Por definir` |
+| Método de Pago | `PPD` | `PPD - Pago en parcialidades o diferido` |
+| Uso del CFDI | `G03` | `G03 - Gastos en general` |
+| Tipo de Comprobante | `I` | `I - Ingreso` |
+| Exportación | `01` | `01 - No aplica` |
+| Tipo Relación | `04` | `04 - Sustitución de los CFDI previos` |
+| Objeto Imp. | `02` | `Sí objeto de impuesto` |
+| Clave Unidad | `E48` | `Unidad de Servicio` |
+| PAC que timbró | `SST060807KU0` | `Buzón E (SST060807KU0)` |
+
+Si una clave no está en el catálogo embebido se renderiza tal cual (fallback seguro, sin excepción). Catálogos soportados (13 helpers / 26 campos): `c_ClaveUnidad`, `c_Impuesto`, `c_ObjetoImp`, `c_UsoCFDI`, `c_RegimenFiscal`, `c_FormaPago`, `c_MetodoPago`, `c_Exportacion`, `c_TipoDeComprobante`, `c_TipoRelacion`, `c_CveTransporte`, `c_TipoPermiso`, `c_ConfigAutotransporte`, `c_SubTipoRem`, `c_FiguraTransporte`. Inventario completo en [CATALOGOS_SAT_MAPEADOS.md](CATALOGOS_SAT_MAPEADOS.md).
+
+### Agregar un PAC propio al diccionario
+
+El RFC del PAC se traduce a nombre comercial para mostrarlo en el bloque fiscal. Si tu PAC no está en el diccionario embebido, el PDF mostrará `"PAC no identificado"`. Envía un PR agregando la entrada en `PdfBuilders/Common/CfdiPdfSections.cs` (diccionario `PacsConocidos`) o ábrenos un issue con el RFC y nombre comercial.
 
 ## ⚙️ Opciones de generación
 

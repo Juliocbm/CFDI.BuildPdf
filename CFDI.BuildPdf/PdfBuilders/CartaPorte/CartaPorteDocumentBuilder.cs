@@ -286,7 +286,7 @@ namespace CFDI.BuildPdf.PdfBuilders.CartaPorte
 
                 table.Cell().Row(1).Column(2).PaddingLeft(6).Column(c =>
                 {
-                    c.Item().Text(t => { LabelValueSpans(t, "Tipo de Comprobante:", model.TipoComprobante); });
+                    c.Item().Text(t => { LabelValueSpans(t, "Tipo de Comprobante:", $"{model.TipoComprobante} - {CfdiPdfSections.NombreTipoComprobante(model.TipoComprobante)}"); });
                     c.Item().Text(t => { LabelValueSpans(t, "Condiciones de Pago:", model.CondicionesPago); });
                 });
             });

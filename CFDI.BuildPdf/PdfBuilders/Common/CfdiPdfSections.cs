@@ -146,6 +146,23 @@ namespace CFDI.BuildPdf.PdfBuilders.Common
         }
 
         /// <summary>
+        /// Traduce la clave SAT del catálogo c_TipoDeComprobante a su descripción.
+        /// Si la clave no corresponde a un valor conocido, se devuelve tal cual.
+        /// </summary>
+        public static string NombreTipoComprobante(string? clave)
+        {
+            return clave switch
+            {
+                "I" => "Ingreso",
+                "E" => "Egreso",
+                "T" => "Traslado",
+                "P" => "Pago",
+                "N" => "Nómina",
+                _ => clave ?? ""
+            };
+        }
+
+        /// <summary>
         /// Traduce la clave SAT del catálogo c_TipoRelacion a su descripción.
         /// Si la clave no corresponde a un valor conocido, se devuelve tal cual.
         /// </summary>

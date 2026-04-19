@@ -120,8 +120,7 @@ namespace CFDI.BuildPdf.PdfBuilders.Nomina
 
                 var serieFolio = (!string.IsNullOrEmpty(model.Serie) ? model.Serie + "-" : "") + model.Folio;
                 CfdiPdfSections.HeaderValueRow(table, 4, 1, "Serie y Folio", serieFolio);
-                var tipoDesc = model.TipoComprobante == "N" ? "Nómina" : model.TipoComprobante;
-                CfdiPdfSections.HeaderValueRow(table, 4, 3, "Tipo de Comprobante", $"{model.TipoComprobante} ({tipoDesc})");
+                CfdiPdfSections.HeaderValueRow(table, 4, 3, "Tipo de Comprobante", $"{model.TipoComprobante} - {CfdiPdfSections.NombreTipoComprobante(model.TipoComprobante)}");
 
                 CfdiPdfSections.HeaderValueRow(table, 5, 1, "PAC que timbró", $"{CfdiPdfSections.NombrePac(model.RfcProvCertif)} ({model.RfcProvCertif})");
 

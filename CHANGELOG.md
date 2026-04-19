@@ -4,6 +4,12 @@ Todas las versiones notables de este proyecto se documentan en este archivo.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/)
 y este proyecto usa [Versionado Semántico](https://semver.org/lang/es/).
 
+## [2.0.6] - 2026-04-18
+
+### Added
+- Catálogo `c_TipoDeComprobante` → helper `NombreTipoComprobante` con las 5 claves del SAT: `I` (Ingreso), `E` (Egreso), `T` (Traslado), `P` (Pago), `N` (Nómina).
+- Campo **Tipo de Comprobante** ahora se muestra como `clave - descripción` tanto en Carta Porte (bloque Forma/Método de Pago) como en Nómina (Datos del Comprobante), consistente con el resto de catálogos.
+
 ## [2.0.5] - 2026-04-16
 
 ### Added
@@ -15,6 +21,43 @@ y este proyecto usa [Versionado Semántico](https://semver.org/lang/es/).
 
 ### Changed
 - `CfdiViewModelBase` expone dos propiedades nuevas (`TipoRelacion`, `RelacionadosUuids`). Aditivo, no rompe consumidores existentes.
+
+## [2.0.4] - 2026-04-15
+
+### Added
+- Catálogo `c_UsoCFDI` → helper `NombreUsoCFDI` (G01–G03, I01–I08, D01–D10, S01, CP01, CN01). Aplicado en el bloque Cliente (Carta Porte) y Datos del Comprobante (Nómina).
+
+### Fixed
+- El campo UUID (Folio Fiscal) ya no parte el valor a mitad de renglón.
+
+## [2.0.3] - 2026-04-14
+
+### Added
+- Catálogos SAT añadidos al template con formato `clave - descripción`:
+  - `c_FormaPago` → `NombreFormaPago` (01–31, 99).
+  - `c_MetodoPago` → `NombreMetodoPago` (PUE, PPD).
+  - `c_RegimenFiscal` → `NombreRegimenFiscal` (601, 603–626) — aplicado al emisor y receptor en Carta Porte y Nómina.
+  - `c_Exportacion` → `NombreExportacion` (01–04).
+- Identificador del PAC timbrador: helper `NombrePac` + diccionario `PacsConocidos` (RFC → nombre comercial). Incluye Buzón E (`SST060807KU0`), InvoiceOne (`SED1102088J7`), SAT pruebas (`SAT970701NN3`) y fallback visible `"PAC no identificado"`.
+- Propiedad `RfcProvCertif` en `CfdiViewModelBase` (se lee del TFD).
+
+## [2.0.2] - 2026-04-13
+
+### Fixed
+- Re-empaquetado en Release tras detectar que 2.0.1 se subió sin los cambios compilados (el `dotnet pack --no-build` tomó binarios Debug obsoletos). A partir de esta versión el flujo exige `dotnet build -c Release` explícito antes de empacar.
+
+## [2.0.1] - 2026-04-12
+
+### Changed
+- Reducción de `FontSize` en títulos y cabeceras de tabla (se percibían demasiado grandes frente al PDF del proveedor).
+- Nueva paleta con más contraste (banners `#2C3E50`, accent `#1F4E79`, bordes principales `#999999`).
+- Alineación numérica a la derecha en columnas de montos (Valor Unitario, Importe, Descuento, Total).
+
+### Fixed
+- Wrap de cabeceras que partía palabras a la mitad (`CANTI/DAD`, `DESCUEN/TO`).
+- Wrap de valores numéricos (`5424.800000` → `5,424.80` con formato `N2` es-MX).
+- Traducción `c_ObjetoImp`: se mostraba como `"01"` literal; ahora muestra la descripción (`"Sí objeto de impuesto"`).
+- Formato de fechas ISO → `dd/MM/yyyy HH:mm:ss`.
 
 ## [2.0.0] - 2026-04-11
 

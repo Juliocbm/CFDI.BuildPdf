@@ -6,8 +6,8 @@ Inventario completo de los campos del PDF donde se resuelve una **clave SAT → 
 
 ## Resumen
 
-- **12 helpers** distintos
-- **24 campos** del PDF donde se aplica traducción clave → descripción
+- **13 helpers** distintos
+- **26 campos** del PDF donde se aplica traducción clave → descripción
 - Aplica tanto a **Carta Porte** como a **Nómina**
 
 ---
@@ -40,6 +40,8 @@ Inventario completo de los campos del PDF donde se resuelve una **clave SAT → 
 | `NombreTipoFigura` | Columna **Tipo Figura** de Figuras de Transporte | Complemento Carta Porte → Figuras de Transporte | `c_FiguraTransporte` |
 | `NombreTipoRelacion` | Campo **Tipo Relación** en Datos de Emisión | Datos de Emisión (Carta Porte) | `c_TipoRelacion` |
 | `NombreTipoRelacion` | Campo **Tipo Relación** en Datos del Comprobante (Nómina) | Datos del Comprobante de Nómina | `c_TipoRelacion` |
+| `NombreTipoComprobante` | Campo **Tipo de Comprobante** en Forma/Método de Pago (Carta Porte) | Forma / Método de Pago | `c_TipoDeComprobante` |
+| `NombreTipoComprobante` | Campo **Tipo de Comprobante** en Datos del Comprobante (Nómina) | Datos del Comprobante de Nómina | `c_TipoDeComprobante` |
 
 ---
 

@@ -4,7 +4,7 @@
 		<TargetFramework>net6.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
-		<Version>2.0.5</Version>
+		<Version>2.0.6</Version>
 		<Authors>Julio Cesar Bautista Monsalvo</Authors>
 		<Company>JCBM</Company>
 		<Description>Librería para generar representación impresa PDF desde un XML para CFDI 4.0 con complementos Carta Porte 3.1 y Nómina 1.2. Cross-platform, sin dependencias nativas.</Description>
