@@ -26,6 +26,7 @@ dotnet add package CFDI.BuildPdf
 - ✔️ Soporte para **CFDI 4.0** con complementos **Carta Porte 3.1** y **Nómina 1.2**.
 - ✔️ Detección automática del tipo de complemento.
 - ✔️ **Traducción automática de claves SAT** (`c_FormaPago`, `c_RegimenFiscal`, `c_UsoCFDI`, `c_TipoDeComprobante`, `c_TipoRelacion`, etc.): el PDF muestra `clave - descripción` legible en lugar de códigos crudos. Ver [CATALOGOS_SAT_MAPEADOS.md](CATALOGOS_SAT_MAPEADOS.md).
+- ✔️ **Catálogos del Complemento Nómina 1.2** traducidos: `c_TipoContrato`, `c_TipoRegimen`, `c_PeriodicidadPago`, `c_RiesgoPuesto`, `c_Estado`, `c_TipoPercepcion`, `c_TipoDeduccion`, `c_TipoOtroPago`, `c_TipoIncapacidad`, `c_TipoHoras`.
 - ✔️ Soporte para `<cfdi:CfdiRelacionados>`: render condicional de los UUIDs relacionados con su `TipoRelacion` descrito.
 - ✔️ Identificación del **PAC timbrador** por RFC (Buzón E, InvoiceOne, SAT pruebas; ampliable).
 - ✔️ Múltiples formatos de entrada: ruta de archivo, `string`, `byte[]` y `Stream`.
@@ -149,8 +150,12 @@ El PDF traduce las claves del SAT a su descripción legible en tiempo de render 
 | Objeto Imp. | `02` | `Sí objeto de impuesto` |
 | Clave Unidad | `E48` | `Unidad de Servicio` |
 | PAC que timbró | `SST060807KU0` | `Buzón E (SST060807KU0)` |
+| Tipo Nómina (contrato) | `01` | `01 - Contrato de trabajo por tiempo indeterminado` |
+| Periodicidad Pago (Nómina) | `04` | `04 - Quincenal` |
+| Tipo Percepción (Nómina) | `001` | `001 - Sueldos, Salarios Rayas y Jornales` |
+| Clave Entidad Federativa | `SIN` | `SIN - Sinaloa` |
 
-Si una clave no está en el catálogo embebido se renderiza tal cual (fallback seguro, sin excepción). Catálogos soportados (13 helpers / 26 campos): `c_ClaveUnidad`, `c_Impuesto`, `c_ObjetoImp`, `c_UsoCFDI`, `c_RegimenFiscal`, `c_FormaPago`, `c_MetodoPago`, `c_Exportacion`, `c_TipoDeComprobante`, `c_TipoRelacion`, `c_CveTransporte`, `c_TipoPermiso`, `c_ConfigAutotransporte`, `c_SubTipoRem`, `c_FiguraTransporte`. Inventario completo en [CATALOGOS_SAT_MAPEADOS.md](CATALOGOS_SAT_MAPEADOS.md).
+Si una clave no está en el catálogo embebido se renderiza tal cual (fallback seguro, sin excepción). Catálogos soportados (23 helpers / 36 campos): `c_ClaveUnidad`, `c_Impuesto`, `c_ObjetoImp`, `c_UsoCFDI`, `c_RegimenFiscal`, `c_FormaPago`, `c_MetodoPago`, `c_Exportacion`, `c_TipoDeComprobante`, `c_TipoRelacion`, `c_CveTransporte`, `c_TipoPermiso`, `c_ConfigAutotransporte`, `c_SubTipoRem`, `c_FiguraTransporte`, `c_TipoContrato`, `c_TipoRegimen`, `c_PeriodicidadPago`, `c_RiesgoPuesto`, `c_Estado`, `c_TipoPercepcion`, `c_TipoDeduccion`, `c_TipoOtroPago`, `c_TipoIncapacidad`, `c_TipoHoras`. Inventario completo en [CATALOGOS_SAT_MAPEADOS.md](CATALOGOS_SAT_MAPEADOS.md).
 
 ### Agregar un PAC propio al diccionario
 

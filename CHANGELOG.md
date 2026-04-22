@@ -4,6 +4,18 @@ Todas las versiones notables de este proyecto se documentan en este archivo.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/)
 y este proyecto usa [Versionado Semántico](https://semver.org/lang/es/).
 
+## [2.0.7] - 2026-04-21
+
+### Changed
+- Rediseño de la **cabecera del PDF de Nómina** para alinearla visualmente con el PDF de Carta Porte: layout de 3 columnas (logo | datos del emisor | bloque fiscal UUID/certificados/PAC/versión), tipografía del nombre del emisor en `ColorAccent` a `FontSizeEmisorName`, etiquetas fiscales en accent bold y márgenes de página armonizados (`MarginTop` 1→0.7 cm, `MarginHorizontal` 1→1.5 cm). La sección "Datos del Comprobante de Nómina" queda reducida a los campos que no duplican la cabecera (Fecha de Emisión, Serie/Folio, Tipo de Comprobante, Tipo Relación + UUIDs).
+
+### Added
+- 10 nuevos catálogos SAT del **Complemento Nómina 1.2** traducidos a `"clave - descripción"`: `c_TipoContrato`, `c_TipoRegimen`, `c_PeriodicidadPago`, `c_RiesgoPuesto`, `c_Estado` (ClaveEntFed), `c_TipoPercepcion` (045 claves), `c_TipoDeduccion` (107 claves), `c_TipoOtroPago`, `c_TipoIncapacidad`, `c_TipoHoras`. Los helpers viven en `CfdiPdfSections.cs` y se aplican en los bloques Datos del Empleado, Percepciones (incluido el sub-bloque Horas Extra), Deducciones, Otros Pagos e Incapacidades.
+
+### Fixed
+- `DocumentLayoutException` al generar PDF de **Nómina** con `LogoBase64` no vacío. El builder fijaba `Width(180)` para la celda del logo, pero en Letter Portrait la columna disponible es ~166 pt, provocando conflicto de restricciones. Se reemplaza por `MaxWidth(150).MaxHeight(70)` para que la imagen respete los límites del contenedor en cualquier orientación.
+- Por consistencia y como medida preventiva, se aplica el mismo patrón (`MaxWidth(150).MaxHeight(70)`) al builder de **Carta Porte**, evitando que logos grandes puedan romper el layout en el futuro.
+
 ## [2.0.6] - 2026-04-18
 
 ### Added

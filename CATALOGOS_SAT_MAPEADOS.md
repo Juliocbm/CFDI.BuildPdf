@@ -6,9 +6,9 @@ Inventario completo de los campos del PDF donde se resuelve una **clave SAT → 
 
 ## Resumen
 
-- **13 helpers** distintos
-- **26 campos** del PDF donde se aplica traducción clave → descripción
-- Aplica tanto a **Carta Porte** como a **Nómina**
+- **23 helpers** distintos
+- **36 campos** del PDF donde se aplica traducción clave → descripción
+- Aplica tanto a **Carta Porte** como a **Nómina** (incluido el complemento Nómina 1.2)
 
 ---
 
@@ -43,6 +43,21 @@ Inventario completo de los campos del PDF donde se resuelve una **clave SAT → 
 | `NombreTipoComprobante` | Campo **Tipo de Comprobante** en Forma/Método de Pago (Carta Porte) | Forma / Método de Pago | `c_TipoDeComprobante` |
 | `NombreTipoComprobante` | Campo **Tipo de Comprobante** en Datos del Comprobante (Nómina) | Datos del Comprobante de Nómina | `c_TipoDeComprobante` |
 
+### Catálogos Nómina 1.2
+
+| Helper | Campo del PDF | Sección | Catálogo SAT |
+|---|---|---|---|
+| `NombreTipoContrato` | Campo **Tipo Contrato** del receptor | Datos del Empleado | `c_TipoContrato` |
+| `NombreTipoRegimen` | Campo **Tipo Régimen** del receptor | Datos del Empleado | `c_TipoRegimen` |
+| `NombrePeriodicidadPago` | Campo **Periodicidad Pago** | Datos del Empleado | `c_PeriodicidadPago` |
+| `NombreRiesgoPuesto` | Campo **Riesgo Puesto** | Datos del Empleado | `c_RiesgoPuesto` |
+| `NombreEstadoSAT` | Campo **Clave Entidad Federativa** (ClaveEntFed) | Datos del Empleado | `c_Estado` |
+| `NombreTipoPercepcion` | Columna **Tipo** de Percepciones | Percepciones | `c_TipoPercepcion` |
+| `NombreTipoDeduccion` | Columna **Tipo** de Deducciones | Deducciones | `c_TipoDeduccion` |
+| `NombreTipoOtroPago` | Columna **Tipo** de Otros Pagos | Otros Pagos | `c_TipoOtroPago` |
+| `NombreTipoIncapacidad` | Columna **Tipo Incapacidad** | Incapacidades | `c_TipoIncapacidad` |
+| `NombreTipoHoras` | Campo **Tipo** en sub-bloque Horas Extra (dentro de Percepciones) | Percepciones → Horas Extra | `c_TipoHoras` |
+
 ---
 
 ## Formato de presentación en el PDF
@@ -58,6 +73,11 @@ Todos los campos siguen el patrón `clave - descripción`. Ejemplos:
 - **Objeto Imp.:** `Sí objeto de impuesto` (solo descripción, sin clave)
 - **Clave Unidad:** `Unidad de Servicio` (solo descripción, sin clave)
 - **Impuesto:** `IVA` (nombre corto, sin clave)
+- **Tipo Contrato:** `01 - Contrato de trabajo por tiempo indeterminado`
+- **Periodicidad Pago:** `04 - Quincenal`
+- **Clave Entidad Federativa:** `SIN - Sinaloa`
+- **Tipo (Percepción):** `001 - Sueldos, Salarios Rayas y Jornales`
+- **Tipo (Deducción):** `002 - ISR`
 
 ---
 

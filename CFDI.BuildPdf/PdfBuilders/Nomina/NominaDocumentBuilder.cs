@@ -39,9 +39,9 @@ namespace CFDI.BuildPdf.PdfBuilders.Nomina
                 container.Page(page =>
                 {
                     page.Size(pageSize);
-                    page.MarginTop(1, Unit.Centimetre);
+                    page.MarginTop(0.7f, Unit.Centimetre);
                     page.MarginBottom(1.2f, Unit.Centimetre);
-                    page.MarginHorizontal(1, Unit.Centimetre);
+                    page.MarginHorizontal(1.5f, Unit.Centimetre);
                     page.DefaultTextStyle(x => x.FontSize(PdfStyleConstants.FontSizeDefault).FontFamily(PdfStyleConstants.FontFamily));
 
                     page.Content().Column(col =>
@@ -78,28 +78,82 @@ namespace CFDI.BuildPdf.PdfBuilders.Nomina
 
         private void ComposeEncabezado(ColumnDescriptor col, CfdiNominaViewModel model)
         {
-            col.Item().Table(table =>
+            col.Item().BorderBottom(1f).BorderColor(PdfStyleConstants.ColorBorder).PaddingBottom(6)
+                .Table(table =>
             {
-                table.ColumnsDefinition(c => { c.RelativeColumn(3); c.RelativeColumn(7); });
+                table.ColumnsDefinition(c =>
+                {
+                    c.RelativeColumn(30); // Logo
+                    c.RelativeColumn(35); // Emisor
+                    c.RelativeColumn(35); // Datos fiscales
+                });
 
                 // Logo
-                table.Cell().Row(1).Column(1).Element(cell =>
-                {
-                    if (!string.IsNullOrEmpty(model.LogoBase64))
+                table.Cell().Row(1).Column(1).AlignLeft().AlignMiddle()
+                    .Element(cell =>
                     {
-                        if (TryDecodeLogo(model.LogoBase64, _logger, out var logoBytes))
-                            cell.Width(180).Image(logoBytes!);
-                    }
+                        if (!string.IsNullOrEmpty(model.LogoBase64))
+                        {
+                            if (TryDecodeLogo(model.LogoBase64, _logger, out var logoBytes))
+                                cell.MaxWidth(150).MaxHeight(70).Image(logoBytes!);
+                        }
+                    });
+
+                // Emisor: nombre + RFC + régimen + lugar
+                table.Cell().Row(1).Column(2).PaddingHorizontal(6).AlignMiddle().Column(c =>
+                {
+                    c.Item().Text(model.EmisorNombre ?? "")
+                        .Bold()
+                        .FontSize(PdfStyleConstants.FontSizeEmisorName)
+                        .FontColor(PdfStyleConstants.ColorAccent);
+                    c.Item().PaddingTop(2).Text(t =>
+                    {
+                        t.Span("RFC: ").Bold().FontSize(PdfStyleConstants.FontSizeLabel).FontColor(PdfStyleConstants.ColorText);
+                        t.Span(model.EmisorRFC ?? "").FontSize(PdfStyleConstants.FontSizeLabel).FontColor(PdfStyleConstants.ColorText);
+                    });
+                    c.Item().PaddingTop(1).Text(t =>
+                    {
+                        t.Span("RÉGIMEN FISCAL: ").Bold().FontSize(PdfStyleConstants.FontSizeLabel).FontColor(PdfStyleConstants.ColorText);
+                        t.Span($"{model.EmisorRegimenFiscal} - {CfdiPdfSections.NombreRegimenFiscal(model.EmisorRegimenFiscal)}").FontSize(PdfStyleConstants.FontSizeLabel).FontColor(PdfStyleConstants.ColorText);
+                    });
+                    c.Item().PaddingTop(1).Text(t =>
+                    {
+                        t.Span("LUGAR DE EXPEDICIÓN: ").Bold().FontSize(PdfStyleConstants.FontSizeLabel).FontColor(PdfStyleConstants.ColorText);
+                        t.Span(model.LugarExpedicion ?? "").FontSize(PdfStyleConstants.FontSizeLabel).FontColor(PdfStyleConstants.ColorText);
+                    });
                 });
 
-                // Datos emisor
-                table.Cell().Row(1).Column(2).AlignRight().Column(c =>
+                // Datos fiscales a la derecha
+                table.Cell().Row(1).Column(3).AlignMiddle().Column(c =>
                 {
-                    c.Item().AlignRight().Text(model.EmisorNombre ?? "").Bold();
-                    c.Item().AlignRight().Text($"RFC: {model.EmisorRFC}");
-                    c.Item().AlignRight().Text($"Régimen Fiscal: {model.EmisorRegimenFiscal} - {CfdiPdfSections.NombreRegimenFiscal(model.EmisorRegimenFiscal)}");
-                    c.Item().AlignRight().Text($"Lugar de Expedición: {model.LugarExpedicion}");
+                    c.Item().Text(t =>
+                    {
+                        t.Span("UUID: ").Bold()
+                            .FontSize(PdfStyleConstants.FontSizeSmall)
+                            .FontColor(PdfStyleConstants.ColorAccent);
+                        t.Span(model.UUID ?? "")
+                            .FontSize(PdfStyleConstants.FontSizeVerySmall)
+                            .FontColor(PdfStyleConstants.ColorText);
+                    });
+                    FiscalRow(c, "FECHA CERTIFICACIÓN:", model.FechaCertificacion.ToString("dd/MM/yyyy HH:mm:ss"));
+                    FiscalRow(c, "NO. CERTIFICADO SAT:", model.NoCertificadoSAT);
+                    FiscalRow(c, "NO. CERTIFICADO EMISOR:", model.NoCertificadoEmisor);
+                    FiscalRow(c, "PAC QUE TIMBRÓ:", $"{CfdiPdfSections.NombrePac(model.RfcProvCertif)} ({model.RfcProvCertif})");
+                    FiscalRow(c, "VERSIÓN CFDI:", model.Version);
                 });
+            });
+        }
+
+        private static void FiscalRow(ColumnDescriptor col, string label, string? value)
+        {
+            col.Item().Text(t =>
+            {
+                t.Span(label + " ").Bold()
+                    .FontSize(PdfStyleConstants.FontSizeSmall)
+                    .FontColor(PdfStyleConstants.ColorAccent);
+                t.Span(value ?? "")
+                    .FontSize(PdfStyleConstants.FontSizeSmall)
+                    .FontColor(PdfStyleConstants.ColorText);
             });
         }
 
@@ -111,24 +165,17 @@ namespace CFDI.BuildPdf.PdfBuilders.Nomina
             {
                 table.ColumnsDefinition(c => { c.RelativeColumn(); c.RelativeColumn(); c.RelativeColumn(); c.RelativeColumn(); });
 
-                CfdiPdfSections.HeaderValueRow(table, 1, 1, "Folio Fiscal (UUID)", model.UUID);
-                CfdiPdfSections.HeaderValueRow(table, 1, 3, "Fecha y Hora de Emisión", model.FechaEmision.ToString("yyyy-MM-dd HH:mm:ss"));
-                CfdiPdfSections.HeaderValueRow(table, 2, 1, "Fecha y Hora de Certificación", model.FechaCertificacion.ToString("yyyy-MM-dd HH:mm:ss"));
-                CfdiPdfSections.HeaderValueRow(table, 2, 3, "No. Certificado Emisor", model.NoCertificadoEmisor);
-                CfdiPdfSections.HeaderValueRow(table, 3, 1, "No. Certificado SAT", model.NoCertificadoSAT);
-                CfdiPdfSections.HeaderValueRow(table, 3, 3, "Versión CFDI", model.Version);
-
+                CfdiPdfSections.HeaderValueRow(table, 1, 1, "Fecha y Hora de Emisión", model.FechaEmision.ToString("dd/MM/yyyy HH:mm:ss"));
                 var serieFolio = (!string.IsNullOrEmpty(model.Serie) ? model.Serie + "-" : "") + model.Folio;
-                CfdiPdfSections.HeaderValueRow(table, 4, 1, "Serie y Folio", serieFolio);
-                CfdiPdfSections.HeaderValueRow(table, 4, 3, "Tipo de Comprobante", $"{model.TipoComprobante} - {CfdiPdfSections.NombreTipoComprobante(model.TipoComprobante)}");
+                CfdiPdfSections.HeaderValueRow(table, 1, 3, "Serie y Folio", serieFolio);
 
-                CfdiPdfSections.HeaderValueRow(table, 5, 1, "PAC que timbró", $"{CfdiPdfSections.NombrePac(model.RfcProvCertif)} ({model.RfcProvCertif})");
+                CfdiPdfSections.HeaderValueRow(table, 2, 1, "Tipo de Comprobante", $"{model.TipoComprobante} - {CfdiPdfSections.NombreTipoComprobante(model.TipoComprobante)}");
 
                 if (!string.IsNullOrWhiteSpace(model.TipoRelacion) || (model.RelacionadosUuids?.Count > 0))
                 {
                     var uuidsTexto = string.Join(", ", model.RelacionadosUuids ?? new System.Collections.Generic.List<string>());
-                    CfdiPdfSections.HeaderValueRow(table, 6, 1, "Tipo Relación", $"{model.TipoRelacion} - {CfdiPdfSections.NombreTipoRelacion(model.TipoRelacion)}");
-                    CfdiPdfSections.HeaderValueRow(table, 6, 3, "UUID(s) Relacionado(s)", uuidsTexto);
+                    CfdiPdfSections.HeaderValueRow(table, 2, 3, "Tipo Relación", $"{model.TipoRelacion} - {CfdiPdfSections.NombreTipoRelacion(model.TipoRelacion)}");
+                    CfdiPdfSections.HeaderValueRow(table, 3, 1, "UUID(s) Relacionado(s)", uuidsTexto);
                 }
             });
         }
@@ -162,14 +209,14 @@ namespace CFDI.BuildPdf.PdfBuilders.Nomina
                 CfdiPdfSections.HeaderValueRow(table, 4, 3, "No. Seguridad Social", receptor?.NumSeguridadSocial);
                 CfdiPdfSections.HeaderValueRow(table, 5, 1, "Fecha Inicio Rel. Laboral", receptor?.FechaInicioRelLaboral?.ToString("yyyy-MM-dd"));
                 CfdiPdfSections.HeaderValueRow(table, 5, 3, "Antigüedad", receptor?.Antiguedad);
-                CfdiPdfSections.HeaderValueRow(table, 6, 1, "Tipo Contrato", receptor?.TipoContrato);
-                CfdiPdfSections.HeaderValueRow(table, 6, 3, "Tipo Régimen", receptor?.TipoRegimen);
-                CfdiPdfSections.HeaderValueRow(table, 7, 1, "Periodicidad Pago", receptor?.PeriodicidadPago);
+                CfdiPdfSections.HeaderValueRow(table, 6, 1, "Tipo Contrato", FormatKeyDesc(receptor?.TipoContrato, CfdiPdfSections.NombreTipoContrato(receptor?.TipoContrato)));
+                CfdiPdfSections.HeaderValueRow(table, 6, 3, "Tipo Régimen", FormatKeyDesc(receptor?.TipoRegimen, CfdiPdfSections.NombreTipoRegimen(receptor?.TipoRegimen)));
+                CfdiPdfSections.HeaderValueRow(table, 7, 1, "Periodicidad Pago", FormatKeyDesc(receptor?.PeriodicidadPago, CfdiPdfSections.NombrePeriodicidadPago(receptor?.PeriodicidadPago)));
                 CfdiPdfSections.HeaderValueRow(table, 7, 3, "Puesto", receptor?.Puesto);
                 CfdiPdfSections.HeaderValueRow(table, 8, 1, "Salario Diario Integrado", receptor?.SalarioDiarioIntegrado?.ToString("C", MxCulture));
-                CfdiPdfSections.HeaderValueRow(table, 8, 3, "Riesgo Puesto", receptor?.RiesgoPuesto);
+                CfdiPdfSections.HeaderValueRow(table, 8, 3, "Riesgo Puesto", FormatKeyDesc(receptor?.RiesgoPuesto, CfdiPdfSections.NombreRiesgoPuesto(receptor?.RiesgoPuesto)));
                 CfdiPdfSections.HeaderValueRow(table, 9, 1, "Salario Base Cot. Apor.", receptor?.SalarioBaseCotApor?.ToString("C", MxCulture));
-                CfdiPdfSections.HeaderValueRow(table, 9, 3, "Clave Entidad Federativa", receptor?.ClaveEntFed);
+                CfdiPdfSections.HeaderValueRow(table, 9, 3, "Clave Entidad Federativa", FormatKeyDesc(receptor?.ClaveEntFed, CfdiPdfSections.NombreEstadoSAT(receptor?.ClaveEntFed)));
             });
         }
 
@@ -269,7 +316,7 @@ namespace CFDI.BuildPdf.PdfBuilders.Nomina
                 foreach (var p in perc.PercepcionesDetalle)
                 {
                     var r = row;
-                    table.Cell().Row(r).Column(1).Border(0.5f).BorderColor(PdfStyleConstants.ColorBorder).Padding(2).Text(p.TipoPercepcion ?? "").FontSize(PdfStyleConstants.FontSizeSmall);
+                    table.Cell().Row(r).Column(1).Border(0.5f).BorderColor(PdfStyleConstants.ColorBorder).Padding(2).Text(FormatKeyDesc(p.TipoPercepcion, CfdiPdfSections.NombreTipoPercepcion(p.TipoPercepcion))).FontSize(PdfStyleConstants.FontSizeSmall);
                     table.Cell().Row(r).Column(2).Border(0.5f).BorderColor(PdfStyleConstants.ColorBorder).Padding(2).Text(p.Clave ?? "").FontSize(PdfStyleConstants.FontSizeSmall);
                     table.Cell().Row(r).Column(3).Border(0.5f).BorderColor(PdfStyleConstants.ColorBorder).Padding(2).Text(p.Concepto ?? "").FontSize(PdfStyleConstants.FontSizeSmall);
                     table.Cell().Row(r).Column(4).Border(0.5f).BorderColor(PdfStyleConstants.ColorBorder).Padding(2).AlignRight().Text(p.ImporteGravado.ToString("C", MxCulture)).FontSize(PdfStyleConstants.FontSizeSmall);
@@ -284,7 +331,7 @@ namespace CFDI.BuildPdf.PdfBuilders.Nomina
                                 heCol.Item().Text("Horas Extra:").Bold().FontSize(PdfStyleConstants.FontSizeSmall);
                                 foreach (var he in p.HorasExtra)
                                 {
-                                    heCol.Item().Text($"Días: {he.Dias}, Tipo: {he.TipoHoras}, Horas: {he.HorasExtra}, Pagado: {he.ImportePagado.ToString("C", MxCulture)}")
+                                    heCol.Item().Text($"Días: {he.Dias}, Tipo: {FormatKeyDesc(he.TipoHoras, CfdiPdfSections.NombreTipoHoras(he.TipoHoras))}, Horas: {he.HorasExtra}, Pagado: {he.ImportePagado.ToString("C", MxCulture)}")
                                         .FontSize(PdfStyleConstants.FontSizeSmall);
                                 }
                             });
@@ -338,7 +385,7 @@ namespace CFDI.BuildPdf.PdfBuilders.Nomina
                 foreach (var d in ded.DeduccionesDetalle)
                 {
                     var r = row;
-                    table.Cell().Row(r).Column(1).Border(0.5f).BorderColor(PdfStyleConstants.ColorBorder).Padding(2).Text(d.TipoDeduccion ?? "").FontSize(PdfStyleConstants.FontSizeSmall);
+                    table.Cell().Row(r).Column(1).Border(0.5f).BorderColor(PdfStyleConstants.ColorBorder).Padding(2).Text(FormatKeyDesc(d.TipoDeduccion, CfdiPdfSections.NombreTipoDeduccion(d.TipoDeduccion))).FontSize(PdfStyleConstants.FontSizeSmall);
                     table.Cell().Row(r).Column(2).Border(0.5f).BorderColor(PdfStyleConstants.ColorBorder).Padding(2).Text(d.Clave ?? "").FontSize(PdfStyleConstants.FontSizeSmall);
                     table.Cell().Row(r).Column(3).Border(0.5f).BorderColor(PdfStyleConstants.ColorBorder).Padding(2).Text(d.Concepto ?? "").FontSize(PdfStyleConstants.FontSizeSmall);
                     table.Cell().Row(r).Column(4).Border(0.5f).BorderColor(PdfStyleConstants.ColorBorder).Padding(2).AlignRight().Text(d.Importe.ToString("C", MxCulture)).FontSize(PdfStyleConstants.FontSizeSmall);
@@ -387,7 +434,7 @@ namespace CFDI.BuildPdf.PdfBuilders.Nomina
                 foreach (var pago in op.OtrosPagosDetalle)
                 {
                     var r = row;
-                    table.Cell().Row(r).Column(1).Border(0.5f).BorderColor(PdfStyleConstants.ColorBorder).Padding(2).Text(pago.TipoOtroPago ?? "").FontSize(PdfStyleConstants.FontSizeSmall);
+                    table.Cell().Row(r).Column(1).Border(0.5f).BorderColor(PdfStyleConstants.ColorBorder).Padding(2).Text(FormatKeyDesc(pago.TipoOtroPago, CfdiPdfSections.NombreTipoOtroPago(pago.TipoOtroPago))).FontSize(PdfStyleConstants.FontSizeSmall);
                     table.Cell().Row(r).Column(2).Border(0.5f).BorderColor(PdfStyleConstants.ColorBorder).Padding(2).Text(pago.Clave ?? "").FontSize(PdfStyleConstants.FontSizeSmall);
                     table.Cell().Row(r).Column(3).Border(0.5f).BorderColor(PdfStyleConstants.ColorBorder).Padding(2).Text(pago.Concepto ?? "").FontSize(PdfStyleConstants.FontSizeSmall);
                     table.Cell().Row(r).Column(4).Border(0.5f).BorderColor(PdfStyleConstants.ColorBorder).Padding(2).AlignRight().Text(pago.Importe.ToString("C", MxCulture)).FontSize(PdfStyleConstants.FontSizeSmall);
@@ -434,7 +481,7 @@ namespace CFDI.BuildPdf.PdfBuilders.Nomina
                 {
                     var r = row;
                     table.Cell().Row(r).Column(1).Border(0.5f).BorderColor(PdfStyleConstants.ColorBorder).Padding(2).AlignRight().Text(inc.DiasIncapacidad.ToString()).FontSize(PdfStyleConstants.FontSizeSmall);
-                    table.Cell().Row(r).Column(2).Border(0.5f).BorderColor(PdfStyleConstants.ColorBorder).Padding(2).Text(inc.TipoIncapacidad ?? "").FontSize(PdfStyleConstants.FontSizeSmall);
+                    table.Cell().Row(r).Column(2).Border(0.5f).BorderColor(PdfStyleConstants.ColorBorder).Padding(2).Text(FormatKeyDesc(inc.TipoIncapacidad, CfdiPdfSections.NombreTipoIncapacidad(inc.TipoIncapacidad))).FontSize(PdfStyleConstants.FontSizeSmall);
                     table.Cell().Row(r).Column(3).Border(0.5f).BorderColor(PdfStyleConstants.ColorBorder).Padding(2).AlignRight().Text(inc.ImporteMonetario?.ToString("C", MxCulture) ?? "").FontSize(PdfStyleConstants.FontSizeSmall);
                     row++;
                 }
@@ -474,6 +521,14 @@ namespace CFDI.BuildPdf.PdfBuilders.Nomina
                     .Border(0.5f).BorderColor(PdfStyleConstants.ColorBorder)
                     .Padding(3).Text(model.CantidadConLetra ?? "");
             });
+        }
+
+        private static string FormatKeyDesc(string? clave, string descripcion)
+        {
+            if (string.IsNullOrWhiteSpace(clave)) return "";
+            if (string.IsNullOrWhiteSpace(descripcion) || string.Equals(descripcion, clave, StringComparison.Ordinal))
+                return clave;
+            return $"{clave} - {descripcion}";
         }
 
         private static bool TryDecodeLogo(string logoBase64, ILogger logger, out byte[]? logoBytes)

@@ -122,7 +122,7 @@ namespace CFDI.BuildPdf.PdfBuilders.CartaPorte
                         if (!string.IsNullOrEmpty(model.LogoBase64))
                         {
                             if (TryDecodeLogo(model.LogoBase64, _logger, out var logoBytes))
-                                cell.Width(150).Image(logoBytes!);
+                                cell.MaxWidth(150).MaxHeight(70).Image(logoBytes!);
                         }
                     });
 

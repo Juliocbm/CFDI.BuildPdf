@@ -6,7 +6,11 @@
       "Bash(dotnet pack *)",
       "Bash(dotnet nuget *)",
       "Bash(curl -s https://api.nuget.org/v3-flatcontainer/cfdi.buildpdf/index.json)",
-      "Bash(dotnet restore *)"
+      "Bash(dotnet restore *)",
+      "Read(//c/Proyectos/GeneratePdfSat/**)"
+    ],
+    "additionalDirectories": [
+      "C:\\Proyectos\\GeneratePdfSat\\CFDI.BuildPdf\\CFDI.BuildPdf\\bin\\Release"
     ]
   }
 }
