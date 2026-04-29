@@ -4,6 +4,15 @@ Todas las versiones notables de este proyecto se documentan en este archivo.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/)
 y este proyecto usa [Versionado Semántico](https://semver.org/lang/es/).
 
+## [2.0.8] - 2026-04-28
+
+### Fixed
+- Las **retenciones a nivel concepto** (`<cfdi:Concepto>/<cfdi:Impuestos>/<cfdi:Retenciones>`) no se renderizaban en la celda del concepto del PDF de Carta Porte. Solo se mostraba el mini-bloque "IMPUESTOS TRASLADADOS"; ahora se agrega un mini-bloque "IMPUESTOS RETENIDOS" análogo cuando el concepto trae retenciones (factor, impuesto traducido, tasa/cuota, base, importe). El panel de totales no se ve afectado (ya consumía el resumen global).
+
+### Added
+- `ConceptoViewModel.Retenciones` (lista de `RetencionConceptoViewModel`) en el modelo público para exponer el detalle por concepto. Aditivo, no rompe consumidores.
+- Fallback en `CartaPorteMapper`: si el CFDI no trae el nodo global `<cfdi:Impuestos>/<cfdi:Retenciones>`, el `RetencionesResumen` y `TotalImpuestosRetenidos` se reconstruyen agrupando las retenciones de cada concepto (simétrico al fallback que ya existe para traslados).
+
 ## [2.0.7] - 2026-04-21
 
 ### Changed

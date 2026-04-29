@@ -62,11 +62,21 @@ namespace CFDI.BuildPdf.Models
         public string ObjetoImpuesto { get; set; }
 
         public List<TrasladoImpuestoViewModel> Traslados { get; set; } = new(); // 🚀 Aquí agregamos
+        public List<RetencionConceptoViewModel> Retenciones { get; set; } = new();
     }
 
     public class TrasladoImpuestoViewModel
     {
         public string Impuesto { get; set; }       // IVA, ISR, etc.
+        public string TipoFactor { get; set; }      // Tasa, Cuota, Exento
+        public decimal TasaOCuota { get; set; }
+        public decimal Base { get; set; }
+        public decimal Importe { get; set; }
+    }
+
+    public class RetencionConceptoViewModel
+    {
+        public string Impuesto { get; set; }       // 001 ISR, 002 IVA, 003 IEPS
         public string TipoFactor { get; set; }      // Tasa, Cuota, Exento
         public decimal TasaOCuota { get; set; }
         public decimal Base { get; set; }

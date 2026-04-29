@@ -64,7 +64,18 @@ namespace CFDI.BuildPdf.Mappers.CartaPorte
                             TasaOCuota = decimal.Parse(t.Attribute("TasaOCuota")?.Value ?? "0", CultureInfo.InvariantCulture),
                             Base = decimal.Parse(t.Attribute("Base")?.Value ?? "0", CultureInfo.InvariantCulture),
                             Importe = decimal.Parse(t.Attribute("Importe")?.Value ?? "0", CultureInfo.InvariantCulture)
-                        }).ToList() ?? new List<TrasladoImpuestoViewModel>()
+                        }).ToList() ?? new List<TrasladoImpuestoViewModel>(),
+                    Retenciones = c.Element(Cfdi + "Impuestos")
+                        ?.Element(Cfdi + "Retenciones")
+                        ?.Elements(Cfdi + "Retencion")
+                        .Select(r => new RetencionConceptoViewModel
+                        {
+                            Impuesto = r.Attribute("Impuesto")?.Value,
+                            TipoFactor = r.Attribute("TipoFactor")?.Value,
+                            TasaOCuota = decimal.Parse(r.Attribute("TasaOCuota")?.Value ?? "0", CultureInfo.InvariantCulture),
+                            Base = decimal.Parse(r.Attribute("Base")?.Value ?? "0", CultureInfo.InvariantCulture),
+                            Importe = decimal.Parse(r.Attribute("Importe")?.Value ?? "0", CultureInfo.InvariantCulture)
+                        }).ToList() ?? new List<RetencionConceptoViewModel>()
                 }).ToList() ?? new();
 
             // Impuestos globales a nivel Comprobante: totales + desglose agrupado
@@ -110,6 +121,22 @@ namespace CFDI.BuildPdf.Mappers.CartaPorte
 
                 if (model.TotalImpuestosTrasladados == 0)
                     model.TotalImpuestosTrasladados = model.TrasladosResumen.Sum(t => t.Importe);
+            }
+
+            // Fallback: si el CFDI no trae nodo global de Retenciones, agrupa los de cada Concepto
+            if (model.RetencionesResumen.Count == 0)
+            {
+                model.RetencionesResumen = model.Conceptos
+                    .SelectMany(c => c.Retenciones)
+                    .GroupBy(r => r.Impuesto)
+                    .Select(g => new RetencionImpuestoViewModel
+                    {
+                        Impuesto = g.Key,
+                        Importe = g.Sum(x => x.Importe)
+                    }).ToList();
+
+                if (model.TotalImpuestosRetenidos == 0)
+                    model.TotalImpuestosRetenidos = model.RetencionesResumen.Sum(r => r.Importe);
             }
 
             // Addenda

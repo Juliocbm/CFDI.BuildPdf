@@ -375,6 +375,35 @@ namespace CFDI.BuildPdf.PdfBuilders.CartaPorte
                                 }
                             });
                         }
+
+                        if (concepto.Retenciones?.Any() == true)
+                        {
+                            descCol.Item().PaddingTop(3).Text("IMPUESTOS RETENIDOS").Bold()
+                                .FontSize(PdfStyleConstants.FontSizeVerySmall)
+                                .FontColor(PdfStyleConstants.ColorAccent);
+                            descCol.Item().Table(retTable =>
+                            {
+                                retTable.ColumnsDefinition(ic =>
+                                {
+                                    ic.RelativeColumn(); ic.RelativeColumn(); ic.RelativeColumn(); ic.RelativeColumn(); ic.RelativeColumn();
+                                });
+                                var retHeaders = new[] { "Factor", "Impuesto", "Tasa/Cuota", "Base", "Importe" };
+                                for (uint ih = 0; ih < retHeaders.Length; ih++)
+                                    retTable.Cell().Row(1).Column(ih + 1).Padding(1).Text(retHeaders[ih]).Bold().FontSize(PdfStyleConstants.FontSizeVerySmall);
+
+                                uint retRow = 2;
+                                foreach (var r in concepto.Retenciones)
+                                {
+                                    var rr = retRow;
+                                    retTable.Cell().Row(rr).Column(1).Padding(1).Text(r.TipoFactor ?? "").FontSize(PdfStyleConstants.FontSizeVerySmall);
+                                    retTable.Cell().Row(rr).Column(2).Padding(1).Text(CfdiPdfSections.NombreImpuesto(r.Impuesto)).FontSize(PdfStyleConstants.FontSizeVerySmall);
+                                    retTable.Cell().Row(rr).Column(3).Padding(1).AlignRight().Text(CfdiPdfSections.FormatTasaOCuota(r.TasaOCuota, r.TipoFactor)).FontSize(PdfStyleConstants.FontSizeVerySmall);
+                                    retTable.Cell().Row(rr).Column(4).Padding(1).AlignRight().Text(CfdiPdfSections.Format2(r.Base)).FontSize(PdfStyleConstants.FontSizeVerySmall);
+                                    retTable.Cell().Row(rr).Column(5).Padding(1).AlignRight().Text(CfdiPdfSections.Format2(r.Importe)).FontSize(PdfStyleConstants.FontSizeVerySmall);
+                                    retRow++;
+                                }
+                            });
+                        }
                     });
 
                     BodyCell(7).AlignRight().Text(CfdiPdfSections.Format2(concepto.ValorUnitario)).FontSize(PdfStyleConstants.FontSizeSmall);
