@@ -6,7 +6,7 @@
                   LugarExpedicion="06600" TipoCambio="1" Moneda="MXN"
                   FormaPago="99" MetodoPago="PPD" TipoDeComprobante="T"
                   Exportacion="01" CondicionesDePago="CONTADO"
-                  SubTotal="1000.00" Total="930.00"
+                  SubTotal="1000.00" Total="953.33"
                   Sello="ABCDEFGHIJKLMNOP1234567890abcdef"
                   NoCertificado="00001000000504465028">
   <cfdi:CfdiRelacionados TipoRelacion="04">

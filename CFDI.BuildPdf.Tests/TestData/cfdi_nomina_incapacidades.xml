@@ -34,12 +34,12 @@
                          Departamento="Sistemas" Puesto="Desarrollador"
                          PeriodicidadPago="04" SalarioBaseCotApor="500.00"
                          SalarioDiarioIntegrado="520.00" ClaveEntFed="JAL" />
-      <nomina12:Percepciones TotalSueldos="15000.00" TotalGravado="13000.00" TotalExento="3500.00">
+      <nomina12:Percepciones TotalSueldos="16500.00" TotalGravado="13000.00" TotalExento="3500.00">
         <nomina12:Percepcion TipoPercepcion="001" Clave="001" Concepto="Sueldo" ImporteGravado="10000.00" ImporteExento="0.00" />
         <nomina12:Percepcion TipoPercepcion="005" Clave="005" Concepto="Prima vacacional" ImporteGravado="2000.00" ImporteExento="3000.00" />
         <nomina12:Percepcion TipoPercepcion="019" Clave="019" Concepto="Horas extra" ImporteGravado="1000.00" ImporteExento="500.00">
-          <nomina12:HorasExtra Dias="3" TipoHoras="01" HorasExtra="9" ImportePagado="1500.00" />
-          <nomina12:HorasExtra Dias="2" TipoHoras="02" HorasExtra="6" ImportePagado="900.00" />
+          <nomina12:HorasExtra Dias="3" TipoHoras="01" HorasExtra="9" ImportePagado="1000.00" />
+          <nomina12:HorasExtra Dias="2" TipoHoras="02" HorasExtra="6" ImportePagado="500.00" />
         </nomina12:Percepcion>
       </nomina12:Percepciones>
       <nomina12:Deducciones TotalOtrasDeducciones="2000.00" TotalImpuestosRetenidos="2000.00">

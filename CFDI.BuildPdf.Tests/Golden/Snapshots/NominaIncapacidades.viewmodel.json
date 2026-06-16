@@ -49,7 +49,7 @@
       "ClaveEntFed": "JAL"
     },
     "Percepciones": {
-      "TotalSueldos": 15000.00,
+      "TotalSueldos": 16500.00,
       "TotalSeparacionIndemnizacion": null,
       "TotalJubilacionPensionRetiro": null,
       "TotalGravado": 13000.00,
@@ -82,13 +82,13 @@
               "Dias": 3,
               "TipoHoras": "01",
               "HorasExtra": 9,
-              "ImportePagado": 1500.00
+              "ImportePagado": 1000.00
             },
             {
               "Dias": 2,
               "TipoHoras": "02",
               "HorasExtra": 6,
-              "ImportePagado": 900.00
+              "ImportePagado": 500.00
             }
           ]
         }
