@@ -480,3 +480,20 @@ git tag f0-baseline -m "F0: net8 + red de seguridad golden tests"
 **Notas para fases siguientes (NO se implementan en F0):**
 - El namespace `CFDI.BuildPdf.Service` del `using` en `PdfSmokeTests.cs` se actualizará a `CFDI.BuildPdf` en F4 al consolidar namespaces.
 - Si en F1+ un refactor cambia legítimamente el ViewModel (p. ej. unificar `Traslado/RetencionConceptoViewModel`), el snapshot fallará a propósito: se revisa el diff y, si es el cambio esperado, se regenera borrando el `.json` y re-ejecutando.
+
+## Carry-forward de la ejecución/revisión de F0 (para fases siguientes)
+
+**Incidente resuelto:** el ID `UglyToad.PdfPig` en nuget.org es un typosquat (solo prereleases raras). El ID correcto es `PdfPig` (namespace en código `UglyToad.PdfPig`). Quedó en `PdfPig` 0.1.9.
+
+**Para F1 (antes de refactorizar builders/mappers):**
+1. **Añadir fixtures de casos límite** antes de tocar builders: una Carta Porte con `Addenda` no nula + `RegimenesAduaneros` poblado, y una Nómina con `Incapacidades` + `HorasExtra` no vacías. Hoy solo hay un fixture "happy path" por tipo, así que ramas condicionales (Addenda null, colecciones vacías, Seguro/Remolque opcionales) están mapeadas pero no ejercitadas en render. El helper `Snapshot` autogenera baseline en la primera corrida, así que es barato.
+2. **Fijar la cultura del test run** (invariante, vía fixture o `[assembly:...]`) para que un cambio de formato culture-dependent en un builder no rompa reproducibilidad entre máquinas/CI.
+3. Al **unificar los ViewModels de impuesto** y **extraer `SatCatalogos`**: regenerar los baselines de forma intencional y **diffear línea a línea** contra los actuales; cualquier delta numérico/de orden inesperado = regresión.
+4. **Opcional:** reforzar los smoke tests para afirmar algunos substrings estables (RFC del emisor, una descripción de concepto), no solo longitud de texto > 200.
+
+**Para F4 (endurecimiento de calidad):**
+- Considerar pinear `AnalysisLevel` a `8-recommended` (en lugar de `latest-recommended`) para que el set de reglas no crezca solo al subir el SDK.
+- Revisar `end_of_line = crlf` en `.editorconfig` vs `.gitattributes` `* text=auto` si entran contribuidores no-Windows.
+- Hay ~40 warnings de analizadores (CA1305 cultura, CA1860 `Any()`, CA1848 logging) que se limpian progresivamente y se vuelven errores en F4. Varios CA1305 están en `.ToString(format)` de los builders: si se "arreglan" añadiendo provider, el texto del PDF puede cambiar — validar con golden/smoke.
+- Pulido menor pendiente en `Snapshot.cs`: guard para `callerFilePath` vacío; newline final en baselines.
+- `Version` sigue en 2.0.8 (se sube a 3.0.0 en F5).
