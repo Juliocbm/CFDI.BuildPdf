@@ -15,7 +15,7 @@
 ## File Structure (F0)
 
 - Modify: `CFDI.BuildPdf/CFDI.BuildPdf.csproj` — `TargetFramework` net8.0; `Microsoft.Extensions.*` 8.0.0; props de análisis.
-- Modify: `CFDI.BuildPdf.Tests/CFDI.BuildPdf.Tests.csproj` — `TargetFramework` net8.0; ref a `UglyToad.PdfPig`.
+- Modify: `CFDI.BuildPdf.Tests/CFDI.BuildPdf.Tests.csproj` — `TargetFramework` net8.0; ref a `PdfPig` (ID del paquete; el namespace es `UglyToad.PdfPig`).
 - Create: `.editorconfig` (raíz del repo) — estilo + nullable + severidades en *warning*.
 - Create: `CFDI.BuildPdf.Tests/Golden/Snapshot.cs` — helper de snapshot por archivo.
 - Create: `CFDI.BuildPdf.Tests/Golden/ViewModelSnapshotTests.cs` — snapshots deterministas de los ViewModels mapeados.
@@ -153,9 +153,9 @@ git commit -m "chore: añadir .editorconfig y analizadores en modo warning (F0)"
 
 - [ ] **Step 1: Añadir la referencia a PdfPig**
 
-En `CFDI.BuildPdf.Tests/CFDI.BuildPdf.Tests.csproj`, dentro del `ItemGroup` de `PackageReference`, añadir:
+En `CFDI.BuildPdf.Tests/CFDI.BuildPdf.Tests.csproj`, dentro del `ItemGroup` de `PackageReference`, añadir (el ID del paquete es `PdfPig`; el namespace en código es `UglyToad.PdfPig`. NO usar el ID `UglyToad.PdfPig`, que es un typosquat sin versiones estables):
 ```xml
-<PackageReference Include="UglyToad.PdfPig" Version="0.1.9" />
+<PackageReference Include="PdfPig" Version="0.1.9" />
 ```
 
 - [ ] **Step 2: Restaurar y compilar los tests**
