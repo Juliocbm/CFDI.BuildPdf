@@ -1,0 +1,191 @@
+{
+  "CondicionesPago": "CONTADO",
+  "Addenda": null,
+  "Conceptos": [
+    {
+      "ClaveProductoServicio": "78101800",
+      "NumeroIdentificacion": "SRV001",
+      "Cantidad": 1.00,
+      "ClaveUnidad": "E48",
+      "Unidad": "Servicio",
+      "Descripcion": "Servicio de transporte con retenciones",
+      "ValorUnitario": 1000.00,
+      "Importe": 1000.00,
+      "Descuento": 0.00,
+      "ObjetoImpuesto": "02",
+      "Traslados": [
+        {
+          "Impuesto": "002",
+          "TipoFactor": "Tasa",
+          "TasaOCuota": 0.160000,
+          "Base": 1000.00,
+          "Importe": 160.00
+        }
+      ],
+      "Retenciones": [
+        {
+          "Impuesto": "001",
+          "TipoFactor": "Tasa",
+          "TasaOCuota": 0.100000,
+          "Base": 1000.00,
+          "Importe": 100.00
+        },
+        {
+          "Impuesto": "002",
+          "TipoFactor": "Tasa",
+          "TasaOCuota": 0.106667,
+          "Base": 1000.00,
+          "Importe": 106.67
+        }
+      ]
+    }
+  ],
+  "TotalImpuestosTrasladados": 160.00,
+  "TotalImpuestosRetenidos": 206.67,
+  "TrasladosResumen": [
+    {
+      "Impuesto": "002",
+      "TipoFactor": "Tasa",
+      "TasaOCuota": 0.160000,
+      "Base": 1000.00,
+      "Importe": 160.00
+    }
+  ],
+  "RetencionesResumen": [
+    {
+      "Impuesto": "001",
+      "Importe": 100.00
+    },
+    {
+      "Impuesto": "002",
+      "Importe": 106.67
+    }
+  ],
+  "CartaPorte": {
+    "IdCCP": "CCC-00002",
+    "Version": "3.1",
+    "TransporteInternacional": "No",
+    "EntradaSalidaMercancia": null,
+    "ViaEntradaSalida": null,
+    "PaisOrigenDestino": null,
+    "DistanciaRecorrida": 150.50,
+    "PesoBrutoTotal": 500.00,
+    "UnidadPeso": "KGM",
+    "NumeroTotalMercancias": 2,
+    "RegimenesAduaneros": [],
+    "Ubicaciones": [
+      {
+        "TipoUbicacion": "Origen",
+        "IDUbicacion": "OR000001",
+        "RFCRemitenteDestinatario": "EDE010101AAA",
+        "NombreRemitenteDestinatario": "EMPRESA DEMO SA DE CV",
+        "FechaHoraSalidaLlegada": "2024-01-16T08:00:00",
+        "CodigoPostal": "06600",
+        "Municipio": "015",
+        "Localidad": null,
+        "Estado": "CMX",
+        "Pais": "MEX",
+        "NumRegIdTrib": null,
+        "ResidenciaFiscal": null
+      },
+      {
+        "TipoUbicacion": "Destino",
+        "IDUbicacion": "DE000001",
+        "RFCRemitenteDestinatario": "CPR020202BBB",
+        "NombreRemitenteDestinatario": "CLIENTE PRUEBA SA DE CV",
+        "FechaHoraSalidaLlegada": "2024-01-16T18:00:00",
+        "CodigoPostal": "44100",
+        "Municipio": "039",
+        "Localidad": null,
+        "Estado": "JAL",
+        "Pais": "MEX",
+        "NumRegIdTrib": null,
+        "ResidenciaFiscal": null
+      }
+    ],
+    "MercanciasDetalle": [
+      {
+        "Descripcion": "Producto A",
+        "Cantidad": 10,
+        "ClaveUnidad": "H87",
+        "PesoEnKg": 250.00,
+        "ValorMercancia": 5000.00,
+        "DocumentosAduaneros": []
+      },
+      {
+        "Descripcion": "Producto B",
+        "Cantidad": 5,
+        "ClaveUnidad": "H87",
+        "PesoEnKg": 250.00,
+        "ValorMercancia": 3000.00,
+        "DocumentosAduaneros": []
+      }
+    ],
+    "Autotransporte": {
+      "PermisoSCT": "TPAF01",
+      "NumeroPermisoSCT": "PERM123456",
+      "ConfigVehicular": "C2",
+      "PesoBrutoVehicular": 15000.00,
+      "PlacaVM": "ABC1234",
+      "AnioModeloVM": 2022
+    },
+    "Seguro": {
+      "AseguradoraResponsabilidadCivil": "Seguros Ejemplo",
+      "PolizaResponsabilidadCivil": "POL-RC-001",
+      "AseguradoraCarga": "Seguros Carga",
+      "PolizaCarga": "POL-C-001",
+      "AseguradoraMedAmbiente": null,
+      "PolizaMedAmbiente": null
+    },
+    "Remolque": {
+      "SubTipoRemolque": "CTR001",
+      "Placa": "REM9876"
+    },
+    "FigurasTransporte": [
+      {
+        "TipoFigura": "01",
+        "RFCFigura": "XAXX010101000",
+        "NombreFigura": "JUAN PEREZ",
+        "NumeroLicencia": "LIC123456"
+      }
+    ]
+  },
+  "Version": "4.0",
+  "Serie": "A",
+  "Folio": "124",
+  "LugarExpedicion": "06600",
+  "FechaEmision": "2024-01-16T10:30:00",
+  "FechaCertificacion": "2024-01-16T10:35:00",
+  "TipoCambio": "1",
+  "Moneda": "MXN",
+  "FormaPago": "99",
+  "MetodoPago": "PPD",
+  "TipoComprobante": "T",
+  "Exportacion": "01",
+  "UUID": "AAB12345-ABCD-1234-EFGH-223456789012",
+  "LogoBase64": null,
+  "EmisorNombre": "EMPRESA DEMO SA DE CV",
+  "EmisorRFC": "EDE010101AAA",
+  "EmisorRegimenFiscal": "601",
+  "ReceptorNombre": "CLIENTE PRUEBA SA DE CV",
+  "ReceptorRFC": "CPR020202BBB",
+  "ReceptorDomicilioFiscal": "44100",
+  "ReceptorRegimenFiscal": "601",
+  "UsoCFDI": "S01",
+  "SubTotal": 1000.00,
+  "Total": 930.00,
+  "CantidadConLetra": "NOVECIENTOS TREINTA PESOS 00/100 MXN",
+  "SelloEmisor": "ABCDEFGHIJKLMNOP1234567890abcdef",
+  "SelloSAT": "SelloSATDePrueba12345678",
+  "CadenaOriginalSAT": "||1.1|AAB12345-ABCD-1234-EFGH-223456789012|2024-01-16T10:35:00|SAT970701NN3|ABCDEFGHIJKLMNOP1234567890abcdef|00001000000504465028||",
+  "NoCertificadoSAT": "00001000000504465028",
+  "NoCertificadoEmisor": "00001000000504465028",
+  "RfcProvCertif": "SAT970701NN3",
+  "TipoRelacion": "04",
+  "RelacionadosUuids": [
+    "A1B2C3D4-E5F6-7890-ABCD-111111111111",
+    "A1B2C3D4-E5F6-7890-ABCD-222222222222"
+  ],
+  "UrlQr": "https://verificacfdi.facturaelectronica.sat.gob.mx/default.aspx?id=AAB12345-ABCD-1234-EFGH-223456789012\u0026re=EDE010101AAA\u0026rr=CPR020202BBB\u0026tt=000000000000000930.000000\u0026fe=90abcdef",
+  "QRCodeBase64": "FAKE_QR_BASE64"
+}

@@ -41,5 +41,31 @@ namespace CFDI.BuildPdf.Tests.Golden
 
             Snapshot.Match(json, "Nomina.viewmodel.json");
         }
+
+        [Fact]
+        [Trait("Category", "Golden")]
+        public void CartaPorteRetenciones_ViewModel_CoincideConBaseline()
+        {
+            var xdoc = TestXmlLoader.LoadCartaPorteRetenciones();
+            var mapper = new CartaPorteMapper(new FakeQrGenerator());
+
+            var model = mapper.Map(xdoc);
+            var json = JsonSerializer.Serialize(model, JsonOpts);
+
+            Snapshot.Match(json, "CartaPorteRetenciones.viewmodel.json");
+        }
+
+        [Fact]
+        [Trait("Category", "Golden")]
+        public void NominaIncapacidades_ViewModel_CoincideConBaseline()
+        {
+            var xdoc = TestXmlLoader.LoadNominaIncapacidades();
+            var mapper = new NominaMapper(new FakeQrGenerator());
+
+            var model = mapper.Map(xdoc);
+            var json = JsonSerializer.Serialize(model, JsonOpts);
+
+            Snapshot.Match(json, "NominaIncapacidades.viewmodel.json");
+        }
     }
 }

@@ -1,0 +1,176 @@
+{
+  "Conceptos": [
+    {
+      "ClaveProductoServicio": "84111505",
+      "NumeroIdentificacion": "EMP001",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Unidad": "Actividad",
+      "Descripcion": "Pago de n\u00F3mina con incapacidades y horas extra",
+      "ValorUnitario": 16500.00,
+      "Importe": 16500.00,
+      "Descuento": 4000.00,
+      "ObjetoImpuesto": "01"
+    }
+  ],
+  "Descuento": 4000.00,
+  "Nomina": {
+    "Version": "1.2",
+    "TipoNomina": "O",
+    "FechaPago": "2024-02-16T00:00:00",
+    "FechaInicialPago": "2024-02-01T00:00:00",
+    "FechaFinalPago": "2024-02-15T00:00:00",
+    "NumDiasPagados": 15,
+    "TotalPercepciones": 16500.00,
+    "TotalDeducciones": 4000.00,
+    "TotalOtrosPagos": 0.00,
+    "Emisor": {
+      "Curp": null,
+      "RegistroPatronal": "A1234567890",
+      "RfcPatronOrigen": null
+    },
+    "Receptor": {
+      "Curp": "XAXX010101HDFABC01",
+      "NumSeguridadSocial": "12345678901",
+      "FechaInicioRelLaboral": "2020-06-01T00:00:00",
+      "Antiguedad": "P3Y8M15D",
+      "TipoContrato": "01",
+      "Sindicalizado": null,
+      "TipoRegimen": "02",
+      "NumEmpleado": "EMP001",
+      "Departamento": "Sistemas",
+      "Puesto": "Desarrollador",
+      "RiesgoPuesto": null,
+      "PeriodicidadPago": "04",
+      "Banco": null,
+      "CuentaBancaria": null,
+      "SalarioBaseCotApor": 500.00,
+      "SalarioDiarioIntegrado": 520.00,
+      "ClaveEntFed": "JAL"
+    },
+    "Percepciones": {
+      "TotalSueldos": 15000.00,
+      "TotalSeparacionIndemnizacion": null,
+      "TotalJubilacionPensionRetiro": null,
+      "TotalGravado": 13000.00,
+      "TotalExento": 3500.00,
+      "PercepcionesDetalle": [
+        {
+          "TipoPercepcion": "001",
+          "Clave": "001",
+          "Concepto": "Sueldo",
+          "ImporteGravado": 10000.00,
+          "ImporteExento": 0.00,
+          "HorasExtra": []
+        },
+        {
+          "TipoPercepcion": "005",
+          "Clave": "005",
+          "Concepto": "Prima vacacional",
+          "ImporteGravado": 2000.00,
+          "ImporteExento": 3000.00,
+          "HorasExtra": []
+        },
+        {
+          "TipoPercepcion": "019",
+          "Clave": "019",
+          "Concepto": "Horas extra",
+          "ImporteGravado": 1000.00,
+          "ImporteExento": 500.00,
+          "HorasExtra": [
+            {
+              "Dias": 3,
+              "TipoHoras": "01",
+              "HorasExtra": 9,
+              "ImportePagado": 1500.00
+            },
+            {
+              "Dias": 2,
+              "TipoHoras": "02",
+              "HorasExtra": 6,
+              "ImportePagado": 900.00
+            }
+          ]
+        }
+      ]
+    },
+    "Deducciones": {
+      "TotalOtrasDeducciones": 2000.00,
+      "TotalImpuestosRetenidos": 2000.00,
+      "DeduccionesDetalle": [
+        {
+          "TipoDeduccion": "002",
+          "Clave": "002",
+          "Concepto": "ISR",
+          "Importe": 2000.00
+        },
+        {
+          "TipoDeduccion": "001",
+          "Clave": "001",
+          "Concepto": "Seguridad social",
+          "Importe": 2000.00
+        }
+      ]
+    },
+    "OtrosPagos": {
+      "OtrosPagosDetalle": [
+        {
+          "TipoOtroPago": "002",
+          "Clave": "002",
+          "Concepto": "Subsidio al empleo",
+          "Importe": 0.00,
+          "SubsidioAlEmpleo": {
+            "SubsidioCausado": 407.02
+          }
+        }
+      ]
+    },
+    "Incapacidades": [
+      {
+        "DiasIncapacidad": 5,
+        "TipoIncapacidad": "01",
+        "ImporteMonetario": 833.33
+      },
+      {
+        "DiasIncapacidad": 3,
+        "TipoIncapacidad": "02",
+        "ImporteMonetario": 499.99
+      }
+    ]
+  },
+  "Version": "4.0",
+  "Serie": "N",
+  "Folio": "457",
+  "LugarExpedicion": "06600",
+  "FechaEmision": "2024-02-16T12:00:00",
+  "FechaCertificacion": "2024-02-16T12:05:00",
+  "TipoCambio": "1",
+  "Moneda": "MXN",
+  "FormaPago": "99",
+  "MetodoPago": "PUE",
+  "TipoComprobante": "N",
+  "Exportacion": "01",
+  "UUID": "CCC11111-DCBA-4321-HGFE-987654321099",
+  "LogoBase64": null,
+  "EmisorNombre": "EMPRESA NOMINA SA DE CV",
+  "EmisorRFC": "ENO030303CCC",
+  "EmisorRegimenFiscal": "601",
+  "ReceptorNombre": "EMPLEADO PRUEBA LOPEZ",
+  "ReceptorRFC": "EPL040404DDD",
+  "ReceptorDomicilioFiscal": "44100",
+  "ReceptorRegimenFiscal": "605",
+  "UsoCFDI": "CN01",
+  "SubTotal": 16500.00,
+  "Total": 12500.00,
+  "CantidadConLetra": "DOCE MIL QUINIENTOS CERO PESOS 00/100 MXN",
+  "SelloEmisor": "XYZsello1234567890abcdefghijklmnop",
+  "SelloSAT": "SelloSATNomina12345679",
+  "CadenaOriginalSAT": "||1.1|CCC11111-DCBA-4321-HGFE-987654321099|2024-02-16T12:05:00|SAT970701NN3|XYZsello1234567890abcdefghijklmnop|00001000000504465028||",
+  "NoCertificadoSAT": "00001000000504465028",
+  "NoCertificadoEmisor": "00001000000504465028",
+  "RfcProvCertif": "SAT970701NN3",
+  "TipoRelacion": null,
+  "RelacionadosUuids": [],
+  "UrlQr": "https://verificacfdi.facturaelectronica.sat.gob.mx/default.aspx?id=CCC11111-DCBA-4321-HGFE-987654321099\u0026re=ENO030303CCC\u0026rr=EPL040404DDD\u0026tt=000000000000012500.000000\u0026fe=ijklmnop",
+  "QRCodeBase64": "FAKE_QR_BASE64"
+}
