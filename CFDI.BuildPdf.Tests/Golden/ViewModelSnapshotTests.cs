@@ -1,6 +1,7 @@
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using CFDI.BuildPdf.Mappers.CartaPorte;
+using CFDI.BuildPdf.Mappers.Nomina;
 using CFDI.BuildPdf.Tests.Helpers;
 using Xunit;
 
@@ -26,6 +27,19 @@ namespace CFDI.BuildPdf.Tests.Golden
             var json = JsonSerializer.Serialize(model, JsonOpts);
 
             Snapshot.Match(json, "CartaPorte.viewmodel.json");
+        }
+
+        [Fact]
+        [Trait("Category", "Golden")]
+        public void Nomina_ViewModel_CoincideConBaseline()
+        {
+            var xdoc = TestXmlLoader.LoadNomina();
+            var mapper = new NominaMapper(new FakeQrGenerator());
+
+            var model = mapper.Map(xdoc);
+            var json = JsonSerializer.Serialize(model, JsonOpts);
+
+            Snapshot.Match(json, "Nomina.viewmodel.json");
         }
     }
 }
