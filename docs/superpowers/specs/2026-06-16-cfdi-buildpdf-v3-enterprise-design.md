@@ -113,7 +113,7 @@ Principio: lo público vive en `CFDI.BuildPdf`; la extensión DI en `Microsoft.E
 - **Golden / anti-regresión** (pragmático, porque el PDF de QuestPDF no es byte-determinista): (a) snapshot del *ViewModel* mapeado (100% determinista, atrapa regresiones de mapeo) + (b) smoke del PDF (extracción de texto de campos clave + nº de páginas + que no lance).
 
 **CI/CD (GitHub Actions):**
-- **PR gate:** build net8 + tests + cobertura (umbral ~80% en lógica de dominio) + analizadores deben pasar.
+- **PR gate:** build net8 + tests + cobertura + analizadores deben pasar. Política de cobertura en **dos niveles**: piso ~80% global (para no bloquear por DTOs/guardas defensivas/render) y meta ~95% en la **lógica de dominio** (mappers, `SatCatalogos`, detección por namespace, `NumberToWordsConverter`, `QrUrlBuilder`). El número es un piso, no el objetivo: lo que importa es el comportamiento verificado.
 - **Release:** tag `v3.0.0` → `pack` (con símbolos) → `publish` a NuGet con API key en secrets.
 
 ## 10. Packaging, docs & migración
@@ -143,6 +143,6 @@ Principio: lo público vive en `CFDI.BuildPdf`; la extensión DI en `Microsoft.E
 - Superficie pública reducida a los ~9 tipos del §6, en `CFDI.BuildPdf` / `Microsoft.Extensions.DependencyInjection`.
 - Todos los hallazgos D1–D4, O1–O3, X1–X4 resueltos o conscientemente documentados.
 - Añadir un complemento nuevo no requiere tocar orquestador, detección ni fachada (solo crear 3 clases + 1 registro).
-- Golden tests verdes en cada fase; cobertura ≥ ~80% en lógica de dominio.
+- Golden tests verdes en cada fase; cobertura ≥ ~80% global y ~95% en la lógica de dominio.
 - Build net8.0 determinista, con SourceLink, símbolos y docs XML; CI verde; v3.0.0 publicable.
 - `MIGRATION.md`, `CHANGELOG.md` y README v3 presentes y consistentes.
