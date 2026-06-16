@@ -23,7 +23,7 @@ namespace CFDI.BuildPdf.Models
         /// Desglose agrupado de impuestos trasladados a nivel comprobante
         /// (ej. IVA 16.00% → 867.97). Se usa para renderizar el panel de totales.
         /// </summary>
-        public List<TrasladoImpuestoViewModel> TrasladosResumen { get; set; } = new();
+        public List<ImpuestoConceptoViewModel> TrasladosResumen { get; set; } = new();
 
         /// <summary>
         /// Desglose agrupado de impuestos retenidos a nivel comprobante
@@ -61,22 +61,13 @@ namespace CFDI.BuildPdf.Models
         public decimal Descuento { get; set; }
         public string ObjetoImpuesto { get; set; }
 
-        public List<TrasladoImpuestoViewModel> Traslados { get; set; } = new(); // 🚀 Aquí agregamos
-        public List<RetencionConceptoViewModel> Retenciones { get; set; } = new();
+        public List<ImpuestoConceptoViewModel> Traslados { get; set; } = new(); // 🚀 Aquí agregamos
+        public List<ImpuestoConceptoViewModel> Retenciones { get; set; } = new();
     }
 
-    public class TrasladoImpuestoViewModel
+    public class ImpuestoConceptoViewModel
     {
         public string Impuesto { get; set; }       // IVA, ISR, etc.
-        public string TipoFactor { get; set; }      // Tasa, Cuota, Exento
-        public decimal TasaOCuota { get; set; }
-        public decimal Base { get; set; }
-        public decimal Importe { get; set; }
-    }
-
-    public class RetencionConceptoViewModel
-    {
-        public string Impuesto { get; set; }       // 001 ISR, 002 IVA, 003 IEPS
         public string TipoFactor { get; set; }      // Tasa, Cuota, Exento
         public decimal TasaOCuota { get; set; }
         public decimal Base { get; set; }

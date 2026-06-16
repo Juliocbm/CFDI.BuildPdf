@@ -57,25 +57,25 @@ namespace CFDI.BuildPdf.Mappers.CartaPorte
                     Traslados = c.Element(Cfdi + "Impuestos")
                         ?.Element(Cfdi + "Traslados")
                         ?.Elements(Cfdi + "Traslado")
-                        .Select(t => new TrasladoImpuestoViewModel
+                        .Select(t => new ImpuestoConceptoViewModel
                         {
                             Impuesto = t.Attribute("Impuesto")?.Value,
                             TipoFactor = t.Attribute("TipoFactor")?.Value,
                             TasaOCuota = decimal.Parse(t.Attribute("TasaOCuota")?.Value ?? "0", CultureInfo.InvariantCulture),
                             Base = decimal.Parse(t.Attribute("Base")?.Value ?? "0", CultureInfo.InvariantCulture),
                             Importe = decimal.Parse(t.Attribute("Importe")?.Value ?? "0", CultureInfo.InvariantCulture)
-                        }).ToList() ?? new List<TrasladoImpuestoViewModel>(),
+                        }).ToList() ?? new List<ImpuestoConceptoViewModel>(),
                     Retenciones = c.Element(Cfdi + "Impuestos")
                         ?.Element(Cfdi + "Retenciones")
                         ?.Elements(Cfdi + "Retencion")
-                        .Select(r => new RetencionConceptoViewModel
+                        .Select(r => new ImpuestoConceptoViewModel
                         {
                             Impuesto = r.Attribute("Impuesto")?.Value,
                             TipoFactor = r.Attribute("TipoFactor")?.Value,
                             TasaOCuota = decimal.Parse(r.Attribute("TasaOCuota")?.Value ?? "0", CultureInfo.InvariantCulture),
                             Base = decimal.Parse(r.Attribute("Base")?.Value ?? "0", CultureInfo.InvariantCulture),
                             Importe = decimal.Parse(r.Attribute("Importe")?.Value ?? "0", CultureInfo.InvariantCulture)
-                        }).ToList() ?? new List<RetencionConceptoViewModel>()
+                        }).ToList() ?? new List<ImpuestoConceptoViewModel>()
                 }).ToList() ?? new();
 
             // Impuestos globales a nivel Comprobante: totales + desglose agrupado
@@ -86,14 +86,14 @@ namespace CFDI.BuildPdf.Mappers.CartaPorte
             model.TrasladosResumen = impuestosNode
                 ?.Element(Cfdi + "Traslados")
                 ?.Elements(Cfdi + "Traslado")
-                .Select(t => new TrasladoImpuestoViewModel
+                .Select(t => new ImpuestoConceptoViewModel
                 {
                     Impuesto = t.Attribute("Impuesto")?.Value,
                     TipoFactor = t.Attribute("TipoFactor")?.Value,
                     TasaOCuota = ParseDecimalAttr(t.Attribute("TasaOCuota")),
                     Base = ParseDecimalAttr(t.Attribute("Base")),
                     Importe = ParseDecimalAttr(t.Attribute("Importe"))
-                }).ToList() ?? new List<TrasladoImpuestoViewModel>();
+                }).ToList() ?? new List<ImpuestoConceptoViewModel>();
 
             model.RetencionesResumen = impuestosNode
                 ?.Element(Cfdi + "Retenciones")
@@ -110,7 +110,7 @@ namespace CFDI.BuildPdf.Mappers.CartaPorte
                 model.TrasladosResumen = model.Conceptos
                     .SelectMany(c => c.Traslados)
                     .GroupBy(t => new { t.Impuesto, t.TipoFactor, t.TasaOCuota })
-                    .Select(g => new TrasladoImpuestoViewModel
+                    .Select(g => new ImpuestoConceptoViewModel
                     {
                         Impuesto = g.Key.Impuesto,
                         TipoFactor = g.Key.TipoFactor,
