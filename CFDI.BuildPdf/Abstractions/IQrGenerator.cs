@@ -3,7 +3,7 @@ namespace CFDI.BuildPdf.Abstractions
     /// <summary>
     /// Contrato para generar códigos QR en formato Base64.
     /// </summary>
-    public interface IQrGenerator
+    internal interface IQrGenerator
     {
         /// <summary>
         /// Genera una imagen QR codificada en Base64 a partir de una URL.

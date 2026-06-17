@@ -5,7 +5,7 @@ namespace CFDI.BuildPdf.Abstractions
     /// <summary>
     /// Contrato para detectar el tipo de complemento CFDI presente en un documento XML.
     /// </summary>
-    public interface ICfdiTypeDetector
+    internal interface ICfdiTypeDetector
     {
         /// <summary>
         /// Detecta el tipo de complemento contenido en el XDocument.

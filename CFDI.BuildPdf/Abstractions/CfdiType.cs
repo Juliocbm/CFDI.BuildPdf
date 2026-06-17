@@ -3,7 +3,7 @@ namespace CFDI.BuildPdf.Abstractions
     /// <summary>
     /// Tipos de complemento CFDI soportados por la librería.
     /// </summary>
-    public enum CfdiType
+    internal enum CfdiType
     {
         /// <summary>Complemento Carta Porte 3.1.</summary>
         CartaPorte,

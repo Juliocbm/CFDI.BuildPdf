@@ -6,7 +6,7 @@ namespace CFDI.BuildPdf.Abstractions
     /// Contrato para mapear un XDocument CFDI a un ViewModel de complemento específico.
     /// </summary>
     /// <typeparam name="TModel">Tipo del ViewModel destino.</typeparam>
-    public interface ICfdiModelMapper<TModel> where TModel : class
+    internal interface ICfdiModelMapper<TModel> where TModel : class
     {
         /// <summary>
         /// Mapea el XDocument al ViewModel correspondiente.

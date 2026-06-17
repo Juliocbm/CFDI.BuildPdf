@@ -7,7 +7,7 @@ namespace CFDI.BuildPdf.Abstractions
     /// Reemplaza la cadena IHtmlRenderer + IPdfConverter con una generación directa.
     /// </summary>
     /// <typeparam name="TModel">Tipo del ViewModel que hereda de <see cref="CfdiViewModelBase"/>.</typeparam>
-    public interface IPdfDocumentBuilder<in TModel> where TModel : CfdiViewModelBase
+    internal interface IPdfDocumentBuilder<in TModel> where TModel : CfdiViewModelBase
     {
         /// <summary>
         /// Genera un PDF en bytes a partir del ViewModel y las opciones proporcionadas.

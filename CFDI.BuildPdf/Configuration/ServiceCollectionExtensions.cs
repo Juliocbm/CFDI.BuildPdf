@@ -1,7 +1,6 @@
 using System;
 using CFDI.BuildPdf.Abstractions;
 using CFDI.BuildPdf.Service;
-using CFDI.BuildPdf.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -40,9 +39,6 @@ namespace CFDI.BuildPdf.Configuration
 
             // Orquestador construido por el composition root compartido (usa el ILoggerFactory del contenedor si está).
             services.AddTransient<ICfdiPdfGenerator>(sp => CfdiPdfFactory.CreateGenerator(sp.GetService<ILoggerFactory>()));
-
-            // Utilidad pública de detección de tipo (no usada por el orquestador; su visibilidad se decide en F4).
-            services.AddTransient<ICfdiTypeDetector, CfdiTypeDetector>();
 
             return services;
         }
