@@ -2,13 +2,8 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 using CFDI.BuildPdf.Abstractions;
-using CFDI.BuildPdf.Complements;
-using CFDI.BuildPdf.Helpers;
-using CFDI.BuildPdf.Mappers.CartaPorte;
-using CFDI.BuildPdf.Mappers.Nomina;
-using CFDI.BuildPdf.PdfBuilders.CartaPorte;
-using CFDI.BuildPdf.PdfBuilders.Nomina;
-using CFDI.BuildPdf.Services;
+using CFDI.BuildPdf.Configuration;
+using Microsoft.Extensions.Logging;
 using QuestPDF.Infrastructure;
 
 namespace CFDI.BuildPdf.Service
@@ -21,20 +16,15 @@ namespace CFDI.BuildPdf.Service
     public static class CfdiPdf
     {
         private static CfdiPdfLicenseType _licenseType = CfdiPdfLicenseType.Community;
+        private static ILoggerFactory? _loggerFactory;
 
         private static readonly Lazy<ICfdiPdfGenerator> _generator = new(() =>
         {
-            QuestPDF.Settings.License = MapLicense(_licenseType);
+            // Idempotente: no pisar una licencia ya configurada explícitamente.
+            if (QuestPDF.Settings.License is null)
+                QuestPDF.Settings.License = MapLicense(_licenseType);
 
-            var qrGenerator = new QrGeneratorService();
-
-            var handlers = new ICfdiComplementHandler[]
-            {
-                new CartaPorteComplementHandler(new CartaPorteMapper(qrGenerator), new CartaPorteDocumentBuilder()),
-                new NominaComplementHandler(new NominaMapper(qrGenerator), new NominaDocumentBuilder())
-            };
-
-            return new CfdiPdfGenerator(handlers);
+            return CfdiPdfFactory.CreateGenerator(_loggerFactory);
         });
 
         private static ICfdiPdfGenerator Generator => _generator.Value;
@@ -53,9 +43,18 @@ namespace CFDI.BuildPdf.Service
         public static void ConfigureQuestPdfLicense(CfdiPdfLicenseType licenseType)
         {
             _licenseType = licenseType;
+            // Intención explícita del consumidor: aplicar de inmediato (puede sobre-escribir el default idempotente).
+            QuestPDF.Settings.License = MapLicense(licenseType);
+        }
 
-            if (_generator.IsValueCreated)
-                QuestPDF.Settings.License = MapLicense(licenseType);
+        /// <summary>
+        /// Configura el <see cref="ILoggerFactory"/> para el diagnóstico de los mappers en el camino de la fachada estática.
+        /// Debe llamarse una sola vez al inicio del proceso, antes del primer uso. Si no se llama, no se emite logging.
+        /// </summary>
+        /// <param name="loggerFactory">Factory de loggers de tu aplicación.</param>
+        public static void ConfigureLogging(ILoggerFactory loggerFactory)
+        {
+            _loggerFactory = loggerFactory ?? throw new ArgumentNullException(nameof(loggerFactory));
         }
 
         internal static LicenseType MapLicense(CfdiPdfLicenseType licenseType) => licenseType switch
