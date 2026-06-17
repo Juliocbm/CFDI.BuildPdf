@@ -43,4 +43,14 @@ jobs:
         id: login
         with:
           user: JCBautistaM
-      - run: dotnet nuget push "./artifacts/*.nupkg" --api-key "${{ steps.login.outputs.NUGET_API_KEY }}" --source https://api.nuget.org/v3/index.json --skip-duplicate
+      - name: NuGet push (con diagnostico)
+        shell: bash
+        run: |
+          set +e
+          out=$(dotnet nuget push "./artifacts/*.nupkg" --api-key "${{ steps.login.outputs.NUGET_API_KEY }}" --source https://api.nuget.org/v3/index.json --skip-duplicate 2>&1)
+          code=$?
+          echo "$out"
+          if [ $code -ne 0 ]; then
+            echo "::error::nuget push fallo (exit $code): $(echo "$out" | grep -iE 'error|status code|forbidden|conflict|denied|unauthor|not found|exception|invalid|api key' | tail -6 | tr '\n' ' / ')"
+          fi
+          exit $code
