@@ -6,6 +6,11 @@
 		<Nullable>enable</Nullable>
 		<AnalysisLevel>latest-recommended</AnalysisLevel>
 		<EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+		<!-- Reglas CA de analizadores diferidas (no errores) hasta una limpieza dedicada; varias cambiarían el output del PDF. -->
+		<!-- CS86xx (nullable): diferidas — son internas a DTOs/Mappers; corregirlas requiere cambios en cascada de alto riesgo. -->
+		<WarningsNotAsErrors>$(WarningsNotAsErrors);CA1305;CA1310;CA1860;CA1861;CA1848;CA1822;CA1835;CA1311;CA1304;CA1510;CS8618;CS8601;CS8602;CS8603;CS8604;CS8619</WarningsNotAsErrors>
 		<Version>2.0.8</Version>
 		<Authors>Julio Cesar Bautista Monsalvo</Authors>
 		<Company>JCBM</Company>
