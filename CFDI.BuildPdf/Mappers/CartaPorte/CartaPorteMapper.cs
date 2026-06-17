@@ -146,7 +146,7 @@ namespace CFDI.BuildPdf.Mappers.CartaPorte
 
         #region Carta Porte
 
-        private void MapCartaPorteComplemento(XElement cpNode, CfdiCartaPorteViewModel model)
+        private static void MapCartaPorteComplemento(XElement cpNode, CfdiCartaPorteViewModel model)
         {
             var mercanciasNode = cpNode.Element(Cp + "Mercancias");
 
