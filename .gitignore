@@ -361,3 +361,5 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+# Datos de prueba locales / facturas reales (confidenciales) del ConsoleDemo — NO versionar
+CFDI.BuildPdf.ConsoleDemo/test/
