@@ -1,5 +1,5 @@
-using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Xml.Linq;
 using CFDI.BuildPdf.Abstractions;
 using CFDI.BuildPdf.Models;
@@ -7,33 +7,23 @@ using CFDI.BuildPdf.Models;
 namespace CFDI.BuildPdf.Complements
 {
     /// <summary>
-    /// Base para handlers de complemento: coordina el mapper y el builder de un tipo
-    /// y aplica las opciones comunes (logo) en un solo lugar.
+    /// Base para handlers de complemento que casan por namespace (Carta Porte, Nómina).
     /// </summary>
-    internal abstract class ComplementHandlerBase<TModel> : ICfdiComplementHandler
+    internal abstract class ComplementHandlerBase<TModel> : CfdiHandlerBase<TModel>, IComplementNamespacesProvider
         where TModel : CfdiViewModelBase
     {
-        private readonly ICfdiModelMapper<TModel> _mapper;
-        private readonly IPdfDocumentBuilder<TModel> _builder;
-
         protected ComplementHandlerBase(ICfdiModelMapper<TModel> mapper, IPdfDocumentBuilder<TModel> builder)
-        {
-            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
-            _builder = builder ?? throw new ArgumentNullException(nameof(builder));
-        }
+            : base(mapper, builder) { }
 
+        /// <summary>Namespace(s) de complemento que este handler reconoce (incluye la versión).</summary>
         public abstract IReadOnlyCollection<string> ComplementNamespaces { get; }
 
-        public virtual int Priority => 0;
-
-        public byte[] Generate(XDocument xdoc, CfdiPdfOptions options)
+        public override bool CanHandle(XDocument xdoc)
         {
-            var model = _mapper.Map(xdoc);
-
-            if (!string.IsNullOrEmpty(options.LogoBase64))
-                model.LogoBase64 = options.LogoBase64;
-
-            return _builder.Build(model, options);
+            var root = xdoc.Root;
+            if (root is null) return false;
+            var present = new HashSet<string>(root.Descendants().Select(e => e.Name.NamespaceName));
+            return ComplementNamespaces.Any(present.Contains);
         }
     }
 }

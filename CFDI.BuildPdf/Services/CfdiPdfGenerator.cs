@@ -28,8 +28,8 @@ namespace CFDI.BuildPdf.Services
 
             // Unicidad: dos handlers no pueden declarar el mismo namespace de complemento.
             var seen = new HashSet<string>();
-            foreach (var handler in _handlers)
-                foreach (var ns in handler.ComplementNamespaces)
+            foreach (var provider in _handlers.OfType<IComplementNamespacesProvider>())
+                foreach (var ns in provider.ComplementNamespaces)
                     if (!seen.Add(ns))
                         throw new InvalidOperationException(
                             $"Más de un handler declara el namespace de complemento '{ns}'.");
@@ -113,17 +113,12 @@ namespace CFDI.BuildPdf.Services
         }
 
         /// <summary>
-        /// Devuelve el handler de mayor prioridad cuyo namespace de complemento aparece en el documento.
+        /// Devuelve el handler de mayor prioridad que declara poder procesar el documento.
         /// </summary>
         private ICfdiComplementHandler? ResolveHandler(XDocument xdoc)
         {
-            var root = xdoc.Root;
-            if (root is null)
-                return null;
-
-            var present = new HashSet<string>(root.Descendants().Select(e => e.Name.NamespaceName));
             // _handlers ya está ordenado por Priority descendente.
-            return _handlers.FirstOrDefault(h => h.ComplementNamespaces.Any(present.Contains));
+            return _handlers.FirstOrDefault(h => h.CanHandle(xdoc));
         }
     }
 }
