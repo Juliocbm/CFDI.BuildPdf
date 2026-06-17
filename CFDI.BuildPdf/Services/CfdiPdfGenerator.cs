@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
@@ -35,66 +36,59 @@ namespace CFDI.BuildPdf.Services
         }
 
         /// <inheritdoc />
-        public Task<byte[]> GenerarDesdeRutaAsync(string rutaXml, CfdiPdfOptions? options = null)
+        public async Task<byte[]> GenerarDesdeRutaAsync(string rutaXml, CfdiPdfOptions? options = null)
         {
             if (string.IsNullOrWhiteSpace(rutaXml))
                 throw new ArgumentException("La ruta del XML no puede ser nula ni vacía.", nameof(rutaXml));
             if (!File.Exists(rutaXml))
                 throw new FileNotFoundException($"No se encontró el archivo XML en la ruta especificada: {rutaXml}", rutaXml);
 
-            var xdoc = LoadXDocument(() => XDocument.Load(rutaXml), $"archivo '{rutaXml}'");
-            return Task.FromResult(GenerarPdfInterno(xdoc, options));
+            await using var stream = new FileStream(rutaXml, FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize: 4096, useAsync: true);
+            var xdoc = await LoadXDocumentAsync(() => XDocument.LoadAsync(stream, LoadOptions.None, CancellationToken.None), $"archivo '{rutaXml}'");
+            return GenerarPdfInterno(xdoc, options);
         }
 
         /// <inheritdoc />
-        public Task<byte[]> GenerarDesdeXmlStringAsync(string xmlContent, CfdiPdfOptions? options = null)
+        public async Task<byte[]> GenerarDesdeXmlStringAsync(string xmlContent, CfdiPdfOptions? options = null)
         {
             if (string.IsNullOrWhiteSpace(xmlContent))
                 throw new ArgumentException("El contenido XML no puede ser nulo ni vacío.", nameof(xmlContent));
 
-            var xdoc = LoadXDocument(() =>
-            {
-                using var reader = new StringReader(xmlContent);
-                return XDocument.Load(reader);
-            }, "cadena XML");
-
-            return Task.FromResult(GenerarPdfInterno(xdoc, options));
+            using var reader = new StringReader(xmlContent);
+            var xdoc = await LoadXDocumentAsync(() => XDocument.LoadAsync(reader, LoadOptions.None, CancellationToken.None), "cadena XML");
+            return GenerarPdfInterno(xdoc, options);
         }
 
         /// <inheritdoc />
-        public Task<byte[]> GenerarDesdeXmlBytesAsync(byte[] xmlBytes, CfdiPdfOptions? options = null)
+        public async Task<byte[]> GenerarDesdeXmlBytesAsync(byte[] xmlBytes, CfdiPdfOptions? options = null)
         {
             if (xmlBytes is null)
                 throw new ArgumentNullException(nameof(xmlBytes));
             if (xmlBytes.Length == 0)
                 throw new ArgumentException("El arreglo de bytes del XML está vacío.", nameof(xmlBytes));
 
-            var xdoc = LoadXDocument(() =>
-            {
-                using var ms = new MemoryStream(xmlBytes);
-                return XDocument.Load(ms);
-            }, "arreglo de bytes XML");
-
-            return Task.FromResult(GenerarPdfInterno(xdoc, options));
+            using var ms = new MemoryStream(xmlBytes);
+            var xdoc = await LoadXDocumentAsync(() => XDocument.LoadAsync(ms, LoadOptions.None, CancellationToken.None), "arreglo de bytes XML");
+            return GenerarPdfInterno(xdoc, options);
         }
 
         /// <inheritdoc />
-        public Task<byte[]> GenerarDesdeStreamAsync(Stream xmlStream, CfdiPdfOptions? options = null)
+        public async Task<byte[]> GenerarDesdeStreamAsync(Stream xmlStream, CfdiPdfOptions? options = null)
         {
             if (xmlStream is null)
                 throw new ArgumentNullException(nameof(xmlStream));
             if (!xmlStream.CanRead)
                 throw new ArgumentException("El Stream proporcionado no es legible.", nameof(xmlStream));
 
-            var xdoc = LoadXDocument(() => XDocument.Load(xmlStream), "Stream XML");
-            return Task.FromResult(GenerarPdfInterno(xdoc, options));
+            var xdoc = await LoadXDocumentAsync(() => XDocument.LoadAsync(xmlStream, LoadOptions.None, CancellationToken.None), "Stream XML");
+            return GenerarPdfInterno(xdoc, options);
         }
 
-        private static XDocument LoadXDocument(Func<XDocument> loader, string origen)
+        private static async Task<XDocument> LoadXDocumentAsync(Func<Task<XDocument>> loader, string origen)
         {
             try
             {
-                return loader();
+                return await loader();
             }
             catch (XmlException ex)
             {
