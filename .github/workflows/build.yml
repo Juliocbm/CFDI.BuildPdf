@@ -25,6 +25,9 @@ jobs:
     needs: build-test
     if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write   # OIDC para NuGet Trusted Publishing (sin API key)
+      contents: read
     steps:
       - uses: actions/checkout@v4
         with:
@@ -33,4 +36,11 @@ jobs:
         with:
           dotnet-version: '8.0.x'
       - run: dotnet pack CFDI.BuildPdf/CFDI.BuildPdf.csproj -c Release -p:ContinuousIntegrationBuild=true -o ./artifacts
-      - run: dotnet nuget push "./artifacts/*.nupkg" --api-key "${{ secrets.NUGET_API_KEY }}" --source https://api.nuget.org/v3/index.json --skip-duplicate
+      # Trusted Publishing: intercambia el token OIDC de GitHub por una API key temporal (1h) de nuget.org.
+      # Requiere una política de Trusted Publishing en nuget.org (Repository Owner=Juliocbm, Repository=CFDI.BuildPdf, Workflow File=build.yml).
+      - name: NuGet login (OIDC -> API key temporal)
+        uses: NuGet/login@v1
+        id: login
+        with:
+          user: JCBautistaM
+      - run: dotnet nuget push "./artifacts/*.nupkg" --api-key "${{ steps.login.outputs.NUGET_API_KEY }}" --source https://api.nuget.org/v3/index.json --skip-duplicate
