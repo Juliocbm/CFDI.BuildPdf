@@ -7,7 +7,7 @@ namespace CFDI.BuildPdf.Models
     /// ViewModel para CFDI 4.0 con complemento Carta Porte 3.1.
     /// Hereda propiedades comunes de <see cref="CfdiViewModelBase"/>.
     /// </summary>
-    public class CfdiCartaPorteViewModel : CfdiViewModelBase
+    internal class CfdiCartaPorteViewModel : CfdiViewModelBase
     {
         public string CondicionesPago { get; set; }
         public AddendaViewModel Addenda { get; set; }
@@ -34,7 +34,7 @@ namespace CFDI.BuildPdf.Models
         // Carta Porte
         public CartaPorteViewModel CartaPorte { get; set; }
     }
-    public class AddendaViewModel
+    internal class AddendaViewModel
     {
 
         public bool IsParserGenerico { get; set; }
@@ -42,13 +42,13 @@ namespace CFDI.BuildPdf.Models
         public string XmlRaw { get; set; }
     }
 
-    public class AddendaSeccionViewModel
+    internal class AddendaSeccionViewModel
     {
         public string NombreSeccion { get; set; }
         public List<KeyValuePair<string, string>> Campos { get; set; } = new();
     }
 
-    public class ConceptoViewModel
+    internal class ConceptoViewModel
     {
         public string ClaveProductoServicio { get; set; }
         public string NumeroIdentificacion { get; set; }
@@ -65,7 +65,7 @@ namespace CFDI.BuildPdf.Models
         public List<ImpuestoConceptoViewModel> Retenciones { get; set; } = new();
     }
 
-    public class ImpuestoConceptoViewModel
+    internal class ImpuestoConceptoViewModel
     {
         public string Impuesto { get; set; }       // IVA, ISR, etc.
         public string TipoFactor { get; set; }      // Tasa, Cuota, Exento
@@ -74,14 +74,14 @@ namespace CFDI.BuildPdf.Models
         public decimal Importe { get; set; }
     }
 
-    public class RetencionImpuestoViewModel
+    internal class RetencionImpuestoViewModel
     {
         public string Impuesto { get; set; }       // IVA, ISR, etc.
         public decimal Importe { get; set; }
     }
 
 
-    public class CartaPorteViewModel
+    internal class CartaPorteViewModel
     {
         public string IdCCP { get; set; }        
         public string Version { get; set; }
@@ -107,7 +107,7 @@ namespace CFDI.BuildPdf.Models
 
     }
 
-    public class UbicacionViewModel
+    internal class UbicacionViewModel
     {
         public string TipoUbicacion { get; set; }
         public string IDUbicacion { get; set; }
@@ -124,7 +124,7 @@ namespace CFDI.BuildPdf.Models
     }
 
 
-    public class MercanciaViewModel
+    internal class MercanciaViewModel
     {
         public string Descripcion { get; set; }
         public decimal Cantidad { get; set; }
@@ -136,7 +136,7 @@ namespace CFDI.BuildPdf.Models
     }
 
 
-    public class AutotransporteViewModel
+    internal class AutotransporteViewModel
     {
         public string PermisoSCT { get; set; }
         public string NumeroPermisoSCT { get; set; }
@@ -146,7 +146,7 @@ namespace CFDI.BuildPdf.Models
         public int AnioModeloVM { get; set; }
     }
 
-    public class SeguroViewModel
+    internal class SeguroViewModel
     {
         // Seguro de Responsabilidad Civil
         public string AseguradoraResponsabilidadCivil { get; set; }
@@ -161,13 +161,13 @@ namespace CFDI.BuildPdf.Models
         public string PolizaMedAmbiente { get; set; }
     }
 
-    public class RemolqueViewModel
+    internal class RemolqueViewModel
     {
         public string SubTipoRemolque { get; set; }
         public string Placa { get; set; }
     }
 
-    public class FiguraTransporteViewModel
+    internal class FiguraTransporteViewModel
     {
         public string TipoFigura { get; set; }
         public string RFCFigura { get; set; }

@@ -7,7 +7,7 @@ namespace CFDI.BuildPdf.Models
     /// Clase base con las propiedades comunes de cualquier CFDI 4.0,
     /// independientemente del tipo de complemento.
     /// </summary>
-    public abstract class CfdiViewModelBase
+    internal abstract class CfdiViewModelBase
     {
         // CFDI Principal
         public string Version { get; set; }

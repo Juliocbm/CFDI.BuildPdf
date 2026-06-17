@@ -7,7 +7,7 @@ namespace CFDI.BuildPdf.Models
     /// ViewModel para CFDI 4.0 con complemento Nómina 1.2.
     /// Hereda propiedades comunes de <see cref="CfdiViewModelBase"/>.
     /// </summary>
-    public class CfdiNominaViewModel : CfdiViewModelBase
+    internal class CfdiNominaViewModel : CfdiViewModelBase
     {
         // Conceptos
         public List<ConceptoNominaViewModel> Conceptos { get; set; } = new();
@@ -19,7 +19,7 @@ namespace CFDI.BuildPdf.Models
         public NominaViewModel Nomina { get; set; }
     }
 
-    public class ConceptoNominaViewModel
+    internal class ConceptoNominaViewModel
     {
         public string ClaveProductoServicio { get; set; } // Usually "84111505" for Nomina
         public string NumeroIdentificacion { get; set; } // Can be employee ID or other internal ID
@@ -33,7 +33,7 @@ namespace CFDI.BuildPdf.Models
         public string ObjetoImpuesto { get; set; } // Usually "01" (No objeto de impuesto) for the main concept
     }
 
-    public class NominaViewModel
+    internal class NominaViewModel
     {
         public string Version { get; set; } = "1.2";
         public string TipoNomina { get; set; } // O (Ordinaria), E (Extraordinaria)
@@ -53,14 +53,14 @@ namespace CFDI.BuildPdf.Models
         public List<IncapacidadViewModel> Incapacidades { get; set; } = new();
     }
 
-    public class EmisorNominaViewModel
+    internal class EmisorNominaViewModel
     {
         public string Curp { get; set; } // Optional CURP for employer (physical person)
         public string RegistroPatronal { get; set; } // Optional
         public string RfcPatronOrigen { get; set; } // Optional
     }
 
-    public class ReceptorNominaViewModel
+    internal class ReceptorNominaViewModel
     {
         public string Curp { get; set; }
         public string NumSeguridadSocial { get; set; } // Optional
@@ -81,7 +81,7 @@ namespace CFDI.BuildPdf.Models
         public string ClaveEntFed { get; set; } // State where employee works
     }
 
-    public class PercepcionesNominaViewModel
+    internal class PercepcionesNominaViewModel
     {
         public decimal? TotalSueldos { get; set; }
         public decimal? TotalSeparacionIndemnizacion { get; set; }
@@ -91,7 +91,7 @@ namespace CFDI.BuildPdf.Models
         public List<PercepcionDetalleViewModel> PercepcionesDetalle { get; set; } = new();
     }
 
-    public class PercepcionDetalleViewModel
+    internal class PercepcionDetalleViewModel
     {
         public string TipoPercepcion { get; set; }
         public string Clave { get; set; }
@@ -102,7 +102,7 @@ namespace CFDI.BuildPdf.Models
         // AccionesOTitulos can be added here if needed
     }
 
-    public class HoraExtraViewModel
+    internal class HoraExtraViewModel
     {
         public int Dias { get; set; }
         public string TipoHoras { get; set; } // "01" Dobles, "02" Triples, "03" Simples
@@ -110,14 +110,14 @@ namespace CFDI.BuildPdf.Models
         public decimal ImportePagado { get; set; }
     }
 
-    public class DeduccionesNominaViewModel
+    internal class DeduccionesNominaViewModel
     {
         public decimal? TotalOtrasDeducciones { get; set; }
         public decimal? TotalImpuestosRetenidos { get; set; }
         public List<DeduccionDetalleViewModel> DeduccionesDetalle { get; set; } = new();
     }
 
-    public class DeduccionDetalleViewModel
+    internal class DeduccionDetalleViewModel
     {
         public string TipoDeduccion { get; set; }
         public string Clave { get; set; }
@@ -125,12 +125,12 @@ namespace CFDI.BuildPdf.Models
         public decimal Importe { get; set; }
     }
 
-    public class OtrosPagosNominaViewModel
+    internal class OtrosPagosNominaViewModel
     {
         public List<OtroPagoDetalleViewModel> OtrosPagosDetalle { get; set; } = new();
     }
 
-    public class OtroPagoDetalleViewModel
+    internal class OtroPagoDetalleViewModel
     {
         public string TipoOtroPago { get; set; }
         public string Clave { get; set; }
@@ -140,12 +140,12 @@ namespace CFDI.BuildPdf.Models
         // CompensacionSaldosAFavor can be added here
     }
 
-    public class SubsidioAlEmpleoViewModel
+    internal class SubsidioAlEmpleoViewModel
     {
         public decimal SubsidioCausado { get; set; }
     }
 
-    public class IncapacidadViewModel
+    internal class IncapacidadViewModel
     {
         public int DiasIncapacidad { get; set; }
         public string TipoIncapacidad { get; set; }
