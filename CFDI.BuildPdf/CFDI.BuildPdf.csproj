@@ -11,7 +11,7 @@
 		<!-- Reglas de analizadores y nullable diferidas (no errores) hasta una limpieza dedicada de nullable/CA;
 		     varias (CA1305/CA1310/CA1311/CA1304 cultura) cambiarían el output del PDF. Ver carry-forward de F4 en docs/superpowers/plans. -->
 		<WarningsNotAsErrors>$(WarningsNotAsErrors);CA1305;CA1310;CA1860;CA1861;CA1848;CA1835;CA1311;CA1304;CA1510;CS8618;CS8601;CS8602;CS8603;CS8604;CS8619</WarningsNotAsErrors>
-		<Version>2.0.8</Version>
+		<Version>3.0.0</Version>
 		<Authors>Julio Cesar Bautista Monsalvo</Authors>
 		<Company>JCBM</Company>
 		<Description>Librería para generar representación impresa PDF desde un XML para CFDI 4.0 con complementos Carta Porte 3.1 y Nómina 1.2. Cross-platform, sin dependencias nativas.</Description>
@@ -25,6 +25,10 @@
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<PackageIcon>logotipo.png</PackageIcon>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<PublishRepositoryUrl>true</PublishRepositoryUrl>
+		<EmbedUntrackedSources>true</EmbedUntrackedSources>
+		<Deterministic>true</Deterministic>
+		<PackageReleaseNotes>v3.0.0: superficie pública mínima (caja cerrada), net8.0, namespaces consolidados en CFDI.BuildPdf, arquitectura de handlers por complemento. Ver MIGRATION.md.</PackageReleaseNotes>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -32,6 +36,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
 		<PackageReference Include="QuestPDF" Version="2024.3.5" />
 		<PackageReference Include="QRCoder" Version="1.6.0" />
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.0" />
