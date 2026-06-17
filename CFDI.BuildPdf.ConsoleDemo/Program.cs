@@ -1,6 +1,5 @@
 using System.Diagnostics;
-using CFDI.BuildPdf.Abstractions;
-using CFDI.BuildPdf.Service;
+using CFDI.BuildPdf;
 
 CfdiPdf.ConfigureQuestPdfLicense(CfdiPdfLicenseType.Community);
 
