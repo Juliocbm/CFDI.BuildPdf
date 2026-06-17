@@ -251,3 +251,17 @@ git tag -f f4-superficie -m "F4: superficie pública mínima (caja cerrada), nam
 - `CfdiType`/`ICfdiTypeDetector` se vuelven internal y `ICfdiTypeDetector` sale del DI: la detección es 100% interna (handlers). `CfdiTypeDetector` y sus tests siguen vivos vía `InternalsVisibleTo`.
 
 **Notas para F5:** bump de `<Version>` a `3.0.0`; SourceLink + build determinista + símbolos; `MIGRATION.md` (incluyendo el cambio de namespaces y los tipos que salen de público — esp. `IQrGenerator`); `CHANGELOG`; README v3; actualizar el `ConsoleDemo` (net8 + referencia al proyecto/paquete v3 + nuevos namespaces); GitHub Actions (build→test→pack→publish).
+
+## Carry-forward de la ejecución de F4 (para F5)
+
+La revisión final confirmó READY FOR F5 sin issues Critical/Important. Plan de F5 (todo confirmado por la revisión):
+1. **Version → 3.0.0** (`CFDI.BuildPdf.csproj`, hoy 2.0.8).
+2. **Packaging hardening:** SourceLink (`Microsoft.SourceLink.GitHub`), `Deterministic`, `ContinuousIntegrationBuild` (en CI), `EmbedUntrackedSources`, `PublishRepositoryUrl`. Hoy solo hay `IncludeSymbols`/`snupkg`.
+3. **`MIGRATION.md` (no existe):** documentar (a) namespaces — DI ext → `Microsoft.Extensions.DependencyInjection`; el resto → `CFDI.BuildPdf` (se van `.Abstractions`/`.Service`); (b) tipos retirados de público — **especialmente `IQrGenerator`** (era público; quien implementara un QR propio se rompe), modelos, `ICfdiTypeDetector`/`CfdiType` (eliminados), `ICfdiModelMapper`/`IPdfDocumentBuilder` (internal); (c) net6→net8.
+4. **`CHANGELOG.md`:** entrada 3.0.0 con la reducción de superficie + breaking changes.
+5. **README v3:** ejemplos con los namespaces consolidados.
+6. **ConsoleDemo (roto vs. el source nuevo):** sigue en net6, referencia el paquete 2.0.8 y usa los namespaces viejos (`.Abstractions`/`.Service`). Compila solo contra el paquete viejo. F5: cambiar a `ProjectReference` + net8 + `using CFDI.BuildPdf;`.
+7. **GitHub Actions:** no existe workflow; añadir build→test(+cobertura)→pack→publish (publish en tag, API key en secrets).
+8. **Deuda diferida:** la lista `WarningsNotAsErrors` (CA1305/1310/1311/1304 cultura — cambiarían el PDF — + nullable CS86xx) → limpieza dedicada golden-guarded, fuera de las fases behavior-preserving.
+
+**Observación menor (no bloquea):** las CARPETAS `Abstractions/` y `Service/` persisten aunque sus tipos públicos ahora declaran `namespace CFDI.BuildPdf` (los tipos internos siguen en sub-namespaces). Inofensivo; considerar renombrar carpetas en una limpieza futura.
