@@ -5,6 +5,11 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
+    <!-- Los golden tests localizan sus baselines vía [CallerFilePath]. ContinuousIntegrationBuild=true
+         (que CI pasa para la librería) reescribe esas rutas a /_/… y rompe la búsqueda del baseline.
+         El assembly de tests nunca se empaqueta, así que desactivar aquí el path-mapping determinista
+         es seguro y conserva la ruta real. (Misma recomendación que la librería Verify.) -->
+    <DeterministicSourcePaths>false</DeterministicSourcePaths>
   </PropertyGroup>
 
   <ItemGroup>
