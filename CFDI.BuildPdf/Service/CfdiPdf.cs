@@ -10,7 +10,7 @@ namespace CFDI.BuildPdf
     /// <summary>
     /// Fachada estática para generar PDFs desde XMLs CFDI 4.0.
     /// Detecta automáticamente el tipo de complemento (Carta Porte, Nómina).
-    /// Para escenarios con DI, usar <see cref="Configuration.ServiceCollectionExtensions.AddCfdiPdfServices"/>.
+    /// Para escenarios con DI, usar <see cref="Microsoft.Extensions.DependencyInjection.ServiceCollectionExtensions.AddCfdiPdfServices"/>.
     /// </summary>
     public static class CfdiPdf
     {

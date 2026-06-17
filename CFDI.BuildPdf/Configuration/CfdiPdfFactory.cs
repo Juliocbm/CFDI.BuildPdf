@@ -12,8 +12,8 @@ namespace CFDI.BuildPdf.Configuration
 {
     /// <summary>
     /// Composition root interno: define en UN solo lugar el grafo mapper→builder→handler→orquestador.
-    /// Lo usan tanto la fachada estática (<see cref="Service.CfdiPdf"/>) como
-    /// <see cref="ServiceCollectionExtensions.AddCfdiPdfServices"/>, evitando duplicar el cableado.
+    /// Lo usan tanto la fachada estática (<see cref="CFDI.BuildPdf.CfdiPdf"/>) como
+    /// <see cref="Microsoft.Extensions.DependencyInjection.ServiceCollectionExtensions.AddCfdiPdfServices"/>, evitando duplicar el cableado.
     /// </summary>
     internal static class CfdiPdfFactory
     {

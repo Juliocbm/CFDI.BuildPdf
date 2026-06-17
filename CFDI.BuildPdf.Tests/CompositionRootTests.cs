@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using CFDI.BuildPdf.Abstractions;
 using CFDI.BuildPdf.Configuration;
 using CFDI.BuildPdf.Tests.Helpers;
 using Microsoft.Extensions.DependencyInjection;
