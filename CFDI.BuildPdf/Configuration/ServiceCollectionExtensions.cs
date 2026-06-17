@@ -50,6 +50,8 @@ namespace CFDI.BuildPdf.Configuration
             services.AddSingleton<IPdfDocumentBuilder<CfdiNominaViewModel>, NominaDocumentBuilder>();
 
             // Servicios de dominio (Transient: sin estado, ligeros)
+            // Utilidad pública de detección de tipo: ya NO la usa el orquestador (despacho por handler),
+            // se conserva como API pública; su visibilidad se decide en F4.
             services.AddTransient<ICfdiTypeDetector, CfdiTypeDetector>();
             services.AddTransient<ICfdiModelMapper<CfdiCartaPorteViewModel>, CartaPorteMapper>();
             services.AddTransient<ICfdiModelMapper<CfdiNominaViewModel>, NominaMapper>();
