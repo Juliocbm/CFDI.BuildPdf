@@ -384,3 +384,10 @@ git tag -f f1-reuso -m "F1: reúso/extracción (SatCatalogos, encabezado común,
 **Notas para fases siguientes:**
 - En F2 (registro de complementos por namespace), `ComposeEncabezado` ya compartido facilita que un complemento nuevo reutilice el encabezado.
 - Fixtures de `RegimenesAduaneros`/`DocumentosAduaneros` quedan pendientes para cuando se añada su mapeo (no es F1).
+
+## Carry-forward de la ejecución de F1
+
+- **BUG real (pre-existente) en `NumberToWordsConverter`:** para montos como 12,500.00 produce "DOCE MIL QUINIENTOS **CERO** PESOS 00/100 MXN" (el "CERO" sobra; debería ser "DOCE MIL QUINIENTOS PESOS..."). Detectado al generar el baseline de `NominaIncapacidades`. Es un cambio de **comportamiento**, así que NO entró en F1 (que es behavior-preserving). Arreglarlo en su propia tarea/bugfix con su test (y regenerar el baseline afectado intencionalmente). Está congelado en `NominaIncapacidades.viewmodel.json` como oráculo del estado actual.
+- **`ImpuestoConceptoViewModel`** ya es el tipo unificado de impuesto a nivel concepto; al volver los modelos `internal` en F4, recordar que `RetencionImpuestoViewModel` (resumen comprobante, solo Impuesto+Importe) es un tipo DISTINTO que debe permanecer.
+- **`SatCatalogos`** (namespace `CFDI.BuildPdf.Catalogs`) queda como datos puros testeables; en F4/testing reforzado conviene añadir tests unitarios directos de los catálogos (hoy se cubren indirectamente vía snapshots).
+- Warnings CA1305/CA1860/CA1861/CA1848 en builders siguen pendientes (se endurecen en F4).
