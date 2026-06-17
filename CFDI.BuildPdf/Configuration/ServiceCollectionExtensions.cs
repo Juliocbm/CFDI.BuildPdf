@@ -1,5 +1,6 @@
 using System;
 using CFDI.BuildPdf.Abstractions;
+using CFDI.BuildPdf.Complements;
 using CFDI.BuildPdf.Helpers;
 using CFDI.BuildPdf.Mappers.CartaPorte;
 using CFDI.BuildPdf.Mappers.Nomina;
@@ -52,6 +53,10 @@ namespace CFDI.BuildPdf.Configuration
             services.AddTransient<ICfdiTypeDetector, CfdiTypeDetector>();
             services.AddTransient<ICfdiModelMapper<CfdiCartaPorteViewModel>, CartaPorteMapper>();
             services.AddTransient<ICfdiModelMapper<CfdiNominaViewModel>, NominaMapper>();
+
+            // Handlers de complemento (Transient: sin estado, ligeros)
+            services.AddTransient<ICfdiComplementHandler, CartaPorteComplementHandler>();
+            services.AddTransient<ICfdiComplementHandler, NominaComplementHandler>();
 
             // Orquestador
             services.AddTransient<ICfdiPdfGenerator, CfdiPdfGenerator>();

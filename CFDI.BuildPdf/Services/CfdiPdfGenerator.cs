@@ -1,38 +1,37 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
 using CFDI.BuildPdf.Abstractions;
-using CFDI.BuildPdf.Models;
+using CFDI.BuildPdf.Complements;
 
 namespace CFDI.BuildPdf.Services
 {
     /// <summary>
     /// Orquestador principal de generación de PDF desde XML CFDI.
-    /// Implementa <see cref="ICfdiPdfGenerator"/> usando inyección de dependencias.
-    /// Detecta automáticamente el tipo de complemento y delega al mapper/builder correspondiente.
+    /// Detecta el complemento por namespace y delega en el <see cref="ICfdiComplementHandler"/> correspondiente.
     /// </summary>
     internal class CfdiPdfGenerator : ICfdiPdfGenerator
     {
-        private readonly ICfdiTypeDetector _typeDetector;
-        private readonly ICfdiModelMapper<CfdiCartaPorteViewModel> _cartaPorteMapper;
-        private readonly ICfdiModelMapper<CfdiNominaViewModel> _nominaMapper;
-        private readonly IPdfDocumentBuilder<CfdiCartaPorteViewModel> _cartaPorteBuilder;
-        private readonly IPdfDocumentBuilder<CfdiNominaViewModel> _nominaBuilder;
+        private readonly IReadOnlyList<ICfdiComplementHandler> _handlers;
 
-        public CfdiPdfGenerator(
-            ICfdiTypeDetector typeDetector,
-            ICfdiModelMapper<CfdiCartaPorteViewModel> cartaPorteMapper,
-            ICfdiModelMapper<CfdiNominaViewModel> nominaMapper,
-            IPdfDocumentBuilder<CfdiCartaPorteViewModel> cartaPorteBuilder,
-            IPdfDocumentBuilder<CfdiNominaViewModel> nominaBuilder)
+        public CfdiPdfGenerator(IEnumerable<ICfdiComplementHandler> handlers)
         {
-            _typeDetector = typeDetector ?? throw new ArgumentNullException(nameof(typeDetector));
-            _cartaPorteMapper = cartaPorteMapper ?? throw new ArgumentNullException(nameof(cartaPorteMapper));
-            _nominaMapper = nominaMapper ?? throw new ArgumentNullException(nameof(nominaMapper));
-            _cartaPorteBuilder = cartaPorteBuilder ?? throw new ArgumentNullException(nameof(cartaPorteBuilder));
-            _nominaBuilder = nominaBuilder ?? throw new ArgumentNullException(nameof(nominaBuilder));
+            if (handlers is null)
+                throw new ArgumentNullException(nameof(handlers));
+
+            _handlers = handlers.OrderByDescending(h => h.Priority).ToList();
+
+            // Unicidad: dos handlers no pueden declarar el mismo namespace de complemento.
+            var seen = new HashSet<string>();
+            foreach (var handler in _handlers)
+                foreach (var ns in handler.ComplementNamespaces)
+                    if (!seen.Add(ns))
+                        throw new InvalidOperationException(
+                            $"Más de un handler declara el namespace de complemento '{ns}'.");
         }
 
         /// <inheritdoc />
@@ -105,40 +104,32 @@ namespace CFDI.BuildPdf.Services
         }
 
         /// <summary>
-        /// Lógica central: detecta tipo de complemento, mapea y genera el PDF directamente.
+        /// Lógica central: selecciona el handler cuyo namespace de complemento esté presente y delega.
         /// </summary>
         private byte[] GenerarPdfInterno(XDocument xdoc, CfdiPdfOptions? options)
         {
             var opts = options ?? new CfdiPdfOptions();
-            var tipo = _typeDetector.Detect(xdoc);
+            var handler = ResolveHandler(xdoc);
 
-            return tipo switch
-            {
-                CfdiType.CartaPorte => GenerarCartaPortePdf(xdoc, opts),
-                CfdiType.Nomina => GenerarNominaPdf(xdoc, opts),
-                _ => throw new CfdiComplementoNoSoportadoException(
-                    $"Tipo de CFDI no soportado: {tipo}. Actualmente la librería solo soporta Carta Porte 3.1 y Nómina 1.2.")
-            };
+            if (handler is null)
+                throw new CfdiComplementoNoSoportadoException(
+                    "Tipo de CFDI no soportado. Actualmente la librería solo soporta Carta Porte 3.1 y Nómina 1.2.");
+
+            return handler.Generate(xdoc, opts);
         }
 
-        private byte[] GenerarCartaPortePdf(XDocument xdoc, CfdiPdfOptions opts)
+        /// <summary>
+        /// Devuelve el handler de mayor prioridad cuyo namespace de complemento aparece en el documento.
+        /// </summary>
+        private ICfdiComplementHandler? ResolveHandler(XDocument xdoc)
         {
-            var model = _cartaPorteMapper.Map(xdoc);
+            var root = xdoc.Root;
+            if (root is null)
+                return null;
 
-            if (!string.IsNullOrEmpty(opts.LogoBase64))
-                model.LogoBase64 = opts.LogoBase64;
-
-            return _cartaPorteBuilder.Build(model, opts);
-        }
-
-        private byte[] GenerarNominaPdf(XDocument xdoc, CfdiPdfOptions opts)
-        {
-            var model = _nominaMapper.Map(xdoc);
-
-            if (!string.IsNullOrEmpty(opts.LogoBase64))
-                model.LogoBase64 = opts.LogoBase64;
-
-            return _nominaBuilder.Build(model, opts);
+            var present = new HashSet<string>(root.Descendants().Select(e => e.Name.NamespaceName));
+            // _handlers ya está ordenado por Priority descendente.
+            return _handlers.FirstOrDefault(h => h.ComplementNamespaces.Any(present.Contains));
         }
     }
 }

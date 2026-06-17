@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 using CFDI.BuildPdf.Abstractions;
+using CFDI.BuildPdf.Complements;
 using CFDI.BuildPdf.Helpers;
 using CFDI.BuildPdf.Mappers.CartaPorte;
 using CFDI.BuildPdf.Mappers.Nomina;
@@ -26,13 +27,14 @@ namespace CFDI.BuildPdf.Service
             QuestPDF.Settings.License = MapLicense(_licenseType);
 
             var qrGenerator = new QrGeneratorService();
-            return new CfdiPdfGenerator(
-                new CfdiTypeDetector(),
-                new CartaPorteMapper(qrGenerator),
-                new NominaMapper(qrGenerator),
-                new CartaPorteDocumentBuilder(),
-                new NominaDocumentBuilder()
-            );
+
+            var handlers = new ICfdiComplementHandler[]
+            {
+                new CartaPorteComplementHandler(new CartaPorteMapper(qrGenerator), new CartaPorteDocumentBuilder()),
+                new NominaComplementHandler(new NominaMapper(qrGenerator), new NominaDocumentBuilder())
+            };
+
+            return new CfdiPdfGenerator(handlers);
         });
 
         private static ICfdiPdfGenerator Generator => _generator.Value;
