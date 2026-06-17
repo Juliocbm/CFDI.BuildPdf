@@ -1,7 +1,7 @@
 using System.IO;
 using System.Threading.Tasks;
 
-namespace CFDI.BuildPdf.Abstractions
+namespace CFDI.BuildPdf
 {
     /// <summary>
     /// Contrato público de alto nivel para generar PDFs desde XMLs CFDI.

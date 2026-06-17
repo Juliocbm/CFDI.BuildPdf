@@ -1,4 +1,4 @@
-namespace CFDI.BuildPdf.Abstractions
+namespace CFDI.BuildPdf
 {
     /// <summary>
     /// Tipo de licencia QuestPDF a aplicar en el proceso host.

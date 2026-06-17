@@ -1,4 +1,4 @@
-namespace CFDI.BuildPdf.Abstractions
+namespace CFDI.BuildPdf
 {
     /// <summary>
     /// Opciones de configuración para la generación de PDFs CFDI.

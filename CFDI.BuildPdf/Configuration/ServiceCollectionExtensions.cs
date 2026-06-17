@@ -1,10 +1,9 @@
 using System;
-using CFDI.BuildPdf.Abstractions;
-using CFDI.BuildPdf.Service;
-using Microsoft.Extensions.DependencyInjection;
+using CFDI.BuildPdf;
+using CFDI.BuildPdf.Configuration;
 using Microsoft.Extensions.Logging;
 
-namespace CFDI.BuildPdf.Configuration
+namespace Microsoft.Extensions.DependencyInjection
 {
     /// <summary>
     /// Extensiones para registrar los servicios de CFDI.BuildPdf en un contenedor de DI.

@@ -1,12 +1,11 @@
 using System;
 using System.IO;
 using System.Threading.Tasks;
-using CFDI.BuildPdf.Abstractions;
 using CFDI.BuildPdf.Configuration;
 using Microsoft.Extensions.Logging;
 using QuestPDF.Infrastructure;
 
-namespace CFDI.BuildPdf.Service
+namespace CFDI.BuildPdf
 {
     /// <summary>
     /// Fachada estática para generar PDFs desde XMLs CFDI 4.0.

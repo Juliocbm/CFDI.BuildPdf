@@ -5,7 +5,7 @@ using CFDI.BuildPdf.Mappers.CartaPorte;
 using CFDI.BuildPdf.Mappers.Nomina;
 using CFDI.BuildPdf.PdfBuilders.CartaPorte;
 using CFDI.BuildPdf.PdfBuilders.Nomina;
-using CFDI.BuildPdf.Service;
+using CFDI.BuildPdf;
 using CFDI.BuildPdf.Services;
 using CFDI.BuildPdf.Tests.Helpers;
 using Xunit;

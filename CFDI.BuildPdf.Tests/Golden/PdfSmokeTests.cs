@@ -1,6 +1,6 @@
 using System.Linq;
 using System.Threading.Tasks;
-using CFDI.BuildPdf.Service;
+using CFDI.BuildPdf;
 using CFDI.BuildPdf.Tests.Helpers;
 using UglyToad.PdfPig;
 using Xunit;

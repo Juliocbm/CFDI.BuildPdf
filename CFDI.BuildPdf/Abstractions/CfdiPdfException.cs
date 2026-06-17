@@ -1,6 +1,6 @@
 using System;
 
-namespace CFDI.BuildPdf.Abstractions
+namespace CFDI.BuildPdf
 {
     /// <summary>
     /// Excepción base para errores de generación de PDFs CFDI.
