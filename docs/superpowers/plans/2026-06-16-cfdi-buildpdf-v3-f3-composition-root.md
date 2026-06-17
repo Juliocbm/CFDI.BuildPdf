@@ -407,3 +407,14 @@ git tag -f f3-composition -m "F3: composition root (CfdiPdfFactory), async hones
 - Quitar las registraciones individuales de DI (mappers/builders/handlers) cambia el grafo de DI: los consumidores ya NO pueden resolver `ICfdiModelMapper<T>` etc. del contenedor — aceptable (son internos en caja cerrada; el contrato público es `ICfdiPdfGenerator`). El test de integración DI confirma que `ICfdiPdfGenerator` resuelve y genera.
 
 **Notas para F4:** `services.Configure(configure)` registra `IOptions<CfdiPdfOptions>` pero nada lo consume (las opciones se pasan por llamada). Revisar en F4 si conviene conectarlo o documentar que `configure` fija defaults que hoy no se aplican automáticamente. La idempotencia de licencia asume "primera configuración gana"; documentar en README (F5) que se configure una vez al inicio.
+
+## Carry-forward de la ejecución de F3 (para F4)
+
+La revisión final confirmó READY FOR F4 sin issues Critical/Important. Plan de F4 según la revisión:
+- **Internalizar:** todos los `Models` (~30 clases), `CfdiType`, `ICfdiTypeDetector`, `IQrGenerator`, `ICfdiModelMapper<T>`, `IPdfDocumentBuilder<T>`. `InternalsVisibleTo CFDI.BuildPdf.Tests` ya existe → los tests siguen compilando.
+- **Mantener público:** `CfdiPdf`, `ServiceCollectionExtensions`, `ICfdiPdfGenerator`, `CfdiPdfOptions`, `PdfOrientation`, `CfdiPdfLicenseType`, y la jerarquía de excepciones. (El demo solo consume estos.)
+- **Decidir `ICfdiTypeDetector`:** hoy está registrado en DI como utilidad pública pero el orquestador no lo usa. En F4: hacerlo internal Y quitar su registro DI (no dejar un tipo internal registrado).
+- **Consolidar namespaces públicos** a `CFDI.BuildPdf` (hoy `Service` vs `Services` difieren en una letra). Es breaking → documentar en CHANGELOG/MIGRATION y bump a 3.0.0.
+- **`TreatWarningsAsErrors`:** la librería compila con 0 warnings hoy → seguro activarlo en `CFDI.BuildPdf.csproj`. Si se aplica a toda la solución, primero silenciar 2 `CS8625` intencionales en tests (`NumberToWordsConverterTests`, `QrUrlBuilderTests`). Activar `GenerateDocumentationFile` para cazar `CS1591` (docs faltantes).
+- **Gaps de test (cheap, F4 o test sprint):** añadir un test directo de `CfdiXmlInvalidoException` con XML mal formado (gap pre-existente); considerar `Volatile.Read/Write` en `CfdiPdf._loggerFactory` (endurecimiento, no crítico — contrato es "configurar al inicio").
+- **Demo (F5):** `ConsoleDemo` apunta a `net6.0` (EOL) y consume el paquete 2.0.8; F5 lo actualiza a net8 + referencia v3 + namespace nuevo.
