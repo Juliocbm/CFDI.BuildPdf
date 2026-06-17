@@ -22,12 +22,6 @@ namespace CFDI.BuildPdf.Mappers.CartaPorte
             : base(qrGenerator, logger) { }
 
         /// <inheritdoc />
-        public override bool CanMap(XDocument xdoc)
-        {
-            return xdoc.Root?.Descendants(Cp + "CartaPorte").Any() == true;
-        }
-
-        /// <inheritdoc />
         protected override CfdiCartaPorteViewModel CreateModel() => new();
 
         /// <inheritdoc />

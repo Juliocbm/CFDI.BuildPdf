@@ -30,9 +30,6 @@ namespace CFDI.BuildPdf.Mappers.Common
         }
 
         /// <inheritdoc />
-        public abstract bool CanMap(XDocument xdoc);
-
-        /// <inheritdoc />
         public TModel Map(XDocument xdoc)
         {
             var model = CreateModel();

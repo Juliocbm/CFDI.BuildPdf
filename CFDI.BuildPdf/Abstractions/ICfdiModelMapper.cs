@@ -9,13 +9,6 @@ namespace CFDI.BuildPdf.Abstractions
     public interface ICfdiModelMapper<TModel> where TModel : class
     {
         /// <summary>
-        /// Determina si este mapper puede procesar el XDocument dado.
-        /// </summary>
-        /// <param name="xdoc">Documento XML CFDI.</param>
-        /// <returns>true si el mapper reconoce el complemento del documento.</returns>
-        bool CanMap(XDocument xdoc);
-
-        /// <summary>
         /// Mapea el XDocument al ViewModel correspondiente.
         /// </summary>
         /// <param name="xdoc">Documento XML CFDI.</param>

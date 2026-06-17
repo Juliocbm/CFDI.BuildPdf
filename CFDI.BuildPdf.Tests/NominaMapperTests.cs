@@ -13,20 +13,6 @@ namespace CFDI.BuildPdf.Tests
         }
 
         [Fact]
-        public void CanMap_NominaXml_RetornaTrue()
-        {
-            var xdoc = TestXmlLoader.LoadNomina();
-            Assert.True(_mapper.CanMap(xdoc));
-        }
-
-        [Fact]
-        public void CanMap_CartaPorteXml_RetornaFalse()
-        {
-            var xdoc = TestXmlLoader.LoadCartaPorte();
-            Assert.False(_mapper.CanMap(xdoc));
-        }
-
-        [Fact]
         public void Map_DatosComprobante_SonCorrectos()
         {
             var xdoc = TestXmlLoader.LoadNomina();

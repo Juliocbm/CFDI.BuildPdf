@@ -22,12 +22,6 @@ namespace CFDI.BuildPdf.Mappers.Nomina
             : base(qrGenerator, logger) { }
 
         /// <inheritdoc />
-        public override bool CanMap(XDocument xdoc)
-        {
-            return xdoc.Root?.Descendants(Nom + "Nomina").Any() == true;
-        }
-
-        /// <inheritdoc />
         protected override CfdiNominaViewModel CreateModel() => new();
 
         /// <inheritdoc />

@@ -14,20 +14,6 @@ namespace CFDI.BuildPdf.Tests
         }
 
         [Fact]
-        public void CanMap_CartaPorteXml_RetornaTrue()
-        {
-            var xdoc = TestXmlLoader.LoadCartaPorte();
-            Assert.True(_mapper.CanMap(xdoc));
-        }
-
-        [Fact]
-        public void CanMap_NominaXml_RetornaFalse()
-        {
-            var xdoc = TestXmlLoader.LoadNomina();
-            Assert.False(_mapper.CanMap(xdoc));
-        }
-
-        [Fact]
         public void Map_DatosComprobante_SonCorrectos()
         {
             var xdoc = TestXmlLoader.LoadCartaPorte();
