@@ -1,15 +1,9 @@
 using System;
 using CFDI.BuildPdf.Abstractions;
-using CFDI.BuildPdf.Complements;
-using CFDI.BuildPdf.Helpers;
-using CFDI.BuildPdf.Mappers.CartaPorte;
-using CFDI.BuildPdf.Mappers.Nomina;
-using CFDI.BuildPdf.Models;
-using CFDI.BuildPdf.PdfBuilders.CartaPorte;
-using CFDI.BuildPdf.PdfBuilders.Nomina;
 using CFDI.BuildPdf.Service;
 using CFDI.BuildPdf.Services;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace CFDI.BuildPdf.Configuration
 {
@@ -37,31 +31,18 @@ namespace CFDI.BuildPdf.Configuration
             if (services is null)
                 throw new ArgumentNullException(nameof(services));
 
-            QuestPDF.Settings.License = CfdiPdf.MapLicense(licenseType);
+            // Idempotente: no pisar una licencia ya configurada (evita degradación silenciosa).
+            if (QuestPDF.Settings.License is null)
+                QuestPDF.Settings.License = CfdiPdf.MapLicense(licenseType);
 
             if (configure != null)
                 services.Configure(configure);
 
-            // QR (Singleton: thread-safe, reutilizable)
-            services.AddSingleton<IQrGenerator, QrGeneratorService>();
+            // Orquestador construido por el composition root compartido (usa el ILoggerFactory del contenedor si está).
+            services.AddTransient<ICfdiPdfGenerator>(sp => CfdiPdfFactory.CreateGenerator(sp.GetService<ILoggerFactory>()));
 
-            // Document builders (Singleton: sin estado, reutilizables)
-            services.AddSingleton<IPdfDocumentBuilder<CfdiCartaPorteViewModel>, CartaPorteDocumentBuilder>();
-            services.AddSingleton<IPdfDocumentBuilder<CfdiNominaViewModel>, NominaDocumentBuilder>();
-
-            // Servicios de dominio (Transient: sin estado, ligeros)
-            // Utilidad pública de detección de tipo: ya NO la usa el orquestador (despacho por handler),
-            // se conserva como API pública; su visibilidad se decide en F4.
+            // Utilidad pública de detección de tipo (no usada por el orquestador; su visibilidad se decide en F4).
             services.AddTransient<ICfdiTypeDetector, CfdiTypeDetector>();
-            services.AddTransient<ICfdiModelMapper<CfdiCartaPorteViewModel>, CartaPorteMapper>();
-            services.AddTransient<ICfdiModelMapper<CfdiNominaViewModel>, NominaMapper>();
-
-            // Handlers de complemento (Transient: sin estado, ligeros)
-            services.AddTransient<ICfdiComplementHandler, CartaPorteComplementHandler>();
-            services.AddTransient<ICfdiComplementHandler, NominaComplementHandler>();
-
-            // Orquestador
-            services.AddTransient<ICfdiPdfGenerator, CfdiPdfGenerator>();
 
             return services;
         }
