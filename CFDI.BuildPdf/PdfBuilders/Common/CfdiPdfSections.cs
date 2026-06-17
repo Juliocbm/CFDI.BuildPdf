@@ -1,6 +1,7 @@
 using System;
 using System.Globalization;
 using CFDI.BuildPdf.Models;
+using Microsoft.Extensions.Logging;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
@@ -1015,6 +1016,25 @@ namespace CFDI.BuildPdf.PdfBuilders.Common
                 "03" => "Simples",
                 _ => clave ?? ""
             };
+        }
+
+        /// <summary>
+        /// Intenta decodificar una cadena Base64 de logo. Devuelve true y los bytes si tiene éxito;
+        /// false (con logoBytes = null) si la cadena no es Base64 válido, registrando una advertencia.
+        /// </summary>
+        internal static bool TryDecodeLogo(string logoBase64, ILogger logger, out byte[]? logoBytes)
+        {
+            try
+            {
+                logoBytes = Convert.FromBase64String(logoBase64);
+                return true;
+            }
+            catch (FormatException ex)
+            {
+                logger.LogWarning(ex, "No se pudo decodificar el logo en Base64 proporcionado por opciones; se omitirá del PDF.");
+                logoBytes = null;
+                return false;
+            }
         }
     }
 }

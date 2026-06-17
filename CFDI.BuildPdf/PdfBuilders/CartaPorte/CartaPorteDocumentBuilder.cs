@@ -121,7 +121,7 @@ namespace CFDI.BuildPdf.PdfBuilders.CartaPorte
                     {
                         if (!string.IsNullOrEmpty(model.LogoBase64))
                         {
-                            if (TryDecodeLogo(model.LogoBase64, _logger, out var logoBytes))
+                            if (CfdiPdfSections.TryDecodeLogo(model.LogoBase64, _logger, out var logoBytes))
                                 cell.MaxWidth(150).MaxHeight(70).Image(logoBytes!);
                         }
                     });
@@ -847,19 +847,5 @@ namespace CFDI.BuildPdf.PdfBuilders.CartaPorte
             "DÉCIMA QUINTA.- Para el caso de que el \"Expedidor\", \"Remitente\" o \"Usuario\" contrate carro por entero, éste aceptará la responsabilidad solidaria para con el \"Transportista\" mediante la figura de la corresponsabilidad que contempla el artículo 10 del Reglamento Sobre el Peso, Dimensiones y Capacidad de los Vehículos de Autotransporte que Transitan en los Caminos y Puentes de Jurisdicción Federal, por lo que el \"Expedidor\", \"Remitente\" o \"Usuario\" queda obligado a verificar que la carga y el vehículo que la transporta cumplan con el peso y dimensiones máximas establecidos en la NOM-012-SCT-2-2017, o la que la sustituya.\n" +
             "Para el caso de incumplimiento e inobservancia a las disposiciones que regulan el peso y dimensiones, por parte del \"Expedidor\", \"Remitente\" o \"Usuario\", éste será corresponsable de las infracciones y multas que la Secretaría de Infraestructura, Comunicaciones y Transportes o la Guardia Nacional impongan al \"Transportista\", por cargar las unidades con exceso de peso.";
 
-        private static bool TryDecodeLogo(string logoBase64, ILogger logger, out byte[]? logoBytes)
-        {
-            try
-            {
-                logoBytes = Convert.FromBase64String(logoBase64);
-                return true;
-            }
-            catch (FormatException ex)
-            {
-                logger.LogWarning(ex, "No se pudo decodificar el logo en Base64 proporcionado por opciones; se omitirá del PDF.");
-                logoBytes = null;
-                return false;
-            }
-        }
     }
 }

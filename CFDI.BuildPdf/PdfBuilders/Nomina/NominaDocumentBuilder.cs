@@ -94,7 +94,7 @@ namespace CFDI.BuildPdf.PdfBuilders.Nomina
                     {
                         if (!string.IsNullOrEmpty(model.LogoBase64))
                         {
-                            if (TryDecodeLogo(model.LogoBase64, _logger, out var logoBytes))
+                            if (CfdiPdfSections.TryDecodeLogo(model.LogoBase64, _logger, out var logoBytes))
                                 cell.MaxWidth(150).MaxHeight(70).Image(logoBytes!);
                         }
                     });
@@ -531,19 +531,5 @@ namespace CFDI.BuildPdf.PdfBuilders.Nomina
             return $"{clave} - {descripcion}";
         }
 
-        private static bool TryDecodeLogo(string logoBase64, ILogger logger, out byte[]? logoBytes)
-        {
-            try
-            {
-                logoBytes = Convert.FromBase64String(logoBase64);
-                return true;
-            }
-            catch (FormatException ex)
-            {
-                logger.LogWarning(ex, "No se pudo decodificar el logo en Base64 proporcionado por opciones; se omitirá del PDF.");
-                logoBytes = null;
-                return false;
-            }
-        }
     }
 }
