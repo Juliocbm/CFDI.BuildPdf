@@ -43,14 +43,17 @@ jobs:
         id: login
         with:
           user: JCBautistaM
-      - name: NuGet push (con diagnostico)
+      # dotnet nuget push NO expande comodines: hay que expandir el glob en el shell
+      # y pasar la ruta real de cada .nupkg (dotnet sube el .snupkg asociado solo).
+      - name: NuGet push
         shell: bash
         run: |
-          set +e
-          out=$(dotnet nuget push "./artifacts/*.nupkg" --api-key "${{ steps.login.outputs.NUGET_API_KEY }}" --source https://api.nuget.org/v3/index.json --skip-duplicate 2>&1)
-          code=$?
-          echo "$out"
-          if [ $code -ne 0 ]; then
-            echo "::error::nuget push fallo (exit $code): $(echo "$out" | grep -iE 'error|status code|forbidden|conflict|denied|unauthor|not found|exception|invalid|api key' | tail -6 | tr '\n' ' / ')"
+          shopt -s nullglob
+          pkgs=(./artifacts/*.nupkg)
+          if [ ${#pkgs[@]} -eq 0 ]; then
+            echo "::error::No se encontraron paquetes .nupkg en ./artifacts"; ls -la ./artifacts; exit 1
           fi
-          exit $code
+          for pkg in "${pkgs[@]}"; do
+            echo "Publicando $pkg"
+            dotnet nuget push "$pkg" --api-key "${{ steps.login.outputs.NUGET_API_KEY }}" --source https://api.nuget.org/v3/index.json --skip-duplicate
+          done
