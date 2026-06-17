@@ -15,6 +15,8 @@
 
 Es cross-platform (Windows, Linux, macOS, contenedores) y **no tiene dependencias nativas**: usa [QuestPDF](https://www.questpdf.com/) como motor de renderizado y [QRCoder](https://github.com/codebude/QRCoder) para el código QR del timbre fiscal.
 
+> **v3.0.0** cambia namespaces y requiere .NET 8. Si migras desde v2.x, consulta [MIGRATION.md](MIGRATION.md).
+
 ## 📥 Instalación
 
 ```bash
@@ -63,8 +65,7 @@ Por defecto, `CFDI.BuildPdf` declara `Community`. Para cambiarlo:
 ### Con la fachada estática
 
 ```csharp
-using CFDI.BuildPdf.Abstractions;
-using CFDI.BuildPdf.Service;
+using CFDI.BuildPdf;
 
 // Llamar una sola vez al iniciar el proceso, antes de generar cualquier PDF
 CfdiPdf.ConfigureQuestPdfLicense(CfdiPdfLicenseType.Professional);
@@ -88,7 +89,7 @@ builder.Services.AddCfdiPdfServices(
 ### Desde una ruta de archivo
 
 ```csharp
-using CFDI.BuildPdf.Service;
+using CFDI.BuildPdf;
 
 var pdfBytes = await CfdiPdf.DesdeRutaAsync(@"C:\facturas\cfdi.xml");
 await File.WriteAllBytesAsync("cfdi_output.pdf", pdfBytes);
@@ -181,8 +182,8 @@ var pdfBytes = await CfdiPdf.DesdeRutaAsync(rutaXml, options);
 ### Registro de servicios
 
 ```csharp
-using CFDI.BuildPdf.Abstractions;
-using CFDI.BuildPdf.Configuration;
+using CFDI.BuildPdf;
+using Microsoft.Extensions.DependencyInjection;
 
 builder.Services.AddCfdiPdfServices(
     configure: opts =>
@@ -196,7 +197,7 @@ builder.Services.AddCfdiPdfServices(
 ### Consumo desde un servicio
 
 ```csharp
-using CFDI.BuildPdf.Abstractions;
+using CFDI.BuildPdf;
 
 public class FacturaService
 {

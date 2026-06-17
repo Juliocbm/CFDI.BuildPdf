@@ -4,6 +4,28 @@ Todas las versiones notables de este proyecto se documentan en este archivo.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/)
 y este proyecto usa [Versionado Semántico](https://semver.org/lang/es/).
 
+## [3.0.0] - 2026-06-17
+
+Versión mayor: refactor a nivel enterprise. **El PDF generado no cambia** respecto a 2.0.8 (validado con pruebas golden y comparación byte a byte del texto contra el paquete v2.0.8). Ver [MIGRATION.md](MIGRATION.md).
+
+### Changed (BREAKING)
+- **Target framework `net6.0` → `net8.0`** (LTS).
+- **Namespaces consolidados:** toda la API pública en `CFDI.BuildPdf`; `AddCfdiPdfServices` en `Microsoft.Extensions.DependencyInjection`. Antes en `.Service`/`.Abstractions`/`.Configuration`.
+- **Superficie pública reducida a 9 tipos (caja cerrada):** los ViewModels, `ICfdiModelMapper<T>`, `IPdfDocumentBuilder<T>` e **`IQrGenerator`** pasaron a `internal`.
+- Despacho de complementos por **registro de handlers por namespace** (Open/Closed): añadir un complemento nuevo ya no toca el orquestador.
+- Composition root único (`CfdiPdfFactory`) compartido por la fachada y el contenedor DI.
+- I/O de carga de XML ahora **asíncrono honesto** (`XDocument.LoadAsync`).
+- Licencia QuestPDF **idempotente** (no degrada una licencia ya configurada).
+
+### Added
+- `CfdiPdf.ConfigureLogging(ILoggerFactory)` para diagnóstico de los mappers en el camino de la fachada.
+- Red de pruebas golden (snapshots de ViewModel + smoke de PDF) y cobertura ampliada de casos límite (retenciones a nivel concepto, CfdiRelacionados, incapacidades, horas extra).
+- SourceLink, build determinista y símbolos `snupkg` en el paquete.
+
+### Removed (BREAKING)
+- `ICfdiTypeDetector`, `CfdiType` y `CfdiTypeDetector` (detección redundante; el despacho es por namespace).
+- Método `CanMap` de `ICfdiModelMapper`.
+
 ## [2.0.8] - 2026-04-28
 
 ### Fixed
