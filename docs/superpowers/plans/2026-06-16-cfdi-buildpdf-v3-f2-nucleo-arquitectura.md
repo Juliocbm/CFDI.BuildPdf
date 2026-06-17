@@ -476,3 +476,13 @@ git tag -f f2-nucleo -m "F2: núcleo de arquitectura (registro de handlers por n
 - Async sigue siendo `Task.FromResult` (X3) — el async honesto se aborda en F3, no aquí.
 
 **Notas para F3:** el grafo de la fachada (`CfdiPdf.cs`) y el de DI (`ServiceCollectionExtensions`) construyen los mismos handlers en dos lugares; F3 unifica ambos en un `CfdiPdfFactory` (composition root) compartido.
+
+## Carry-forward de la ejecución de F2 (para F3)
+
+La revisión final confirmó READY FOR F3 sin issues Critical/Important. Recordatorios:
+- **D1 (unificar grafo):** fachada y DI construyen el mismo grafo mapper→builder→handler en dos sitios, con lifetimes distintos (DI: builders Singleton / mappers Transient; fachada: `new` fresco). F3 introduce `CfdiPdfFactory` para tener un solo composition root.
+- **X3 async honesto:** los 4 `Generar*Async` siguen con `Task.FromResult`; F3 usa `XDocument.LoadAsync` para ruta/stream.
+- **X4 licencia idempotente:** fachada y `AddCfdiPdfServices` sobreescriben `QuestPDF.Settings.License` incondicionalmente (coexistencia puede degradar Enterprise→Community); F3 lo hace idempotente.
+- **Logging fachada:** `BaseCfdiMapper` acepta `ILogger` pero la fachada nunca lo inyecta → logging del camino fachada se pierde; F3 añade `CfdiPdf.ConfigureLogging(ILoggerFactory)`.
+- **Validación DI:** activar `ValidateScopes`/`ValidateOnBuild` y confirmar lifetime Transient de los handlers.
+- **Minor (no bloquea):** el despacho por namespace es marginalmente más permisivo que el detector viejo (matchea cualquier elemento del namespace, no el elemento raíz nombrado) — equivalente para CFDI válidos. `Priority` está cableado pero sin test (ambos handlers en 0; los complementos reales no coexisten) — añadir test si llegan documentos multi-complemento.
