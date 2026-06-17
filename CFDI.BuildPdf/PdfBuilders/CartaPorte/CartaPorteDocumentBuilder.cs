@@ -45,8 +45,7 @@ namespace CFDI.BuildPdf.PdfBuilders.CartaPorte
 
                     page.Content().Column(col =>
                     {
-                        ComposeEncabezado(col, model);
-                        ComposeLogoYCertificados(col, model);
+                        col.Item().Element(c => CfdiPdfSections.ComposeEncabezado(c, model, _logger));
                         ComposeClienteYEmision(col, model);
                         ComposeFormaPago(col, model);
                         ComposeConceptos(col, model);
@@ -95,93 +94,6 @@ namespace CFDI.BuildPdf.PdfBuilders.CartaPorte
             });
 
             return document.GeneratePdf();
-        }
-
-        private static void ComposeEncabezado(ColumnDescriptor col, CfdiCartaPorteViewModel model)
-        {
-            // Bloque unificado: la renderización real ocurre en ComposeLogoYCertificados.
-            // Se mantiene el método como punto de extensión futuro.
-        }
-
-        private void ComposeLogoYCertificados(ColumnDescriptor col, CfdiCartaPorteViewModel model)
-        {
-            col.Item().BorderBottom(1f).BorderColor(PdfStyleConstants.ColorBorder).PaddingBottom(6)
-                .Table(table =>
-            {
-                table.ColumnsDefinition(c =>
-                {
-                    c.RelativeColumn(30); // Logo
-                    c.RelativeColumn(35); // Emisor
-                    c.RelativeColumn(35); // Datos fiscales
-                });
-
-                // Logo
-                table.Cell().Row(1).Column(1).AlignLeft().AlignMiddle()
-                    .Element(cell =>
-                    {
-                        if (!string.IsNullOrEmpty(model.LogoBase64))
-                        {
-                            if (CfdiPdfSections.TryDecodeLogo(model.LogoBase64, _logger, out var logoBytes))
-                                cell.MaxWidth(150).MaxHeight(70).Image(logoBytes!);
-                        }
-                    });
-
-                // Emisor: nombre + RFC + régimen
-                table.Cell().Row(1).Column(2).PaddingHorizontal(6).AlignMiddle().Column(c =>
-                {
-                    c.Item().Text(model.EmisorNombre ?? "")
-                        .Bold()
-                        .FontSize(PdfStyleConstants.FontSizeEmisorName)
-                        .FontColor(PdfStyleConstants.ColorAccent);
-                    c.Item().PaddingTop(2).Text(t =>
-                    {
-                        t.Span("RFC: ").Bold().FontSize(PdfStyleConstants.FontSizeLabel).FontColor(PdfStyleConstants.ColorText);
-                        t.Span(model.EmisorRFC ?? "").FontSize(PdfStyleConstants.FontSizeLabel).FontColor(PdfStyleConstants.ColorText);
-                    });
-                    c.Item().PaddingTop(1).Text(t =>
-                    {
-                        t.Span("RÉGIMEN FISCAL: ").Bold().FontSize(PdfStyleConstants.FontSizeLabel).FontColor(PdfStyleConstants.ColorText);
-                        t.Span($"{model.EmisorRegimenFiscal} - {CfdiPdfSections.NombreRegimenFiscal(model.EmisorRegimenFiscal)}").FontSize(PdfStyleConstants.FontSizeLabel).FontColor(PdfStyleConstants.ColorText);
-                    });
-                    c.Item().PaddingTop(1).Text(t =>
-                    {
-                        t.Span("LUGAR DE EXPEDICIÓN: ").Bold().FontSize(PdfStyleConstants.FontSizeLabel).FontColor(PdfStyleConstants.ColorText);
-                        t.Span(model.LugarExpedicion ?? "").FontSize(PdfStyleConstants.FontSizeLabel).FontColor(PdfStyleConstants.ColorText);
-                    });
-                });
-
-                // Datos fiscales a la derecha
-                table.Cell().Row(1).Column(3).AlignMiddle().Column(c =>
-                {
-                    c.Item().Text(t =>
-                    {
-                        t.Span("UUID: ").Bold()
-                            .FontSize(PdfStyleConstants.FontSizeSmall)
-                            .FontColor(PdfStyleConstants.ColorAccent);
-                        t.Span(model.UUID ?? "")
-                            .FontSize(PdfStyleConstants.FontSizeVerySmall)
-                            .FontColor(PdfStyleConstants.ColorText);
-                    });
-                    FiscalRow(c, "FECHA CERTIFICACIÓN:", model.FechaCertificacion.ToString("dd/MM/yyyy HH:mm:ss"));
-                    FiscalRow(c, "NO. CERTIFICADO SAT:", model.NoCertificadoSAT);
-                    FiscalRow(c, "NO. CERTIFICADO EMISOR:", model.NoCertificadoEmisor);
-                    FiscalRow(c, "PAC QUE TIMBRÓ:", $"{CfdiPdfSections.NombrePac(model.RfcProvCertif)} ({model.RfcProvCertif})");
-                    FiscalRow(c, "VERSIÓN CFDI:", model.Version);
-                });
-            });
-        }
-
-        private static void FiscalRow(ColumnDescriptor col, string label, string? value)
-        {
-            col.Item().Text(t =>
-            {
-                t.Span(label + " ").Bold()
-                    .FontSize(PdfStyleConstants.FontSizeSmall)
-                    .FontColor(PdfStyleConstants.ColorAccent);
-                t.Span(value ?? "")
-                    .FontSize(PdfStyleConstants.FontSizeSmall)
-                    .FontColor(PdfStyleConstants.ColorText);
-            });
         }
 
         private static void ComposeClienteYEmision(ColumnDescriptor col, CfdiCartaPorteViewModel model)
