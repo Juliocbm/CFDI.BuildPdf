@@ -2,6 +2,7 @@ using System;
 using System.Globalization;
 using System.Linq;
 using CFDI.BuildPdf.Abstractions;
+using CFDI.BuildPdf.Catalogs;
 using CFDI.BuildPdf.Models;
 using CFDI.BuildPdf.PdfBuilders.Common;
 using Microsoft.Extensions.Logging;
@@ -124,8 +125,8 @@ namespace CFDI.BuildPdf.PdfBuilders.CartaPorte
                                 .FontColor(PdfStyleConstants.ColorText);
                             cc.Item().PaddingTop(2).Text(t => { LabelValueSpans(t, "RFC:", model.ReceptorRFC); });
                             cc.Item().Text(t => { LabelValueSpans(t, "Domicilio Fiscal:", model.ReceptorDomicilioFiscal); });
-                            cc.Item().Text(t => { LabelValueSpans(t, "Régimen Fiscal:", $"{model.ReceptorRegimenFiscal} - {CfdiPdfSections.NombreRegimenFiscal(model.ReceptorRegimenFiscal)}"); });
-                            cc.Item().Text(t => { LabelValueSpans(t, "Uso del CFDI:", $"{model.UsoCFDI} - {CfdiPdfSections.NombreUsoCFDI(model.UsoCFDI)}"); });
+                            cc.Item().Text(t => { LabelValueSpans(t, "Régimen Fiscal:", $"{model.ReceptorRegimenFiscal} - {SatCatalogos.NombreRegimenFiscal(model.ReceptorRegimenFiscal)}"); });
+                            cc.Item().Text(t => { LabelValueSpans(t, "Uso del CFDI:", $"{model.UsoCFDI} - {SatCatalogos.NombreUsoCFDI(model.UsoCFDI)}"); });
                         });
                     });
 
@@ -149,7 +150,7 @@ namespace CFDI.BuildPdf.PdfBuilders.CartaPorte
                             cc.Item().Text(t => { LabelValueSpans(t, "Moneda:", model.Moneda); });
                             cc.Item().Text(t => { LabelValueSpans(t, "Tipo de Cambio:", model.TipoCambio); });
                             cc.Item().Text(t => { LabelValueSpans(t, "Lugar de Expedición:", model.LugarExpedicion); });
-                            cc.Item().Text(t => { LabelValueSpans(t, "Exportación:", $"{model.Exportacion} - {CfdiPdfSections.NombreExportacion(model.Exportacion)}"); });
+                            cc.Item().Text(t => { LabelValueSpans(t, "Exportación:", $"{model.Exportacion} - {SatCatalogos.NombreExportacion(model.Exportacion)}"); });
 
                             if (!string.IsNullOrWhiteSpace(model.TipoRelacion) || (model.RelacionadosUuids?.Count > 0))
                             {
@@ -158,7 +159,7 @@ namespace CFDI.BuildPdf.PdfBuilders.CartaPorte
                                     .FontSize(PdfStyleConstants.FontSizeLabel)
                                     .FontColor(PdfStyleConstants.ColorAccent);
 
-                                cc.Item().Text(t => { LabelValueSpans(t, "Tipo Relación:", $"{model.TipoRelacion} - {CfdiPdfSections.NombreTipoRelacion(model.TipoRelacion)}"); });
+                                cc.Item().Text(t => { LabelValueSpans(t, "Tipo Relación:", $"{model.TipoRelacion} - {SatCatalogos.NombreTipoRelacion(model.TipoRelacion)}"); });
 
                                 foreach (var uuid in model.RelacionadosUuids ?? Enumerable.Empty<string>())
                                 {
@@ -192,13 +193,13 @@ namespace CFDI.BuildPdf.PdfBuilders.CartaPorte
 
                 table.Cell().Row(1).Column(1).PaddingRight(6).Column(c =>
                 {
-                    c.Item().Text(t => { LabelValueSpans(t, "Forma de Pago:", $"{model.FormaPago} - {CfdiPdfSections.NombreFormaPago(model.FormaPago)}"); });
-                    c.Item().Text(t => { LabelValueSpans(t, "Método de Pago:", $"{model.MetodoPago} - {CfdiPdfSections.NombreMetodoPago(model.MetodoPago)}"); });
+                    c.Item().Text(t => { LabelValueSpans(t, "Forma de Pago:", $"{model.FormaPago} - {SatCatalogos.NombreFormaPago(model.FormaPago)}"); });
+                    c.Item().Text(t => { LabelValueSpans(t, "Método de Pago:", $"{model.MetodoPago} - {SatCatalogos.NombreMetodoPago(model.MetodoPago)}"); });
                 });
 
                 table.Cell().Row(1).Column(2).PaddingLeft(6).Column(c =>
                 {
-                    c.Item().Text(t => { LabelValueSpans(t, "Tipo de Comprobante:", $"{model.TipoComprobante} - {CfdiPdfSections.NombreTipoComprobante(model.TipoComprobante)}"); });
+                    c.Item().Text(t => { LabelValueSpans(t, "Tipo de Comprobante:", $"{model.TipoComprobante} - {SatCatalogos.NombreTipoComprobante(model.TipoComprobante)}"); });
                     c.Item().Text(t => { LabelValueSpans(t, "Condiciones de Pago:", model.CondicionesPago); });
                 });
             });
@@ -251,7 +252,7 @@ namespace CFDI.BuildPdf.PdfBuilders.CartaPorte
                     BodyCell(1).Text(concepto.ClaveProductoServicio ?? "").FontSize(PdfStyleConstants.FontSizeSmall);
                     BodyCell(2).Text(concepto.NumeroIdentificacion ?? "").FontSize(PdfStyleConstants.FontSizeSmall);
                     BodyCell(3).AlignCenter().Text(concepto.Cantidad.ToString(CultureInfo.InvariantCulture)).FontSize(PdfStyleConstants.FontSizeSmall);
-                    BodyCell(4).Text(CfdiPdfSections.NombreClaveUnidad(concepto.ClaveUnidad)).FontSize(PdfStyleConstants.FontSizeSmall);
+                    BodyCell(4).Text(SatCatalogos.NombreClaveUnidad(concepto.ClaveUnidad)).FontSize(PdfStyleConstants.FontSizeSmall);
                     BodyCell(5).Text(concepto.Unidad ?? "").FontSize(PdfStyleConstants.FontSizeSmall);
 
                     // Descripción + traslados
@@ -279,7 +280,7 @@ namespace CFDI.BuildPdf.PdfBuilders.CartaPorte
                                 {
                                     var ir = impRow;
                                     impTable.Cell().Row(ir).Column(1).Padding(1).Text(t.TipoFactor ?? "").FontSize(PdfStyleConstants.FontSizeVerySmall);
-                                    impTable.Cell().Row(ir).Column(2).Padding(1).Text(CfdiPdfSections.NombreImpuesto(t.Impuesto)).FontSize(PdfStyleConstants.FontSizeVerySmall);
+                                    impTable.Cell().Row(ir).Column(2).Padding(1).Text(SatCatalogos.NombreImpuesto(t.Impuesto)).FontSize(PdfStyleConstants.FontSizeVerySmall);
                                     impTable.Cell().Row(ir).Column(3).Padding(1).AlignRight().Text(CfdiPdfSections.FormatTasaOCuota(t.TasaOCuota, t.TipoFactor)).FontSize(PdfStyleConstants.FontSizeVerySmall);
                                     impTable.Cell().Row(ir).Column(4).Padding(1).AlignRight().Text(CfdiPdfSections.Format2(t.Base)).FontSize(PdfStyleConstants.FontSizeVerySmall);
                                     impTable.Cell().Row(ir).Column(5).Padding(1).AlignRight().Text(CfdiPdfSections.Format2(t.Importe)).FontSize(PdfStyleConstants.FontSizeVerySmall);
@@ -308,7 +309,7 @@ namespace CFDI.BuildPdf.PdfBuilders.CartaPorte
                                 {
                                     var rr = retRow;
                                     retTable.Cell().Row(rr).Column(1).Padding(1).Text(r.TipoFactor ?? "").FontSize(PdfStyleConstants.FontSizeVerySmall);
-                                    retTable.Cell().Row(rr).Column(2).Padding(1).Text(CfdiPdfSections.NombreImpuesto(r.Impuesto)).FontSize(PdfStyleConstants.FontSizeVerySmall);
+                                    retTable.Cell().Row(rr).Column(2).Padding(1).Text(SatCatalogos.NombreImpuesto(r.Impuesto)).FontSize(PdfStyleConstants.FontSizeVerySmall);
                                     retTable.Cell().Row(rr).Column(3).Padding(1).AlignRight().Text(CfdiPdfSections.FormatTasaOCuota(r.TasaOCuota, r.TipoFactor)).FontSize(PdfStyleConstants.FontSizeVerySmall);
                                     retTable.Cell().Row(rr).Column(4).Padding(1).AlignRight().Text(CfdiPdfSections.Format2(r.Base)).FontSize(PdfStyleConstants.FontSizeVerySmall);
                                     retTable.Cell().Row(rr).Column(5).Padding(1).AlignRight().Text(CfdiPdfSections.Format2(r.Importe)).FontSize(PdfStyleConstants.FontSizeVerySmall);
@@ -321,7 +322,7 @@ namespace CFDI.BuildPdf.PdfBuilders.CartaPorte
                     BodyCell(7).AlignRight().Text(CfdiPdfSections.Format2(concepto.ValorUnitario)).FontSize(PdfStyleConstants.FontSizeSmall);
                     BodyCell(8).AlignRight().Text(CfdiPdfSections.Format2(concepto.Importe)).FontSize(PdfStyleConstants.FontSizeSmall);
                     BodyCell(9).AlignRight().Text(concepto.Descuento != 0 ? CfdiPdfSections.Format2(concepto.Descuento) : "").FontSize(PdfStyleConstants.FontSizeSmall);
-                    BodyCell(10).AlignCenter().Text(CfdiPdfSections.NombreObjetoImp(concepto.ObjetoImpuesto)).FontSize(PdfStyleConstants.FontSizeSmall);
+                    BodyCell(10).AlignCenter().Text(SatCatalogos.NombreObjetoImp(concepto.ObjetoImpuesto)).FontSize(PdfStyleConstants.FontSizeSmall);
 
                     row++;
                 }
@@ -376,7 +377,7 @@ namespace CFDI.BuildPdf.PdfBuilders.CartaPorte
 
                         foreach (var t in model.TrasladosResumen)
                         {
-                            var etiqueta = $"   {CfdiPdfSections.NombreImpuesto(t.Impuesto)} {CfdiPdfSections.FormatTasaOCuota(t.TasaOCuota, t.TipoFactor)}";
+                            var etiqueta = $"   {SatCatalogos.NombreImpuesto(t.Impuesto)} {CfdiPdfSections.FormatTasaOCuota(t.TasaOCuota, t.TipoFactor)}";
                             TotalRow(inner, etiqueta, CfdiPdfSections.FormatCurrency(t.Importe));
                         }
 
@@ -392,7 +393,7 @@ namespace CFDI.BuildPdf.PdfBuilders.CartaPorte
 
                         foreach (var r in model.RetencionesResumen)
                         {
-                            var etiqueta = $"   {CfdiPdfSections.NombreImpuesto(r.Impuesto)}";
+                            var etiqueta = $"   {SatCatalogos.NombreImpuesto(r.Impuesto)}";
                             TotalRow(inner, etiqueta, CfdiPdfSections.FormatCurrency(r.Importe));
                         }
 
@@ -490,7 +491,7 @@ namespace CFDI.BuildPdf.PdfBuilders.CartaPorte
 
                 CfdiPdfSections.HeaderValueRow(table, 1, 1, "Versión", cp.Version);
                 CfdiPdfSections.HeaderValueRow(table, 1, 3, "Transporte Internacional", cp.TransporteInternacional);
-                CfdiPdfSections.HeaderValueRow(table, 1, 5, "Vía de entrada/salida", CfdiPdfSections.NombreCveTransporte(cp.ViaEntradaSalida));
+                CfdiPdfSections.HeaderValueRow(table, 1, 5, "Vía de entrada/salida", SatCatalogos.NombreCveTransporte(cp.ViaEntradaSalida));
 
                 CfdiPdfSections.HeaderValueRow(table, 2, 1, "Entrada/Salida", cp.EntradaSalidaMercancia);
                 CfdiPdfSections.HeaderValueRow(table, 2, 3, "País Origen/Destino", cp.PaisOrigenDestino);
@@ -568,7 +569,7 @@ namespace CFDI.BuildPdf.PdfBuilders.CartaPorte
 
                         BCell(1).Text(m.Descripcion ?? "").FontSize(PdfStyleConstants.FontSizeSmall);
                         BCell(2).AlignRight().Text(CfdiPdfSections.Format6(m.Cantidad)).FontSize(PdfStyleConstants.FontSizeSmall);
-                        BCell(3).Text(CfdiPdfSections.NombreClaveUnidad(m.ClaveUnidad)).FontSize(PdfStyleConstants.FontSizeSmall);
+                        BCell(3).Text(SatCatalogos.NombreClaveUnidad(m.ClaveUnidad)).FontSize(PdfStyleConstants.FontSizeSmall);
                         BCell(4).AlignRight().Text(CfdiPdfSections.Format6(m.PesoEnKg)).FontSize(PdfStyleConstants.FontSizeSmall);
                         BCell(5).AlignRight().Text(CfdiPdfSections.Format6(m.ValorMercancia)).FontSize(PdfStyleConstants.FontSizeSmall);
                         row++;
@@ -606,9 +607,9 @@ namespace CFDI.BuildPdf.PdfBuilders.CartaPorte
             {
                 table.ColumnsDefinition(c => { c.RelativeColumn(); c.RelativeColumn(); c.RelativeColumn(); c.RelativeColumn(); });
 
-                CfdiPdfSections.HeaderValueRow(table, 1, 1, "Permiso SCT", CfdiPdfSections.NombrePermisoSCT(at.PermisoSCT));
+                CfdiPdfSections.HeaderValueRow(table, 1, 1, "Permiso SCT", SatCatalogos.NombrePermisoSCT(at.PermisoSCT));
                 CfdiPdfSections.HeaderValueRow(table, 1, 3, "Número Permiso SCT", at.NumeroPermisoSCT);
-                CfdiPdfSections.HeaderValueRow(table, 2, 1, "Configuración Vehicular", CfdiPdfSections.NombreConfigVehicular(at.ConfigVehicular));
+                CfdiPdfSections.HeaderValueRow(table, 2, 1, "Configuración Vehicular", SatCatalogos.NombreConfigVehicular(at.ConfigVehicular));
                 CfdiPdfSections.HeaderValueRow(table, 2, 3, "Peso Bruto Vehicular", at.PesoBrutoVehicular.ToString(CultureInfo.InvariantCulture));
                 CfdiPdfSections.HeaderValueRow(table, 3, 1, "Placa Vehículo", at.PlacaVM);
                 CfdiPdfSections.HeaderValueRow(table, 3, 3, "Año Modelo Vehículo", at.AnioModeloVM.ToString());
@@ -656,7 +657,7 @@ namespace CFDI.BuildPdf.PdfBuilders.CartaPorte
             col.Item().Table(table =>
             {
                 table.ColumnsDefinition(c => { c.RelativeColumn(); c.RelativeColumn(); c.RelativeColumn(); c.RelativeColumn(); });
-                CfdiPdfSections.HeaderValueRow(table, 1, 1, "SubTipo Remolque", CfdiPdfSections.NombreSubTipoRemolque(model.CartaPorte.Remolque.SubTipoRemolque));
+                CfdiPdfSections.HeaderValueRow(table, 1, 1, "SubTipo Remolque", SatCatalogos.NombreSubTipoRemolque(model.CartaPorte.Remolque.SubTipoRemolque));
                 CfdiPdfSections.HeaderValueRow(table, 1, 3, "Placa", model.CartaPorte.Remolque.Placa);
             });
         }
@@ -682,7 +683,7 @@ namespace CFDI.BuildPdf.PdfBuilders.CartaPorte
                     IContainer BCell(uint column) => table.Cell().Row(r).Column(column)
                         .Border(0.3f).BorderColor(PdfStyleConstants.ColorBorderSoft).Padding(3);
 
-                    BCell(1).Text(CfdiPdfSections.NombreTipoFigura(f.TipoFigura)).FontSize(PdfStyleConstants.FontSizeSmall);
+                    BCell(1).Text(SatCatalogos.NombreTipoFigura(f.TipoFigura)).FontSize(PdfStyleConstants.FontSizeSmall);
                     BCell(2).Text(f.RFCFigura ?? "").FontSize(PdfStyleConstants.FontSizeSmall);
                     BCell(3).Text(f.NombreFigura ?? "").FontSize(PdfStyleConstants.FontSizeSmall);
                     BCell(4).Text(f.NumeroLicencia ?? "").FontSize(PdfStyleConstants.FontSizeSmall);

@@ -1,0 +1,871 @@
+using System;
+using System.Collections.Generic;
+
+namespace CFDI.BuildPdf.Catalogs
+{
+    /// <summary>
+    /// Catálogos SAT (clave → descripción). Datos puros, sin dependencia de QuestPDF.
+    /// </summary>
+    internal static class SatCatalogos
+    {
+        /// <summary>
+        /// Traduce la clave SAT del catálogo c_TipoDeComprobante a su descripción.
+        /// Si la clave no corresponde a un valor conocido, se devuelve tal cual.
+        /// </summary>
+        public static string NombreTipoComprobante(string? clave)
+        {
+            return clave switch
+            {
+                "I" => "Ingreso",
+                "E" => "Egreso",
+                "T" => "Traslado",
+                "P" => "Pago",
+                "N" => "Nómina",
+                _ => clave ?? ""
+            };
+        }
+
+        /// <summary>
+        /// Traduce la clave SAT del catálogo c_TipoRelacion a su descripción.
+        /// Si la clave no corresponde a un valor conocido, se devuelve tal cual.
+        /// </summary>
+        public static string NombreTipoRelacion(string? clave)
+        {
+            return clave switch
+            {
+                "01" => "Nota de crédito de los documentos relacionados",
+                "02" => "Nota de débito de los documentos relacionados",
+                "03" => "Devolución de mercancía sobre facturas o traslados previos",
+                "04" => "Sustitución de los CFDI previos",
+                "05" => "Traslados de mercancías facturados previamente",
+                "06" => "Factura generada por los traslados previos",
+                "07" => "CFDI por aplicación de anticipo",
+                _ => clave ?? ""
+            };
+        }
+
+        public static string NombreUsoCFDI(string? clave)
+        {
+            return clave switch
+            {
+                "G01" => "Adquisición de mercancías",
+                "G02" => "Devoluciones, descuentos o bonificaciones",
+                "G03" => "Gastos en general",
+                "I01" => "Construcciones",
+                "I02" => "Mobiliario y equipo de oficina por inversiones",
+                "I03" => "Equipo de transporte",
+                "I04" => "Equipo de computo y accesorios",
+                "I05" => "Dados, troqueles, moldes, matrices y herramental",
+                "I06" => "Comunicaciones telefónicas",
+                "I07" => "Comunicaciones satelitales",
+                "I08" => "Otra maquinaria y equipo",
+                "D01" => "Honorarios médicos, dentales y gastos hospitalarios",
+                "D02" => "Gastos médicos por incapacidad o discapacidad",
+                "D03" => "Gastos funerales",
+                "D04" => "Donativos",
+                "D05" => "Intereses reales por créditos hipotecarios",
+                "D06" => "Aportaciones voluntarias al SAR",
+                "D07" => "Primas por seguros de gastos médicos",
+                "D08" => "Gastos de transportación escolar obligatoria",
+                "D09" => "Depósitos en cuentas para el ahorro",
+                "D10" => "Pagos por servicios educativos (colegiaturas)",
+                "S01" => "Sin efectos fiscales",
+                "CP01" => "Pagos",
+                "CN01" => "Nómina",
+                _ => clave ?? ""
+            };
+        }
+
+        public static string NombreExportacion(string? clave)
+        {
+            return clave switch
+            {
+                "01" => "No aplica",
+                "02" => "Definitiva",
+                "03" => "Temporal",
+                "04" => "Definitiva con clave distinta a A1",
+                _ => clave ?? ""
+            };
+        }
+
+        public static string NombreMetodoPago(string? clave)
+        {
+            return clave switch
+            {
+                "PUE" => "Pago en una sola exhibición",
+                "PPD" => "Pago en parcialidades o diferido",
+                _ => clave ?? ""
+            };
+        }
+
+        public static string NombreFormaPago(string? clave)
+        {
+            return clave switch
+            {
+                "01" => "Efectivo",
+                "02" => "Cheque nominativo",
+                "03" => "Transferencia electrónica de fondos",
+                "04" => "Tarjeta de crédito",
+                "05" => "Monedero electrónico",
+                "06" => "Dinero electrónico",
+                "08" => "Vales de despensa",
+                "12" => "Dación en pago",
+                "13" => "Pago por subrogación",
+                "14" => "Pago por consignación",
+                "15" => "Condonación",
+                "17" => "Compensación",
+                "23" => "Novación",
+                "24" => "Confusión",
+                "25" => "Remisión de deuda",
+                "26" => "Prescripción o caducidad",
+                "27" => "A satisfacción del acreedor",
+                "28" => "Tarjeta de débito",
+                "29" => "Tarjeta de servicios",
+                "30" => "Aplicación de anticipos",
+                "31" => "Intermediario pagos",
+                "99" => "Por definir",
+                _ => clave ?? ""
+            };
+        }
+
+        public static string NombreRegimenFiscal(string? clave)
+        {
+            return clave switch
+            {
+                "601" => "General de Ley Personas Morales",
+                "603" => "Personas Morales con Fines no Lucrativos",
+                "605" => "Sueldos y Salarios e Ingresos Asimilados a Salarios",
+                "606" => "Arrendamiento",
+                "607" => "Régimen de Enajenación o Adquisición de Bienes",
+                "608" => "Demás ingresos",
+                "609" => "Consolidación",
+                "610" => "Residentes en el Extranjero sin Establecimiento Permanente en México",
+                "611" => "Ingresos por Dividendos (socios y accionistas)",
+                "612" => "Personas Físicas con Actividades Empresariales y Profesionales",
+                "614" => "Ingresos por intereses",
+                "615" => "Régimen de los ingresos por obtención de premios",
+                "616" => "Sin obligaciones fiscales",
+                "620" => "Sociedades Cooperativas de Producción que optan por diferir sus ingresos",
+                "621" => "Incorporación Fiscal",
+                "622" => "Actividades Agrícolas, Ganaderas, Silvícolas y Pesqueras",
+                "623" => "Opcional para Grupos de Sociedades",
+                "624" => "Coordinados",
+                "625" => "Régimen de las Actividades Empresariales con ingresos a través de Plataformas Tecnológicas",
+                "626" => "Régimen Simplificado de Confianza",
+                _ => clave ?? ""
+            };
+        }
+
+        /// <summary>
+        /// Diccionario RFC → nombre comercial del PAC (Proveedor Autorizado de Certificación).
+        /// Las claves deben estar en MAYÚSCULAS. Amplía esta lista con los PACs que tu organización utilice.
+        /// </summary>
+        private static readonly Dictionary<string, string> PacsConocidos =
+            new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                { "SST060807KU0", "Buzón E" },
+                { "SED1102088J7", "InvoiceOne" },
+                { "SAT970701NN3", "SAT (pruebas)" },
+                // Agrega aquí los RFCs de los PACs adicionales con los que trabajes.
+            };
+
+        /// <summary>
+        /// Traduce el RFC del PAC (atributo RfcProvCertif del TimbreFiscalDigital)
+        /// a su nombre comercial. Si el RFC no está en el diccionario, se devuelve
+        /// "PAC no identificado" como fallback visible para el lector.
+        /// </summary>
+        public static string NombrePac(string? rfcProvCertif)
+        {
+            if (string.IsNullOrWhiteSpace(rfcProvCertif))
+                return "PAC no identificado";
+
+            return PacsConocidos.TryGetValue(rfcProvCertif, out var nombre)
+                ? nombre
+                : "PAC no identificado";
+        }
+
+        /// <summary>
+        /// Traduce la clave SAT del catálogo c_ObjetoImp a su descripción corta.
+        /// Si la clave no corresponde a un valor conocido, se devuelve tal cual.
+        /// </summary>
+        public static string NombreObjetoImp(string? clave)
+        {
+            return clave switch
+            {
+                "01" => "No objeto de impuesto",
+                "02" => "Sí objeto de impuesto",
+                "03" => "Sí objeto, sin desglose",
+                "04" => "Sí objeto, no causa",
+                "05" => "Sí objeto, IVA crédito PODEBI",
+                "06" => "Sí objeto IVA, no traslado",
+                "07" => "No traslado IVA, sí IEPS",
+                "08" => "No traslado IVA, no IEPS",
+                _ => clave ?? ""
+            };
+        }
+
+        /// <summary>
+        /// Traduce el código SAT de impuesto a su nombre corto (001=ISR, 002=IVA, 003=IEPS).
+        /// Si el valor no corresponde a un código conocido, se devuelve tal cual.
+        /// </summary>
+        public static string NombreImpuesto(string? codigo)
+        {
+            return codigo switch
+            {
+                "001" => "ISR",
+                "002" => "IVA",
+                "003" => "IEPS",
+                _ => codigo ?? ""
+            };
+        }
+
+        /// <summary>
+        /// Traduce la clave SAT del catálogo c_FiguraTransporte a su descripción.
+        /// Devuelve el formato "clave - Descripción" (ej. "01 - Operador").
+        /// Si la clave no corresponde a un valor conocido, se devuelve tal cual.
+        /// </summary>
+        public static string NombreTipoFigura(string? clave)
+        {
+            var descripcion = clave switch
+            {
+                "01" => "Operador",
+                "02" => "Propietario",
+                "03" => "Arrendador",
+                "04" => "Notificado",
+                _ => null
+            };
+
+            if (descripcion == null)
+                return clave ?? "";
+
+            return $"{clave} - {descripcion}";
+        }
+
+        /// <summary>
+        /// Traduce la clave SAT del catálogo c_CveTransporte (vía de entrada/salida)
+        /// a su descripción. Devuelve el formato "clave - Descripción" (ej. "01 - Autotransporte").
+        /// Si la clave no corresponde a un valor conocido, se devuelve tal cual.
+        /// </summary>
+        public static string NombreCveTransporte(string? clave)
+        {
+            var descripcion = clave switch
+            {
+                "01" => "Autotransporte",
+                "02" => "Transporte Marítimo",
+                "03" => "Transporte Aéreo",
+                "04" => "Transporte Ferroviario",
+                _ => null
+            };
+
+            if (descripcion == null)
+                return clave ?? "";
+
+            return $"{clave} - {descripcion}";
+        }
+
+        /// <summary>
+        /// Traduce la clave SAT del catálogo c_ClaveUnidad (unidad de medida) a su descripción.
+        /// Cubre las unidades más utilizadas en CFDI. Si la clave no corresponde a un valor conocido,
+        /// se devuelve tal cual (fallback seguro para el catálogo completo).
+        /// </summary>
+        public static string NombreClaveUnidad(string? clave)
+        {
+            return clave switch
+            {
+                // Múltiplos / fracciones / decimales
+                "H87" => "Pieza",
+                "XUN" => "Unidad",
+                "EA"  => "Elemento",
+                "E48" => "Unidad de Servicio",
+                "ACT" => "Actividad",
+                "E51" => "Trabajo",
+                "A9"  => "Tarifa",
+                "E54" => "Viaje",
+                "E46" => "Elemento de consumo eléctrico",
+                "E01" => "Pedazo",
+
+                // Peso / masa
+                "KGM" => "Kilogramo",
+                "GRM" => "Gramo",
+                "MGM" => "Miligramo",
+                "TNE" => "Tonelada métrica",
+                "LBR" => "Libra",
+                "ONZ" => "Onza",
+
+                // Longitud
+                "MTR" => "Metro",
+                "CMT" => "Centímetro",
+                "MMT" => "Milímetro",
+                "KMT" => "Kilómetro",
+                "INH" => "Pulgada",
+                "FOT" => "Pie",
+
+                // Área
+                "MTK" => "Metro cuadrado",
+                "CMK" => "Centímetro cuadrado",
+                "HAR" => "Hectárea",
+
+                // Volumen
+                "MTQ" => "Metro cúbico",
+                "LTR" => "Litro",
+                "MLT" => "Mililitro",
+                "CMQ" => "Centímetro cúbico",
+                "GLL" => "Galón",
+                "BLL" => "Barril",
+
+                // Tiempo
+                "HUR" => "Hora",
+                "MIN" => "Minuto",
+                "SEC" => "Segundo",
+                "DAY" => "Día",
+                "WEE" => "Semana",
+                "MON" => "Mes",
+                "ANN" => "Año",
+
+                // Empaque / presentación
+                "XBX" => "Caja",
+                "XBG" => "Bolsa",
+                "XPK" => "Paquete",
+                "XPA" => "Cajón",
+                "XPL" => "Tarima",
+                "XRO" => "Rollo",
+                "XLT" => "Lote",
+                "XTK" => "Tanque",
+                "XCT" => "Cartón",
+                "XCS" => "Estuche",
+                "XCR" => "Cajón de cartón",
+                "XCU" => "Cubo",
+                "XDR" => "Tambor",
+                "XST" => "Hoja",
+                "XBA" => "Barril (contenedor)",
+                "BB"  => "Caja base",
+                "KT"  => "Kit",
+                "SET" => "Conjunto",
+                "PR"  => "Par",
+                "DPC" => "Docenas de piezas",
+                "11"  => "Equipos",
+                "10"  => "Grupos",
+                "4G"  => "Variedad",
+
+                // Energía
+                "KWH" => "Kilowatt-hora",
+                "WTT" => "Watt",
+
+                // Otros
+                "BG"  => "Bolsa",
+                "ROL" => "Rollo",
+
+                _ => clave ?? ""
+            };
+        }
+
+        /// <summary>
+        /// Traduce la clave SAT del catálogo c_TipoPermiso (permiso SCT / SICT) a su descripción.
+        /// Devuelve el formato "clave - Descripción" (ej. "TPAF01 - Autotransporte Federal de carga general").
+        /// Si la clave no corresponde a un valor conocido, se devuelve tal cual.
+        /// </summary>
+        public static string NombrePermisoSCT(string? clave)
+        {
+            var descripcion = clave switch
+            {
+                "TPAF01" => "Autotransporte Federal de carga general",
+                "TPAF02" => "Transporte privado de carga",
+                "TPAF03" => "Autotransporte Federal de Carga Especializada de materiales y residuos peligrosos",
+                "TPAF04" => "Transporte de automóviles sin rodar en vehículo tipo góndola",
+                "TPAF05" => "Transporte de carga de gran peso y/o volumen de hasta 90 toneladas",
+                "TPAF06" => "Transporte de carga especializada de gran peso y/o volumen de más 90 toneladas",
+                "TPAF07" => "Transporte de madera en rollo",
+                "TPAF08" => "Autotransporte Internacional de carga de largo recorrido",
+                "TPAF09" => "Autotransporte Internacional de carga especializada de materiales y residuos peligrosos de largo recorrido",
+                "TPAF10" => "Autotransporte de Carga General cuyo ámbito de aplicación comprende la franja fronteriza con Estados Unidos",
+                "TPAF11" => "Autotransporte de Carga Especializada cuyo ámbito de aplicación comprende la franja fronteriza con Estados Unidos",
+                "TPAF12" => "Servicio auxiliar de arrastre en las vías generales de comunicación",
+                "TPAF13" => "Servicio auxiliar de servicios de arrastre, salvamento y depósito de vehículos en las vías generales de comunicación",
+                "TPAF14" => "Servicio de paquetería y mensajería en las vías generales de comunicación",
+                "TPAF15" => "Transporte especial para el tránsito de grúas industriales con peso máximo de 90 toneladas",
+                "TPAF16" => "Empresas trasladistas de vehículos nuevos",
+                "TPAF17" => "Empresas fabricantes o distribuidoras de vehículos nuevos",
+                "TPAF18" => "Autorización expresa para circular en los caminos y puentes de jurisdicción federal con configuraciones de tractocamión doblemente articulado",
+                "TPAF19" => "Permiso Especial para Autotransporte de Carga Especializada de Cabotaje",
+                "TPAF20" => "Permiso Temporal para Navegación de Cabotaje",
+                "TPTM01" => "Permiso temporal para navegación de cabotaje",
+                "TPTM02" => "Concesión y/o autorización para el servicio regular nacional e internacional para empresas mexicanas",
+                "TPTA01" => "Permisos para el servicio aéreo regular de empresas extranjeras",
+                "TPTA02" => "Permisos para el servicio aéreo nacional e internacional no regular de fletamento",
+                "TPTA03" => "Permisos para el servicio aéreo nacional e internacional no regular de taxis aéreos",
+                "TPXX00" => "Permiso no comprendido en el catálogo",
+                _ => null
+            };
+
+            if (descripcion == null)
+                return clave ?? "";
+
+            return $"{clave} - {descripcion}";
+        }
+
+        /// <summary>
+        /// Traduce la clave SAT del catálogo c_ConfigAutotransporte (configuración vehicular)
+        /// a su descripción. Devuelve el formato "clave - Descripción" (ej. "C2 - Camión Unitario").
+        /// Si la clave no corresponde a un valor conocido, se devuelve tal cual.
+        /// </summary>
+        public static string NombreConfigVehicular(string? clave)
+        {
+            var descripcion = clave switch
+            {
+                "VL" => "Vehículo ligero de carga",
+                "C2" => "Camión Unitario (2 ejes)",
+                "C3" => "Camión Unitario (3 ejes)",
+                "C2R2" => "Camión-Remolque (2-2 ejes)",
+                "C3R2" => "Camión-Remolque (3-2 ejes)",
+                "C2R3" => "Camión-Remolque (2-3 ejes)",
+                "C3R3" => "Camión-Remolque (3-3 ejes)",
+                "T2S1" => "Tractocamión Articulado (2-1 ejes)",
+                "T2S2" => "Tractocamión Articulado (2-2 ejes)",
+                "T2S3" => "Tractocamión Articulado (2-3 ejes)",
+                "T3S1" => "Tractocamión Articulado (3-1 ejes)",
+                "T3S2" => "Tractocamión Articulado (3-2 ejes)",
+                "T3S3" => "Tractocamión Articulado (3-3 ejes)",
+                "T2S1R2" => "Tractocamión Semirremolque-Remolque (2-1-2 ejes)",
+                "T2S2R2" => "Tractocamión Semirremolque-Remolque (2-2-2 ejes)",
+                "T2S1R3" => "Tractocamión Semirremolque-Remolque (2-1-3 ejes)",
+                "T3S1R2" => "Tractocamión Semirremolque-Remolque (3-1-2 ejes)",
+                "T3S1R3" => "Tractocamión Semirremolque-Remolque (3-1-3 ejes)",
+                "T3S2R2" => "Tractocamión Semirremolque-Remolque (3-2-2 ejes)",
+                "T3S2R3" => "Tractocamión Semirremolque-Remolque (3-2-3 ejes)",
+                "T3S2R4" => "Tractocamión Semirremolque-Remolque (3-2-4 ejes)",
+                "T2S2S2" => "Tractocamión Semirremolque-Semirremolque (2-2-2 ejes)",
+                "T3S2S2" => "Tractocamión Semirremolque-Semirremolque (3-2-2 ejes)",
+                "T3S3S2" => "Tractocamión Semirremolque-Semirremolque (3-3-2 ejes)",
+                "OTROEVGP" => "Especializado de carga voluminosa y/o gran peso",
+                "OTROSG" => "Servicio de grúas",
+                "GPLUTA" => "Grúa Industrial",
+                "GPLUTB" => "Grúa Tipo Canasta",
+                "GPLUTC" => "Grúa Tipo Plataforma",
+                "GPLUTD" => "Grúa Tipo Telescópica",
+                _ => null
+            };
+
+            if (descripcion == null)
+                return clave ?? "";
+
+            return $"{clave} - {descripcion}";
+        }
+
+        /// <summary>
+        /// Traduce la clave SAT del catálogo c_SubTipoRem (subtipo de remolque / semirremolque)
+        /// a su descripción. Devuelve el formato "clave - Descripción" (ej. "CTR001 - Caballete").
+        /// Si la clave no corresponde a un valor conocido, se devuelve tal cual.
+        /// </summary>
+        public static string NombreSubTipoRemolque(string? clave)
+        {
+            var descripcion = clave switch
+            {
+                "CTR001" => "Caballete",
+                "CTR002" => "Caja",
+                "CTR003" => "Caja Abierta",
+                "CTR004" => "Caja Cerrada",
+                "CTR005" => "Caja De Recolección Con Cargador Frontal",
+                "CTR006" => "Caja Refrigerada",
+                "CTR007" => "Caja Seca",
+                "CTR008" => "Caja Transferencia",
+                "CTR009" => "Cama Baja o Cuello Ganso",
+                "CTR010" => "Chasis Portacontenedor",
+                "CTR011" => "Convencional De Chasis",
+                "CTR012" => "Equipo Especial",
+                "CTR013" => "Estacas",
+                "CTR014" => "Góndola Madrina",
+                "CTR015" => "Grúa Industrial",
+                "CTR016" => "Grúas",
+                "CTR017" => "Integrales",
+                "CTR018" => "Jaula",
+                "CTR019" => "Media Redila",
+                "CTR020" => "Pallet o Celdillas",
+                "CTR021" => "Plataforma",
+                "CTR022" => "Plataforma Con Grúas",
+                "CTR023" => "Plataforma Encortinada",
+                "CTR024" => "Redilas",
+                "CTR025" => "Refrigerador",
+                "CTR026" => "Revolvedora",
+                "CTR027" => "Semieje",
+                "CTR028" => "Tanque",
+                "CTR029" => "Tolva",
+                "CTR030" => "Tolva Grano",
+                "CTR031" => "Volteo",
+                "CTR032" => "Volteo Desmontable",
+                _ => null
+            };
+
+            if (descripcion == null)
+                return clave ?? "";
+
+            return $"{clave} - {descripcion}";
+        }
+
+        // -------------------------------------------------------------------
+        // Catálogos del Complemento Nómina 1.2
+        // -------------------------------------------------------------------
+
+        /// <summary>
+        /// Traduce la clave SAT del catálogo c_TipoContrato a su descripción.
+        /// Si la clave no corresponde a un valor conocido, se devuelve tal cual.
+        /// </summary>
+        public static string NombreTipoContrato(string? clave)
+        {
+            return clave switch
+            {
+                "01" => "Contrato de trabajo por tiempo indeterminado",
+                "02" => "Contrato de trabajo para obra determinada",
+                "03" => "Contrato de trabajo por tiempo determinado",
+                "04" => "Contrato de trabajo por temporada",
+                "05" => "Contrato de trabajo sujeto a prueba",
+                "06" => "Contrato de trabajo con capacitación inicial",
+                "07" => "Modalidad de contratación por pago de hora laborada",
+                "08" => "Modalidad de trabajo por comisión laboral",
+                "09" => "Modalidades de contratación donde no existe relación de trabajo",
+                "10" => "Jubilación, pensión, retiro",
+                "99" => "Otro contrato",
+                _ => clave ?? ""
+            };
+        }
+
+        /// <summary>
+        /// Traduce la clave SAT del catálogo c_TipoRegimen (Nómina) a su descripción.
+        /// Si la clave no corresponde a un valor conocido, se devuelve tal cual.
+        /// </summary>
+        public static string NombreTipoRegimen(string? clave)
+        {
+            return clave switch
+            {
+                "02" => "Sueldos (Incluye ingresos señalados en la fracción I del artículo 94 de LISR)",
+                "03" => "Jubilados",
+                "04" => "Pensionados",
+                "05" => "Asimilados a salarios, Miembros de las Sociedades Cooperativas de Producción",
+                "06" => "Asimilados a salarios, Integrantes de Sociedades y Asociaciones Civiles",
+                "07" => "Asimilados a salarios, Miembros de consejos directivos, de vigilancia, consultivos, honorarios a administradores, comisarios y gerentes generales",
+                "08" => "Asimilados a salarios, Actividad empresarial (comisionistas)",
+                "09" => "Asimilados a salarios, Honorarios asimilados a salarios",
+                "10" => "Asimilados a salarios, Ingresos acciones o títulos valor",
+                "11" => "Sueldos asimilados a salarios",
+                "12" => "Jubilados o Pensionados",
+                "13" => "Indemnización o Separación",
+                "99" => "Otro Régimen",
+                _ => clave ?? ""
+            };
+        }
+
+        /// <summary>
+        /// Traduce la clave SAT del catálogo c_PeriodicidadPago a su descripción.
+        /// Si la clave no corresponde a un valor conocido, se devuelve tal cual.
+        /// </summary>
+        public static string NombrePeriodicidadPago(string? clave)
+        {
+            return clave switch
+            {
+                "01" => "Diario",
+                "02" => "Semanal",
+                "03" => "Catorcenal",
+                "04" => "Quincenal",
+                "05" => "Mensual",
+                "06" => "Bimestral",
+                "07" => "Unidad obra",
+                "08" => "Comisión",
+                "09" => "Precio alzado",
+                "10" => "Decenal",
+                "99" => "Otra Periodicidad",
+                _ => clave ?? ""
+            };
+        }
+
+        /// <summary>
+        /// Traduce la clave SAT del catálogo c_RiesgoPuesto a su descripción.
+        /// Si la clave no corresponde a un valor conocido, se devuelve tal cual.
+        /// </summary>
+        public static string NombreRiesgoPuesto(string? clave)
+        {
+            return clave switch
+            {
+                "1" => "Clase I",
+                "2" => "Clase II",
+                "3" => "Clase III",
+                "4" => "Clase IV",
+                "5" => "Clase V",
+                "99" => "No aplica",
+                _ => clave ?? ""
+            };
+        }
+
+        /// <summary>
+        /// Traduce la clave SAT del catálogo c_Estado (ClaveEntFed de Nómina) a su descripción.
+        /// Si la clave no corresponde a un valor conocido, se devuelve tal cual.
+        /// </summary>
+        public static string NombreEstadoSAT(string? clave)
+        {
+            return clave switch
+            {
+                "AGU" => "Aguascalientes",
+                "BCN" => "Baja California",
+                "BCS" => "Baja California Sur",
+                "CAM" => "Campeche",
+                "CHP" => "Chiapas",
+                "CHH" => "Chihuahua",
+                "COA" => "Coahuila",
+                "COL" => "Colima",
+                "CMX" => "Ciudad de México",
+                "DUR" => "Durango",
+                "MEX" => "Estado de México",
+                "GUA" => "Guanajuato",
+                "GRO" => "Guerrero",
+                "HID" => "Hidalgo",
+                "JAL" => "Jalisco",
+                "MIC" => "Michoacán",
+                "MOR" => "Morelos",
+                "NAY" => "Nayarit",
+                "NLE" => "Nuevo León",
+                "OAX" => "Oaxaca",
+                "PUE" => "Puebla",
+                "QUE" => "Querétaro",
+                "ROO" => "Quintana Roo",
+                "SLP" => "San Luis Potosí",
+                "SIN" => "Sinaloa",
+                "SON" => "Sonora",
+                "TAB" => "Tabasco",
+                "TAM" => "Tamaulipas",
+                "TLA" => "Tlaxcala",
+                "VER" => "Veracruz",
+                "YUC" => "Yucatán",
+                "ZAC" => "Zacatecas",
+                "NCZ" => "Nacional",
+                _ => clave ?? ""
+            };
+        }
+
+        /// <summary>
+        /// Traduce la clave SAT del catálogo c_TipoPercepcion a su descripción.
+        /// Si la clave no corresponde a un valor conocido, se devuelve tal cual.
+        /// </summary>
+        public static string NombreTipoPercepcion(string? clave)
+        {
+            return clave switch
+            {
+                "001" => "Sueldos, Salarios Rayas y Jornales",
+                "002" => "Gratificación Anual (Aguinaldo)",
+                "003" => "Participación de los Trabajadores en las Utilidades PTU",
+                "004" => "Reembolso de Gastos Médicos Dentales y Hospitalarios",
+                "005" => "Fondo de Ahorro",
+                "006" => "Caja de ahorro",
+                "009" => "Contribuciones a Cargo del Trabajador Pagadas por el Patrón",
+                "010" => "Premios por puntualidad",
+                "011" => "Prima de Seguro de Vida",
+                "012" => "Seguro de Gastos Médicos Mayores",
+                "013" => "Cuotas Sindicales Pagadas por el Patrón",
+                "014" => "Subsidios por incapacidad",
+                "015" => "Becas para trabajadores y/o hijos",
+                "019" => "Horas extra",
+                "020" => "Prima dominical",
+                "021" => "Prima vacacional",
+                "022" => "Prima por antigüedad",
+                "023" => "Pagos por separación",
+                "024" => "Seguro de retiro",
+                "025" => "Indemnizaciones",
+                "026" => "Reembolso por funeral",
+                "027" => "Cuotas de seguridad social pagadas por el patrón",
+                "028" => "Comisiones",
+                "029" => "Vales de despensa",
+                "030" => "Vales de restaurante",
+                "031" => "Vales de gasolina",
+                "032" => "Vales de ropa",
+                "033" => "Ayuda para renta",
+                "034" => "Ayuda para artículos escolares",
+                "035" => "Ayuda para anteojos",
+                "036" => "Ayuda para transporte",
+                "037" => "Ayuda para gastos de funeral",
+                "038" => "Otros ingresos por salarios",
+                "039" => "Jubilaciones, pensiones o haberes de retiro",
+                "040" => "Jubilaciones, pensiones o haberes de retiro en parcialidades",
+                "041" => "Pagos por separación por jubilación",
+                "042" => "Pagos por separación por retiro",
+                "044" => "Jubilaciones, pensiones o haberes de retiro en una sola exhibición",
+                "045" => "Ingresos en acciones o títulos valor que representan bienes",
+                "046" => "Ingresos asimilados a salarios",
+                "047" => "Alimentación",
+                "048" => "Habitación",
+                "049" => "Premios por asistencia",
+                "050" => "Viáticos",
+                "051" => "Pagos por gratificaciones, primas, compensaciones, recompensas u otros a extrabajadores derivados de jubilación en parcialidades",
+                _ => clave ?? ""
+            };
+        }
+
+        /// <summary>
+        /// Traduce la clave SAT del catálogo c_TipoDeduccion a su descripción.
+        /// Cubre las 107 claves oficiales. Si la clave no corresponde a un valor conocido,
+        /// se devuelve tal cual (fallback seguro).
+        /// </summary>
+        public static string NombreTipoDeduccion(string? clave)
+        {
+            return clave switch
+            {
+                "001" => "Seguridad social",
+                "002" => "ISR",
+                "003" => "Aportaciones a retiro, cesantía en edad avanzada y vejez",
+                "004" => "Otros",
+                "005" => "Aportaciones a Fondo de vivienda",
+                "006" => "Descuento por incapacidad",
+                "007" => "Pensión alimenticia",
+                "008" => "Renta",
+                "009" => "Préstamos provenientes del Fondo Nacional de la Vivienda para los Trabajadores",
+                "010" => "Pago por crédito de vivienda",
+                "011" => "Pago de abonos INFONACOT",
+                "012" => "Anticipo de salarios",
+                "013" => "Pagos hechos con exceso al trabajador",
+                "014" => "Errores",
+                "015" => "Pérdidas",
+                "016" => "Averías",
+                "017" => "Adquisición de artículos producidos por la empresa o establecimiento",
+                "018" => "Cuotas para la constitución y fomento de sociedades cooperativas y de cajas de ahorro",
+                "019" => "Cuotas sindicales",
+                "020" => "Ausencia (Ausentismo)",
+                "021" => "Cuotas obrero patronales",
+                "022" => "Impuestos Locales",
+                "023" => "Aportaciones Voluntarias",
+                "024" => "Ajuste en Gratificación Anual (Aguinaldo) Exento",
+                "025" => "Ajuste en Gratificación Anual (Aguinaldo) Gravado",
+                "026" => "Ajuste en Participación de los Trabajadores en las Utilidades PTU Exento",
+                "027" => "Ajuste en Participación de los Trabajadores en las Utilidades PTU Gravado",
+                "028" => "Ajuste en Reembolso de Gastos Médicos, Dentales y Hospitalarios Exento",
+                "029" => "Ajuste en Fondo de ahorro Exento",
+                "030" => "Ajuste en Caja de ahorro Exento",
+                "031" => "Ajuste en Contribuciones a Cargo del Trabajador Pagadas por el Patrón Exento",
+                "032" => "Ajuste en Premios por puntualidad Gravado",
+                "033" => "Ajuste en Prima de Seguro de vida Exento",
+                "034" => "Ajuste en Seguro de Gastos Médicos Mayores Exento",
+                "035" => "Ajuste en Cuotas Sindicales Pagadas por el Patrón Exento",
+                "036" => "Ajuste en Subsidios por incapacidad Exento",
+                "037" => "Ajuste en Becas para trabajadores y/o hijos Exento",
+                "038" => "Ajuste en Horas extra Exento",
+                "039" => "Ajuste en Horas extra Gravado",
+                "040" => "Ajuste en Prima Dominical Exento",
+                "041" => "Ajuste en Prima Dominical Gravado",
+                "042" => "Ajuste en Prima vacacional Exento",
+                "043" => "Ajuste en Prima vacacional Gravado",
+                "044" => "Ajuste en Prima por antigüedad Exento",
+                "045" => "Ajuste en Prima por antigüedad Gravado",
+                "046" => "Ajuste en Pagos por separación Exento",
+                "047" => "Ajuste en Pagos por separación Gravado",
+                "048" => "Ajuste en Seguro de Retiro Exento",
+                "049" => "Ajuste en Indemnizaciones Exento",
+                "050" => "Ajuste en Indemnizaciones Gravado",
+                "051" => "Ajuste en Reembolso por Funeral Exento",
+                "052" => "Ajuste en Cuotas de Seguridad Social pagadas por el patrón Exento",
+                "053" => "Ajuste en Comisiones Gravado",
+                "054" => "Ajuste en Vales de despensa Exento",
+                "055" => "Ajuste en Vales de restaurante Exento",
+                "056" => "Ajuste en Vales de gasolina Exento",
+                "057" => "Ajuste en Vales de ropa Exento",
+                "058" => "Ajuste en Ayuda para renta Exento",
+                "059" => "Ajuste en Ayuda para artículos escolares Exento",
+                "060" => "Ajuste en Ayuda para anteojos Exento",
+                "061" => "Ajuste en Ayuda para transporte Exento",
+                "062" => "Ajuste en Ayuda para gastos de funeral Exento",
+                "063" => "Ajuste en Otros ingresos por salarios Exento",
+                "064" => "Ajuste en Otros ingresos por salarios Gravado",
+                "065" => "Ajuste en Jubilaciones, pensiones o haberes de retiro en una sola exhibición Exento",
+                "066" => "Ajuste en Jubilaciones, pensiones o haberes de retiro en una sola exhibición Gravado",
+                "067" => "Ajuste en Pagos por separación Acumulable",
+                "068" => "Ajuste en Pagos por separación No acumulable",
+                "069" => "Ajuste en Jubilaciones, pensiones o haberes de retiro en parcialidades Exento",
+                "070" => "Ajuste en Jubilaciones, pensiones o haberes de retiro en parcialidades Gravado",
+                "071" => "Ajuste en subsidio para el empleo (efectivamente entregado al trabajador)",
+                "072" => "Ajuste en Ingresos en acciones o títulos valor que representan bienes Exento",
+                "073" => "Ajuste en Ingresos en acciones o títulos valor que representan bienes Gravado",
+                "074" => "Ajuste en alimentación Exento",
+                "075" => "Ajuste en alimentación Gravado",
+                "076" => "Ajuste en habitación Exento",
+                "077" => "Ajuste en habitación Gravado",
+                "078" => "Ajuste en premios por asistencia",
+                "079" => "Ajuste en pagos distintos a los listados y que no deben considerarse como ingreso por sueldos, salarios o ingresos asimilados",
+                "080" => "Ajuste en Viáticos gravados",
+                "081" => "Ajuste en Viáticos (entregados al trabajador)",
+                "082" => "Ajuste en Fondo de ahorro Gravado",
+                "083" => "Ajuste en Caja de ahorro Gravado",
+                "084" => "Ajuste en Prima de Seguro de vida Gravado",
+                "085" => "Ajuste en Seguro de Gastos Médicos Mayores Gravado",
+                "086" => "Ajuste en Subsidios por incapacidad Gravado",
+                "087" => "Ajuste en Becas para trabajadores y/o hijos Gravado",
+                "088" => "Ajuste en Seguro de retiro Gravado",
+                "089" => "Ajuste en Vales de despensa Gravado",
+                "090" => "Ajuste en Vales de restaurante Gravado",
+                "091" => "Ajuste en Vales de gasolina Gravado",
+                "092" => "Ajuste en Vales de ropa Gravado",
+                "093" => "Ajuste en Ayuda para renta Gravado",
+                "094" => "Ajuste en Ayuda para artículos escolares Gravado",
+                "095" => "Ajuste en Ayuda para anteojos Gravado",
+                "096" => "Ajuste en Ayuda para transporte Gravado",
+                "097" => "Ajuste en Ayuda para gastos de funeral Gravado",
+                "098" => "Ajuste a ingresos asimilados a salarios Gravados",
+                "099" => "Ajuste a ingresos por sueldos y salarios Gravados",
+                "100" => "Ajuste en Viáticos exentos",
+                "101" => "ISR Retenido de Ejercicio Anterior",
+                "102" => "Ajuste a Pagos por Gratificaciones, Primas, Compensaciones, Recompensas u Otros a Extrabajadores derivados de Jubilación en Parcialidades, Gravados",
+                "103" => "Ajuste a Pagos que se realicen a Extrabajadores que Obtengan una Jubilación en Parcialidades derivados de la Ejecución de Resoluciones Judicial o de un Laudo, Gravados",
+                "104" => "Ajuste a Pagos que se realicen a Extrabajadores que Obtengan una Jubilación en Parcialidades derivados de la Ejecución de Resoluciones Judicial o de un Laudo, Exentos",
+                "105" => "Ajuste a Pagos que se realicen a Extrabajadores que Obtengan una Jubilación en una sola Exhibición derivados de la Ejecución de Resoluciones Judicial o de un Laudo, Gravados",
+                "106" => "Ajuste a Pagos que se realicen a Extrabajadores que Obtengan una Jubilación en una sola Exhibición derivados de la Ejecución de Resoluciones Judicial o de un Laudo, Exentos",
+                "107" => "Ajuste en Subsidio para el Empleo (efectivamente entregado al trabajador)",
+                _ => clave ?? ""
+            };
+        }
+
+        /// <summary>
+        /// Traduce la clave SAT del catálogo c_TipoOtroPago a su descripción.
+        /// Si la clave no corresponde a un valor conocido, se devuelve tal cual.
+        /// </summary>
+        public static string NombreTipoOtroPago(string? clave)
+        {
+            return clave switch
+            {
+                "001" => "Reintegro de ISR pagado en exceso (siempre que no haya sido enterado al SAT)",
+                "002" => "Subsidio para el empleo (efectivamente entregado al trabajador)",
+                "003" => "Viáticos (entregados al trabajador)",
+                "004" => "Aplicación de saldo a favor por compensación anual",
+                "005" => "Reintegro de ISR retenido en exceso de ejercicio anterior (siempre que no haya sido enterado al SAT)",
+                "006" => "Alimentación (art. 94 LISR fracción VI)",
+                "007" => "Habitación (art. 94 LISR fracción VI)",
+                "008" => "Premios por asistencia",
+                "999" => "Pagos distintos a los listados y que no deben considerarse como ingreso por sueldos, salarios o ingresos asimilados",
+                _ => clave ?? ""
+            };
+        }
+
+        /// <summary>
+        /// Traduce la clave SAT del catálogo c_TipoIncapacidad a su descripción.
+        /// Si la clave no corresponde a un valor conocido, se devuelve tal cual.
+        /// </summary>
+        public static string NombreTipoIncapacidad(string? clave)
+        {
+            return clave switch
+            {
+                "01" => "Riesgo de trabajo",
+                "02" => "Enfermedad en general",
+                "03" => "Maternidad",
+                "04" => "Licencia por cuidados médicos de hijos diagnosticados con cáncer",
+                _ => clave ?? ""
+            };
+        }
+
+        /// <summary>
+        /// Traduce la clave SAT del catálogo c_TipoHoras (Horas Extra) a su descripción.
+        /// Si la clave no corresponde a un valor conocido, se devuelve tal cual.
+        /// </summary>
+        public static string NombreTipoHoras(string? clave)
+        {
+            return clave switch
+            {
+                "01" => "Dobles",
+                "02" => "Triples",
+                "03" => "Simples",
+                _ => clave ?? ""
+            };
+        }
+    }
+}
