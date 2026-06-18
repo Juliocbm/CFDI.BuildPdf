@@ -2,8 +2,10 @@ using CFDI.BuildPdf.Abstractions;
 using CFDI.BuildPdf.Complements;
 using CFDI.BuildPdf.Helpers;
 using CFDI.BuildPdf.Mappers.CartaPorte;
+using CFDI.BuildPdf.Mappers.Factura;
 using CFDI.BuildPdf.Mappers.Nomina;
 using CFDI.BuildPdf.PdfBuilders.CartaPorte;
+using CFDI.BuildPdf.PdfBuilders.Factura;
 using CFDI.BuildPdf.PdfBuilders.Nomina;
 using CFDI.BuildPdf.Services;
 using Microsoft.Extensions.Logging;
@@ -32,7 +34,10 @@ namespace CFDI.BuildPdf.Configuration
                     new CartaPorteDocumentBuilder()),
                 new NominaComplementHandler(
                     new NominaMapper(qrGenerator, loggerFactory?.CreateLogger<NominaMapper>()),
-                    new NominaDocumentBuilder())
+                    new NominaDocumentBuilder()),
+                new FacturaComplementHandler(
+                    new FacturaMapper(qrGenerator, loggerFactory?.CreateLogger<FacturaMapper>()),
+                    new FacturaDocumentBuilder())
             };
 
             return new CfdiPdfGenerator(handlers);

@@ -57,5 +57,36 @@ namespace CFDI.BuildPdf.Tests
             await Assert.ThrowsAsync<CfdiComplementoNoSoportadoException>(
                 () => CfdiPdf.DesdeXmlStringAsync(xmlSinComplemento));
         }
+
+        [Theory]
+        [InlineData("I")]
+        [InlineData("E")]
+        public async Task FacturaBaseIngresoEgreso_GeneraPdf(string tipo)
+        {
+            var xml =
+                $"<cfdi:Comprobante xmlns:cfdi=\"http://www.sat.gob.mx/cfd/4\" Version=\"4.0\" " +
+                $"TipoDeComprobante=\"{tipo}\" SubTotal=\"100\" Total=\"116\" Moneda=\"MXN\">" +
+                "<cfdi:Emisor Rfc=\"AAA010101AAA\" Nombre=\"E\" RegimenFiscal=\"601\"/>" +
+                "<cfdi:Receptor Rfc=\"XAXX010101000\" Nombre=\"R\" RegimenFiscalReceptor=\"601\" UsoCFDI=\"G03\"/>" +
+                "<cfdi:Conceptos><cfdi:Concepto ClaveProdServ=\"01010101\" Cantidad=\"1\" ClaveUnidad=\"H87\" Descripcion=\"X\" ValorUnitario=\"100\" Importe=\"100\" ObjetoImp=\"02\"/></cfdi:Conceptos>" +
+                "</cfdi:Comprobante>";
+
+            var pdf = await CfdiPdf.DesdeXmlStringAsync(xml);
+            Assert.True(pdf.Length > 1000);
+            Assert.Equal((byte)'%', pdf[0]);
+        }
+
+        [Theory]
+        [InlineData("T")]
+        [InlineData("P")]
+        public async Task TipoNoSoportadoSinComplemento_Lanza(string tipo)
+        {
+            var xml =
+                $"<cfdi:Comprobante xmlns:cfdi=\"http://www.sat.gob.mx/cfd/4\" Version=\"4.0\" " +
+                $"TipoDeComprobante=\"{tipo}\" SubTotal=\"0\" Total=\"0\"></cfdi:Comprobante>";
+
+            await Assert.ThrowsAsync<CfdiComplementoNoSoportadoException>(
+                () => CfdiPdf.DesdeXmlStringAsync(xml));
+        }
     }
 }

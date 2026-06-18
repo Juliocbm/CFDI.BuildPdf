@@ -107,7 +107,7 @@ namespace CFDI.BuildPdf.Services
 
             if (handler is null)
                 throw new CfdiComplementoNoSoportadoException(
-                    "Tipo de CFDI no soportado. Actualmente la librería solo soporta Carta Porte 3.1 y Nómina 1.2.");
+                    "Tipo de CFDI no soportado. La librería soporta factura base de Ingreso (I) y Egreso (E), Carta Porte 3.1 y Nómina 1.2.");
 
             return handler.Generate(xdoc, opts);
         }

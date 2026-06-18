@@ -125,5 +125,26 @@ namespace CFDI.BuildPdf.Tests.Golden
             var texto = string.Join(" ", pdf.GetPages().Select(p => p.Text));
             Assert.True(texto.Length > 200, $"Texto extraído demasiado corto: {texto.Length} chars");
         }
+
+        [Fact]
+        [Trait("Category", "Golden")]
+        public async Task Factura_GeneraPdfValidoConContenido()
+        {
+            var xml = TestXmlLoader.LoadFacturaIngreso().ToString();
+
+            var pdfBytes = await CfdiPdf.DesdeXmlStringAsync(xml);
+
+            Assert.NotNull(pdfBytes);
+            Assert.True(pdfBytes.Length > 1000, $"PDF demasiado pequeño: {pdfBytes.Length} bytes");
+            Assert.Equal((byte)'%', pdfBytes[0]);
+            Assert.Equal((byte)'P', pdfBytes[1]);
+            Assert.Equal((byte)'D', pdfBytes[2]);
+            Assert.Equal((byte)'F', pdfBytes[3]);
+
+            using var pdf = PdfDocument.Open(pdfBytes);
+            Assert.True(pdf.NumberOfPages >= 1);
+            var texto = string.Join(" ", pdf.GetPages().Select(p => p.Text));
+            Assert.True(texto.Length > 200, $"Texto extraído demasiado corto: {texto.Length} chars");
+        }
     }
 }
