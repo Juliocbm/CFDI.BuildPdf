@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Xml.Linq;
@@ -130,6 +131,120 @@ namespace CFDI.BuildPdf.Mappers.Common
                 model.SelloEmisor ?? string.Empty
             );
             model.QRCodeBase64 = _qrGenerator.GenerateBase64(model.UrlQr);
+        }
+
+        /// <summary>Mapea los Conceptos del comprobante con sus impuestos a nivel concepto.</summary>
+        protected static List<ConceptoViewModel> MapConceptos(XElement comprobante)
+        {
+            return comprobante
+                .Element(Cfdi + "Conceptos")
+                ?.Elements(Cfdi + "Concepto")
+                .Select(c => new ConceptoViewModel
+                {
+                    ClaveProductoServicio = c.Attribute("ClaveProdServ")?.Value,
+                    NumeroIdentificacion = c.Attribute("NoIdentificacion")?.Value,
+                    Descripcion = c.Attribute("Descripcion")?.Value,
+                    Cantidad = decimal.Parse(c.Attribute("Cantidad")?.Value ?? "0", CultureInfo.InvariantCulture),
+                    ClaveUnidad = c.Attribute("ClaveUnidad")?.Value,
+                    Unidad = c.Attribute("Unidad")?.Value,
+                    ValorUnitario = decimal.Parse(c.Attribute("ValorUnitario")?.Value ?? "0", CultureInfo.InvariantCulture),
+                    Importe = decimal.Parse(c.Attribute("Importe")?.Value ?? "0", CultureInfo.InvariantCulture),
+                    Descuento = decimal.Parse(c.Attribute("Descuento")?.Value ?? "0", CultureInfo.InvariantCulture),
+                    ObjetoImpuesto = c.Attribute("ObjetoImp")?.Value,
+                    Traslados = c.Element(Cfdi + "Impuestos")?.Element(Cfdi + "Traslados")?.Elements(Cfdi + "Traslado")
+                        .Select(t => new ImpuestoConceptoViewModel
+                        {
+                            Impuesto = t.Attribute("Impuesto")?.Value,
+                            TipoFactor = t.Attribute("TipoFactor")?.Value,
+                            TasaOCuota = decimal.Parse(t.Attribute("TasaOCuota")?.Value ?? "0", CultureInfo.InvariantCulture),
+                            Base = decimal.Parse(t.Attribute("Base")?.Value ?? "0", CultureInfo.InvariantCulture),
+                            Importe = decimal.Parse(t.Attribute("Importe")?.Value ?? "0", CultureInfo.InvariantCulture)
+                        }).ToList() ?? new List<ImpuestoConceptoViewModel>(),
+                    Retenciones = c.Element(Cfdi + "Impuestos")?.Element(Cfdi + "Retenciones")?.Elements(Cfdi + "Retencion")
+                        .Select(r => new ImpuestoConceptoViewModel
+                        {
+                            Impuesto = r.Attribute("Impuesto")?.Value,
+                            TipoFactor = r.Attribute("TipoFactor")?.Value,
+                            TasaOCuota = decimal.Parse(r.Attribute("TasaOCuota")?.Value ?? "0", CultureInfo.InvariantCulture),
+                            Base = decimal.Parse(r.Attribute("Base")?.Value ?? "0", CultureInfo.InvariantCulture),
+                            Importe = decimal.Parse(r.Attribute("Importe")?.Value ?? "0", CultureInfo.InvariantCulture)
+                        }).ToList() ?? new List<ImpuestoConceptoViewModel>()
+                }).ToList() ?? new List<ConceptoViewModel>();
+        }
+
+        /// <summary>
+        /// Mapea el resumen de impuestos a nivel comprobante (totales + desglose agrupado),
+        /// con fallback que agrega desde los conceptos cuando no hay nodo global.
+        /// </summary>
+        protected static void MapResumenImpuestos(
+            XElement comprobante,
+            List<ConceptoViewModel> conceptos,
+            out decimal totalTrasladados,
+            out decimal totalRetenidos,
+            out List<ImpuestoConceptoViewModel> trasladosResumen,
+            out List<RetencionImpuestoViewModel> retencionesResumen)
+        {
+            var impuestosNode = comprobante.Element(Cfdi + "Impuestos");
+            totalTrasladados = ParseDecimalAttr(impuestosNode?.Attribute("TotalImpuestosTrasladados"));
+            totalRetenidos = ParseDecimalAttr(impuestosNode?.Attribute("TotalImpuestosRetenidos"));
+
+            trasladosResumen = impuestosNode?.Element(Cfdi + "Traslados")?.Elements(Cfdi + "Traslado")
+                .Select(t => new ImpuestoConceptoViewModel
+                {
+                    Impuesto = t.Attribute("Impuesto")?.Value,
+                    TipoFactor = t.Attribute("TipoFactor")?.Value,
+                    TasaOCuota = ParseDecimalAttr(t.Attribute("TasaOCuota")),
+                    Base = ParseDecimalAttr(t.Attribute("Base")),
+                    Importe = ParseDecimalAttr(t.Attribute("Importe"))
+                }).ToList() ?? new List<ImpuestoConceptoViewModel>();
+
+            retencionesResumen = impuestosNode?.Element(Cfdi + "Retenciones")?.Elements(Cfdi + "Retencion")
+                .Select(r => new RetencionImpuestoViewModel
+                {
+                    Impuesto = r.Attribute("Impuesto")?.Value,
+                    Importe = ParseDecimalAttr(r.Attribute("Importe"))
+                }).ToList() ?? new List<RetencionImpuestoViewModel>();
+
+            if (trasladosResumen.Count == 0)
+            {
+                trasladosResumen = conceptos
+                    .SelectMany(c => c.Traslados)
+                    .GroupBy(t => new { t.Impuesto, t.TipoFactor, t.TasaOCuota })
+                    .Select(g => new ImpuestoConceptoViewModel
+                    {
+                        Impuesto = g.Key.Impuesto,
+                        TipoFactor = g.Key.TipoFactor,
+                        TasaOCuota = g.Key.TasaOCuota,
+                        Base = g.Sum(x => x.Base),
+                        Importe = g.Sum(x => x.Importe)
+                    }).ToList();
+
+                if (totalTrasladados == 0)
+                    totalTrasladados = trasladosResumen.Sum(t => t.Importe);
+            }
+
+            if (retencionesResumen.Count == 0)
+            {
+                retencionesResumen = conceptos
+                    .SelectMany(c => c.Retenciones)
+                    .GroupBy(r => r.Impuesto)
+                    .Select(g => new RetencionImpuestoViewModel
+                    {
+                        Impuesto = g.Key,
+                        Importe = g.Sum(x => x.Importe)
+                    }).ToList();
+
+                if (totalRetenidos == 0)
+                    totalRetenidos = retencionesResumen.Sum(r => r.Importe);
+            }
+        }
+
+        /// <summary>Parsea un atributo decimal con InvariantCulture; 0 si ausente/ inválido.</summary>
+        protected static decimal ParseDecimalAttr(XAttribute? attribute)
+        {
+            if (attribute == null || string.IsNullOrWhiteSpace(attribute.Value))
+                return 0m;
+            return decimal.TryParse(attribute.Value, NumberStyles.Any, CultureInfo.InvariantCulture, out var v) ? v : 0m;
         }
 
         #region Helpers compartidos
