@@ -1,0 +1,109 @@
+{
+  "CondicionesPago": "CONTADO",
+  "Conceptos": [
+    {
+      "ClaveProductoServicio": "01010101",
+      "NumeroIdentificacion": "P001",
+      "Cantidad": 1,
+      "ClaveUnidad": "H87",
+      "Unidad": "Pieza",
+      "Descripcion": "Producto A",
+      "ValorUnitario": 1000.00,
+      "Importe": 1000.00,
+      "Descuento": 0.00,
+      "ObjetoImpuesto": "02",
+      "Traslados": [
+        {
+          "Impuesto": "002",
+          "TipoFactor": "Tasa",
+          "TasaOCuota": 0.160000,
+          "Base": 1000.00,
+          "Importe": 160.00
+        }
+      ],
+      "Retenciones": []
+    },
+    {
+      "ClaveProductoServicio": "01010101",
+      "NumeroIdentificacion": "P002",
+      "Cantidad": 2,
+      "ClaveUnidad": "H87",
+      "Unidad": "Pieza",
+      "Descripcion": "Producto B",
+      "ValorUnitario": 250.00,
+      "Importe": 500.00,
+      "Descuento": 0.00,
+      "ObjetoImpuesto": "02",
+      "Traslados": [
+        {
+          "Impuesto": "002",
+          "TipoFactor": "Tasa",
+          "TasaOCuota": 0.160000,
+          "Base": 500.00,
+          "Importe": 80.00
+        }
+      ],
+      "Retenciones": [
+        {
+          "Impuesto": "001",
+          "TipoFactor": "Tasa",
+          "TasaOCuota": 0.100000,
+          "Base": 500.00,
+          "Importe": 50.00
+        }
+      ]
+    }
+  ],
+  "TotalImpuestosTrasladados": 240.00,
+  "TotalImpuestosRetenidos": 50.00,
+  "TrasladosResumen": [
+    {
+      "Impuesto": "002",
+      "TipoFactor": "Tasa",
+      "TasaOCuota": 0.160000,
+      "Base": 1500.00,
+      "Importe": 240.00
+    }
+  ],
+  "RetencionesResumen": [
+    {
+      "Impuesto": "001",
+      "Importe": 50.00
+    }
+  ],
+  "Version": "4.0",
+  "Serie": "A",
+  "Folio": "1001",
+  "LugarExpedicion": "64000",
+  "FechaEmision": "2026-01-15T10:30:00",
+  "FechaCertificacion": "2026-01-15T10:31:00",
+  "TipoCambio": null,
+  "Moneda": "MXN",
+  "FormaPago": "03",
+  "MetodoPago": "PUE",
+  "TipoComprobante": "I",
+  "Exportacion": "01",
+  "UUID": "11111111-1111-1111-1111-111111111111",
+  "LogoBase64": null,
+  "EmisorNombre": "EMISOR DEMO SA DE CV",
+  "EmisorRFC": "AAA010101AAA",
+  "EmisorRegimenFiscal": "601",
+  "ReceptorNombre": "CLIENTE DEMO",
+  "ReceptorRFC": "XAXX010101000",
+  "ReceptorDomicilioFiscal": "64000",
+  "ReceptorRegimenFiscal": "601",
+  "UsoCFDI": "G03",
+  "SubTotal": 1500.00,
+  "Total": 1690.00,
+  "CantidadConLetra": "MIL SEISCIENTOS NOVENTA PESOS 00/100 MXN",
+  "SelloEmisor": "SELLO_EMISOR_DEMO",
+  "SelloSAT": "SELLO_SAT_DEMO",
+  "CadenaOriginalSAT": "||1.1|11111111-1111-1111-1111-111111111111|2026-01-15T10:31:00|PPD101129EA3|SELLO_EMISOR_DEMO|00001000000500000002||",
+  "NoCertificadoSAT": "00001000000500000002",
+  "NoCertificadoEmisor": "00001000000500000001",
+  "RfcProvCertif": "PPD101129EA3",
+  "TipoRelacion": null,
+  "RelacionadosUuids": [],
+  "UrlQr": "https://verificacfdi.facturaelectronica.sat.gob.mx/default.aspx?id=11111111-1111-1111-1111-111111111111\u0026re=AAA010101AAA\u0026rr=XAXX010101000\u0026tt=000000000000001690.000000\u0026fe=SOR_DEMO",
+  "QRCodeBase64": "FAKE_QR_BASE64"
+}

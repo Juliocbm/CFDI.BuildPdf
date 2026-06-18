@@ -1,6 +1,7 @@
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using CFDI.BuildPdf.Mappers.CartaPorte;
+using CFDI.BuildPdf.Mappers.Factura;
 using CFDI.BuildPdf.Mappers.Nomina;
 using CFDI.BuildPdf.Tests.Helpers;
 using Xunit;
@@ -66,6 +67,32 @@ namespace CFDI.BuildPdf.Tests.Golden
             var json = JsonSerializer.Serialize(model, JsonOpts);
 
             Snapshot.Match(json, "NominaIncapacidades.viewmodel.json");
+        }
+
+        [Fact]
+        [Trait("Category", "Golden")]
+        public void Factura_ViewModel_CoincideConBaseline()
+        {
+            var xdoc = TestXmlLoader.LoadFacturaIngreso();
+            var mapper = new FacturaMapper(new FakeQrGenerator());
+
+            var model = mapper.Map(xdoc);
+            var json = JsonSerializer.Serialize(model, JsonOpts);
+
+            Snapshot.Match(json, "Factura.viewmodel.json");
+        }
+
+        [Fact]
+        [Trait("Category", "Golden")]
+        public void FacturaEgreso_ViewModel_CoincideConBaseline()
+        {
+            var xdoc = TestXmlLoader.LoadFacturaEgreso();
+            var mapper = new FacturaMapper(new FakeQrGenerator());
+
+            var model = mapper.Map(xdoc);
+            var json = JsonSerializer.Serialize(model, JsonOpts);
+
+            Snapshot.Match(json, "FacturaEgreso.viewmodel.json");
         }
     }
 }

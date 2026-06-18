@@ -1,0 +1,74 @@
+{
+  "CondicionesPago": "CONTADO",
+  "Conceptos": [
+    {
+      "ClaveProductoServicio": "84111506",
+      "NumeroIdentificacion": "DEV01",
+      "Cantidad": 1,
+      "ClaveUnidad": "ACT",
+      "Unidad": "Actividad",
+      "Descripcion": "Devolucion parcial",
+      "ValorUnitario": 800.00,
+      "Importe": 800.00,
+      "Descuento": 0.00,
+      "ObjetoImpuesto": "02",
+      "Traslados": [
+        {
+          "Impuesto": "002",
+          "TipoFactor": "Tasa",
+          "TasaOCuota": 0.160000,
+          "Base": 800.00,
+          "Importe": 128.00
+        }
+      ],
+      "Retenciones": []
+    }
+  ],
+  "TotalImpuestosTrasladados": 128.00,
+  "TotalImpuestosRetenidos": 0,
+  "TrasladosResumen": [
+    {
+      "Impuesto": "002",
+      "TipoFactor": "Tasa",
+      "TasaOCuota": 0.160000,
+      "Base": 800.00,
+      "Importe": 128.00
+    }
+  ],
+  "RetencionesResumen": [],
+  "Version": "4.0",
+  "Serie": "NC",
+  "Folio": "55",
+  "LugarExpedicion": "64000",
+  "FechaEmision": "2026-02-20T09:00:00",
+  "FechaCertificacion": "2026-02-20T09:01:00",
+  "TipoCambio": null,
+  "Moneda": "MXN",
+  "FormaPago": "01",
+  "MetodoPago": "PUE",
+  "TipoComprobante": "E",
+  "Exportacion": "01",
+  "UUID": "22222222-2222-2222-2222-222222222222",
+  "LogoBase64": null,
+  "EmisorNombre": "EMISOR DEMO SA DE CV",
+  "EmisorRFC": "AAA010101AAA",
+  "EmisorRegimenFiscal": "601",
+  "ReceptorNombre": "CLIENTE DEMO",
+  "ReceptorRFC": "XAXX010101000",
+  "ReceptorDomicilioFiscal": "64000",
+  "ReceptorRegimenFiscal": "601",
+  "UsoCFDI": "G02",
+  "SubTotal": 800.00,
+  "Total": 928.00,
+  "CantidadConLetra": "NOVECIENTOS VEINTIOCHO PESOS 00/100 MXN",
+  "SelloEmisor": "SELLO_EMISOR_DEMO",
+  "SelloSAT": "SELLO_SAT_DEMO",
+  "CadenaOriginalSAT": "||1.1|22222222-2222-2222-2222-222222222222|2026-02-20T09:01:00|PPD101129EA3|SELLO_EMISOR_DEMO|00001000000500000002||",
+  "NoCertificadoSAT": "00001000000500000002",
+  "NoCertificadoEmisor": "00001000000500000001",
+  "RfcProvCertif": "PPD101129EA3",
+  "TipoRelacion": null,
+  "RelacionadosUuids": [],
+  "UrlQr": "https://verificacfdi.facturaelectronica.sat.gob.mx/default.aspx?id=22222222-2222-2222-2222-222222222222\u0026re=AAA010101AAA\u0026rr=XAXX010101000\u0026tt=000000000000000928.000000\u0026fe=SOR_DEMO",
+  "QRCodeBase64": "FAKE_QR_BASE64"
+}

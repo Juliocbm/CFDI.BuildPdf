@@ -23,6 +23,12 @@ namespace CFDI.BuildPdf.Tests.Helpers
         public static XDocument LoadNominaIncapacidades()
             => Load("CFDI.BuildPdf.Tests.TestData.cfdi_nomina_incapacidades.xml");
 
+        public static XDocument LoadFacturaIngreso()
+            => Load("CFDI.BuildPdf.Tests.TestData.cfdi_factura_ingreso.xml");
+
+        public static XDocument LoadFacturaEgreso()
+            => Load("CFDI.BuildPdf.Tests.TestData.cfdi_factura_egreso.xml");
+
         public static XDocument Load(string resourceName)
         {
             using var stream = Assembly.GetManifestResourceStream(resourceName)

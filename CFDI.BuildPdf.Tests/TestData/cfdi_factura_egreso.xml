@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cfdi:Comprobante xmlns:cfdi="http://www.sat.gob.mx/cfd/4" Version="4.0" Serie="NC" Folio="55" Fecha="2026-02-20T09:00:00" FormaPago="01" MetodoPago="PUE" Moneda="MXN" TipoDeComprobante="E" Exportacion="01" LugarExpedicion="64000" CondicionesDePago="CONTADO" SubTotal="800.00" Total="928.00" Sello="SELLO_EMISOR_DEMO" NoCertificado="00001000000500000001" Certificado="">
+  <cfdi:Emisor Rfc="AAA010101AAA" Nombre="EMISOR DEMO SA DE CV" RegimenFiscal="601"/>
+  <cfdi:Receptor Rfc="XAXX010101000" Nombre="CLIENTE DEMO" DomicilioFiscalReceptor="64000" RegimenFiscalReceptor="601" UsoCFDI="G02"/>
+  <cfdi:Conceptos>
+    <cfdi:Concepto ClaveProdServ="84111506" NoIdentificacion="DEV01" Cantidad="1" ClaveUnidad="ACT" Unidad="Actividad" Descripcion="Devolucion parcial" ValorUnitario="800.00" Importe="800.00" Descuento="0.00" ObjetoImp="02">
+      <cfdi:Impuestos>
+        <cfdi:Traslados>
+          <cfdi:Traslado Base="800.00" Impuesto="002" TipoFactor="Tasa" TasaOCuota="0.160000" Importe="128.00"/>
+        </cfdi:Traslados>
+      </cfdi:Impuestos>
+    </cfdi:Concepto>
+  </cfdi:Conceptos>
+  <cfdi:Impuestos TotalImpuestosTrasladados="128.00">
+    <cfdi:Traslados>
+      <cfdi:Traslado Base="800.00" Impuesto="002" TipoFactor="Tasa" TasaOCuota="0.160000" Importe="128.00"/>
+    </cfdi:Traslados>
+  </cfdi:Impuestos>
+  <cfdi:Complemento>
+    <tfd:TimbreFiscalDigital xmlns:tfd="http://www.sat.gob.mx/TimbreFiscalDigital" Version="1.1" UUID="22222222-2222-2222-2222-222222222222" FechaTimbrado="2026-02-20T09:01:00" RfcProvCertif="PPD101129EA3" SelloCFD="SELLO_EMISOR_DEMO" NoCertificadoSAT="00001000000500000002" SelloSAT="SELLO_SAT_DEMO"/>
+  </cfdi:Complemento>
+</cfdi:Comprobante>
