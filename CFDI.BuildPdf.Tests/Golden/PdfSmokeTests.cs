@@ -1,6 +1,10 @@
 using System.Linq;
 using System.Threading.Tasks;
 using CFDI.BuildPdf;
+using CFDI.BuildPdf.Abstractions;
+using CFDI.BuildPdf.Helpers;
+using CFDI.BuildPdf.Mappers.Factura;
+using CFDI.BuildPdf.PdfBuilders.Factura;
 using CFDI.BuildPdf.Tests.Helpers;
 using UglyToad.PdfPig;
 using Xunit;
@@ -81,6 +85,33 @@ namespace CFDI.BuildPdf.Tests.Golden
             var xml = TestXmlLoader.LoadNominaIncapacidades().ToString();
 
             var pdfBytes = await CfdiPdf.DesdeXmlStringAsync(xml);
+
+            Assert.NotNull(pdfBytes);
+            Assert.True(pdfBytes.Length > 1000, $"PDF demasiado pequeño: {pdfBytes.Length} bytes");
+            Assert.Equal((byte)'%', pdfBytes[0]);
+            Assert.Equal((byte)'P', pdfBytes[1]);
+            Assert.Equal((byte)'D', pdfBytes[2]);
+            Assert.Equal((byte)'F', pdfBytes[3]);
+
+            using var pdf = PdfDocument.Open(pdfBytes);
+            Assert.True(pdf.NumberOfPages >= 1);
+            var texto = string.Join(" ", pdf.GetPages().Select(p => p.Text));
+            Assert.True(texto.Length > 200, $"Texto extraído demasiado corto: {texto.Length} chars");
+        }
+
+        [Fact]
+        [Trait("Category", "Golden")]
+        public void Factura_Builder_GeneraPdfValidoConContenido()
+        {
+            QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
+
+            var xdoc = TestXmlLoader.LoadFacturaIngreso();
+            // QR real (base64 decodable): el footer fiscal decodifica el QR al renderizar.
+            var mapper = new FacturaMapper(new QrGeneratorService());
+            var model = mapper.Map(xdoc);
+
+            var builder = new FacturaDocumentBuilder();
+            var pdfBytes = builder.Build(model, new CfdiPdfOptions());
 
             Assert.NotNull(pdfBytes);
             Assert.True(pdfBytes.Length > 1000, $"PDF demasiado pequeño: {pdfBytes.Length} bytes");
