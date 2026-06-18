@@ -4,6 +4,14 @@ Todas las versiones notables de este proyecto se documentan en este archivo.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/)
 y este proyecto usa [Versionado Semántico](https://semver.org/lang/es/).
 
+## [3.1.0]
+### Agregado
+- Generación de PDF para **facturas base CFDI 4.0** (TipoDeComprobante Ingreso `I` y Egreso `E`) sin complemento Carta Porte ni Nómina.
+
+### Cambiado
+- Despacho interno de handlers por predicado `CanHandle(XDocument)` (sin impacto en la API pública).
+- Secciones de render y mapeo de conceptos/impuestos extraídas a componentes compartidos (reuso entre factura y Carta Porte).
+
 ## [3.0.0] - 2026-06-17
 
 Versión mayor: refactor a nivel enterprise. **El PDF generado no cambia** respecto a 2.0.8 (validado con pruebas golden y comparación byte a byte del texto contra el paquete v2.0.8). Ver [MIGRATION.md](MIGRATION.md).

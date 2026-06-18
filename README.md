@@ -8,8 +8,9 @@
 
 ## Descripción general
 
-**CFDI.BuildPdf** es una librería .NET 8+ que genera una representación impresa en PDF a partir de un XML **CFDI 4.0**. Detecta automáticamente el tipo de complemento y soporta actualmente:
+**CFDI.BuildPdf** es una librería .NET 8+ que genera una representación impresa en PDF a partir de un XML **CFDI 4.0**. Detecta automáticamente el tipo de comprobante/complemento y soporta actualmente:
 
+- **Factura base (Ingreso/Egreso) sin complemento**
 - **Complemento Carta Porte 3.1**
 - **Complemento Nómina 1.2**
 
