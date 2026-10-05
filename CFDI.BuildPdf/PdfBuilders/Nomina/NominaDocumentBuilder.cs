@@ -63,14 +63,7 @@ namespace CFDI.BuildPdf.PdfBuilders.Nomina
                             .FontSize(PdfStyleConstants.FontSizeSmall);
                     });
 
-                    page.Footer().AlignCenter().Text(text =>
-                    {
-                        text.DefaultTextStyle(x => x.FontSize(PdfStyleConstants.FontSizeSmall));
-                        text.Span("Página ");
-                        text.CurrentPageNumber();
-                        text.Span(" de ");
-                        text.TotalPages();
-                    });
+                    page.Footer().Element(c => CfdiPdfSections.ComposePiePagina(c, options.TextoPiePagina, incluirLeyenda: false));
                 });
             });
 

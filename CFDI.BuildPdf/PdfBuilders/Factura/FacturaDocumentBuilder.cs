@@ -48,15 +48,7 @@ namespace CFDI.BuildPdf.PdfBuilders.Factura
                         col.Item().Element(c => CfdiPdfSections.ComposeFooterFiscal(c, model));
                     });
 
-                    page.Footer().AlignCenter().Text(text =>
-                    {
-                        text.DefaultTextStyle(x => x.FontSize(PdfStyleConstants.FontSizeSmall));
-                        text.Span("ESTE DOCUMENTO ES UNA REPRESENTACIÓN IMPRESA DE UN CFDI");
-                        text.Span("    Página ");
-                        text.CurrentPageNumber();
-                        text.Span(" de ");
-                        text.TotalPages();
-                    });
+                    page.Footer().Element(c => CfdiPdfSections.ComposePiePagina(c, options.TextoPiePagina, incluirLeyenda: true));
                 });
             });
 

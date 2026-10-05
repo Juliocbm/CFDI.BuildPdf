@@ -30,6 +30,14 @@ namespace CFDI.BuildPdf
         /// Orientación de la página del PDF. Default: Portrait.
         /// </summary>
         public PdfOrientation Orientacion { get; set; } = PdfOrientation.Portrait;
+
+        /// <summary>
+        /// Texto libre que se imprime centrado en el pie de página de todas las hojas, arriba de la
+        /// leyenda y el paginado (por ejemplo un folio interno, una leyenda o un código de control).
+        /// Admite saltos de línea; se muestran a lo más 2 renglones y el excedente se corta con "…".
+        /// Null o vacío (default): no se imprime nada y el PDF queda igual que sin esta opción.
+        /// </summary>
+        public string? TextoPiePagina { get; set; }
     }
 
     /// <summary>

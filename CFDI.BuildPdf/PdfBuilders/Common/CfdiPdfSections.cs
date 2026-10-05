@@ -1,5 +1,6 @@
 using System;
 using System.Globalization;
+using System.Text;
 using CFDI.BuildPdf.Catalogs;
 using CFDI.BuildPdf.Models;
 using Microsoft.Extensions.Logging;
@@ -14,6 +15,88 @@ namespace CFDI.BuildPdf.PdfBuilders.Common
     /// </summary>
     internal static class CfdiPdfSections
     {
+        private const string LeyendaRepresentacionImpresa = "ESTE DOCUMENTO ES UNA REPRESENTACIÓN IMPRESA DE UN CFDI";
+
+        /// <summary>
+        /// Máximo de renglones del texto libre del pie; el excedente se corta con "…" para que un
+        /// texto muy largo no haga crecer el pie (que se repite en cada hoja) hasta romper el layout.
+        /// </summary>
+        internal const int MaxRenglonesTextoPiePagina = 2;
+
+        /// <summary>
+        /// Renderiza el pie de página de las hojas del comprobante: el texto libre de
+        /// <see cref="CfdiPdfOptions.TextoPiePagina"/> (si viene) arriba de la línea de paginado.
+        /// </summary>
+        /// <param name="container">Contenedor del pie de página.</param>
+        /// <param name="textoPiePagina">Texto libre del consumidor; null o vacío no agrega nada.</param>
+        /// <param name="incluirLeyenda">Antepone al paginado la leyenda de representación impresa del CFDI.</param>
+        public static void ComposePiePagina(IContainer container, string? textoPiePagina, bool incluirLeyenda)
+        {
+            container.Column(col =>
+            {
+                col.Item().Element(c => ComposeTextoPiePagina(c, textoPiePagina));
+
+                col.Item().AlignCenter().Text(text =>
+                {
+                    text.DefaultTextStyle(x => x.FontSize(PdfStyleConstants.FontSizeSmall));
+                    if (incluirLeyenda)
+                    {
+                        text.Span(LeyendaRepresentacionImpresa);
+                        text.Span("    Página ");
+                    }
+                    else
+                    {
+                        text.Span("Página ");
+                    }
+                    text.CurrentPageNumber();
+                    text.Span(" de ");
+                    text.TotalPages();
+                });
+            });
+        }
+
+        /// <summary>
+        /// Renderiza solo el texto libre del pie, centrado y a lo más <see cref="MaxRenglonesTextoPiePagina"/> renglones.
+        /// No dibuja nada (altura cero) si el texto es nulo o queda vacío tras normalizarlo.
+        /// </summary>
+        public static void ComposeTextoPiePagina(IContainer container, string? textoPiePagina)
+        {
+            var texto = NormalizarTextoPiePagina(textoPiePagina);
+            if (texto is null)
+                return;
+
+            container.PaddingBottom(1).Text(text =>
+            {
+                text.AlignCenter();
+                text.ClampLines(MaxRenglonesTextoPiePagina);
+                text.DefaultTextStyle(x => x.FontSize(PdfStyleConstants.FontSizeSmall));
+                text.Span(texto);
+            });
+        }
+
+        /// <summary>
+        /// Unifica los saltos de línea a '\n', reemplaza por espacio cualquier otro carácter de control
+        /// (tabuladores, nulos, etc., que el PDF pintaría como cajas), recorta cada renglón y descarta
+        /// los renglones vacíos para que no consuman el tope de renglones. Devuelve null si no queda texto.
+        /// </summary>
+        internal static string? NormalizarTextoPiePagina(string? texto)
+        {
+            if (string.IsNullOrWhiteSpace(texto))
+                return null;
+
+            var sb = new StringBuilder(texto.Length);
+            foreach (var c in texto.Replace("\r\n", "\n").Replace('\r', '\n'))
+                sb.Append(c != '\n' && char.IsControl(c) ? ' ' : c);
+
+            var renglones = sb.ToString()
+                .Split('\n')
+                .Select(r => r.Trim())
+                .Where(r => r.Length > 0);
+
+            var resultado = string.Join("\n", renglones);
+            return resultado.Length == 0 ? null : resultado;
+        }
+
         /// <summary>
         /// Renderiza el footer fiscal: QR + sellos digitales.
         /// </summary>

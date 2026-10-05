@@ -66,15 +66,7 @@ namespace CFDI.BuildPdf.PdfBuilders.CartaPorte
                         col.Item().Element(c => CfdiPdfSections.ComposeFooterFiscal(c, model));
                     });
 
-                    page.Footer().AlignCenter().Text(text =>
-                    {
-                        text.DefaultTextStyle(x => x.FontSize(PdfStyleConstants.FontSizeSmall));
-                        text.Span("ESTE DOCUMENTO ES UNA REPRESENTACIÓN IMPRESA DE UN CFDI");
-                        text.Span("    Página ");
-                        text.CurrentPageNumber();
-                        text.Span(" de ");
-                        text.TotalPages();
-                    });
+                    page.Footer().Element(c => CfdiPdfSections.ComposePiePagina(c, options.TextoPiePagina, incluirLeyenda: true));
                 });
 
                 // Página de Condiciones del Contrato (opcional)
@@ -90,6 +82,9 @@ namespace CFDI.BuildPdf.PdfBuilders.CartaPorte
                         {
                             ComposeCondicionesContrato(col, model);
                         });
+
+                        // Esta hoja no lleva paginado; solo el texto libre del consumidor, si viene.
+                        page.Footer().Element(c => CfdiPdfSections.ComposeTextoPiePagina(c, options.TextoPiePagina));
                     });
                 }
             });
