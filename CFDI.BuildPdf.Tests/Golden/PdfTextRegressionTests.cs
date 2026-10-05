@@ -35,5 +35,21 @@ namespace CFDI.BuildPdf.Tests.Golden
             var texto = await ExtraerTexto(TestXmlLoader.LoadCartaPorteRetenciones());
             Snapshot.Match(texto, "CartaPorteRetenciones.pdftext.txt");
         }
+
+        [Fact]
+        [Trait("Category", "Golden")]
+        public async Task Factura_TextoPdf_CoincideConBaseline()
+        {
+            var texto = await ExtraerTexto(TestXmlLoader.LoadFacturaIngreso());
+            Snapshot.Match(texto, "Factura.pdftext.txt");
+        }
+
+        [Fact]
+        [Trait("Category", "Golden")]
+        public async Task Nomina_TextoPdf_CoincideConBaseline()
+        {
+            var texto = await ExtraerTexto(TestXmlLoader.LoadNomina());
+            Snapshot.Match(texto, "Nomina.pdftext.txt");
+        }
     }
 }
