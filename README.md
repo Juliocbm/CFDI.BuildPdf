@@ -34,7 +34,7 @@ dotnet add package CFDI.BuildPdf
 - ✔️ Identificación del **PAC timbrador** por RFC (Buzón E, InvoiceOne, SAT pruebas; ampliable).
 - ✔️ Múltiples formatos de entrada: ruta de archivo, `string`, `byte[]` y `Stream`.
 - ✔️ Escritura directa a archivo o `Stream` de salida (ideal para respuestas HTTP).
-- ✔️ Opciones configurables: mostrar/ocultar mercancías, condiciones del contrato, addenda; logotipo en Base64; orientación portrait/landscape.
+- ✔️ Opciones configurables: mostrar/ocultar mercancías, condiciones del contrato, addenda; logotipo en Base64; orientación portrait/landscape; texto libre en el pie de página (folio, leyenda, código).
 - ✔️ Inyección de dependencias con `Microsoft.Extensions.DependencyInjection`.
 - ✔️ Integración opcional con `ILogger` para diagnóstico.
 - ✔️ Excepciones de dominio claras (`CfdiXmlInvalidoException`, `CfdiComplementoNoSoportadoException`).
@@ -172,10 +172,30 @@ var options = new CfdiPdfOptions
     MostrarCondicionesContrato = true,   // Carta Porte: incluir página de condiciones
     MostrarAddenda = true,               // Incluir sección de addenda
     LogoBase64 = logoBase64,             // Logo de la empresa (opcional)
-    Orientacion = PdfOrientation.Portrait
+    Orientacion = PdfOrientation.Portrait,
+    TextoPiePagina = "FOLIO INTERNO: HG-123456" // Texto libre en el pie de todas las hojas (opcional)
 };
 
 var pdfBytes = await CfdiPdf.DesdeRutaAsync(rutaXml, options);
+```
+
+### Texto libre en el pie de página
+
+`TextoPiePagina` imprime un texto propio (folio interno, leyenda, código de control, etc.) centrado en el pie de **todas las hojas**, arriba de la leyenda y el paginado. En Carta Porte también aparece en la hoja de condiciones del contrato.
+
+- Admite saltos de línea (`\n`); se muestran **a lo más 2 renglones** y el excedente se corta con `…`, para que un texto largo nunca rompa el layout.
+- Los renglones vacíos se descartan y los caracteres de control (tabuladores, etc.) se cambian por espacio.
+- `null` o vacío (default): no se imprime nada y el PDF queda igual que sin la opción.
+
+```
+                 FOLIO INTERNO: HG-123456
+ESTE DOCUMENTO ES UNA REPRESENTACIÓN IMPRESA DE UN CFDI    Página 1 de 2
+```
+
+Para probarlo sin integrar la librería, el demo de consola acepta `--pie`:
+
+```bash
+dotnet run --project CFDI.BuildPdf.ConsoleDemo -- ./cfdi.xml ./salida.pdf --pie "FOLIO INTERNO: HG-123456"
 ```
 
 ## 💉 Uso con inyección de dependencias

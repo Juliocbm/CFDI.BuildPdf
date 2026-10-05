@@ -4,6 +4,15 @@ Todas las versiones notables de este proyecto se documentan en este archivo.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/)
 y este proyecto usa [Versionado Semántico](https://semver.org/lang/es/).
 
+## [3.2.0] - 2026-10-05
+### Agregado
+- `CfdiPdfOptions.TextoPiePagina`: texto libre (folio interno, leyenda, código, etc.) que se imprime centrado en el pie de **todas las hojas** de Factura, Carta Porte (incluida la hoja de condiciones del contrato) y Nómina, arriba de la leyenda y el paginado. Admite saltos de línea; máximo 2 renglones, el excedente se corta con `…`. Renglones vacíos descartados y caracteres de control normalizados a espacio.
+- Demo de consola: opción `--pie "<texto>"` para probar el pie sin integrar la librería.
+- Pruebas golden del texto del PDF de Factura y Nómina (antes solo Carta Porte).
+
+### Cambiado
+- El pie de página de los tres builders se compone en un helper compartido (`CfdiPdfSections.ComposePiePagina`). **Sin `TextoPiePagina` el PDF no cambia**: verificado byte a byte contra 3.1.0 en los 6 XML de prueba (solo difiere la fecha de creación).
+
 ## [3.1.0]
 ### Agregado
 - Generación de PDF para **facturas base CFDI 4.0** (TipoDeComprobante Ingreso `I` y Egreso `E`) sin complemento Carta Porte ni Nómina.
