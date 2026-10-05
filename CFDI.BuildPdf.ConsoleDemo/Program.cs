@@ -3,24 +3,42 @@ using CFDI.BuildPdf;
 
 CfdiPdf.ConfigureQuestPdfLicense(CfdiPdfLicenseType.Community);
 
-if (args.Length == 0)
+// Opción nombrada --pie "<texto>" (en cualquier posición); el resto son argumentos posicionales.
+string? textoPie = null;
+var posicionales = new List<string>();
+for (var i = 0; i < args.Length; i++)
+{
+    if (args[i] == "--pie")
+    {
+        if (i + 1 >= args.Length)
+        {
+            Console.Error.WriteLine("ERROR: --pie requiere un texto.");
+            return 1;
+        }
+        textoPie = args[++i];
+        continue;
+    }
+    posicionales.Add(args[i]);
+}
+
+if (posicionales.Count == 0)
 {
     PrintUsage();
     return 1;
 }
 
-var xmlPath = Path.GetFullPath(args[0]);
+var xmlPath = Path.GetFullPath(posicionales[0]);
 if (!File.Exists(xmlPath))
 {
     Console.Error.WriteLine($"ERROR: No existe el archivo XML: {xmlPath}");
     return 2;
 }
 
-var pdfPath = args.Length > 1
-    ? Path.GetFullPath(args[1])
+var pdfPath = posicionales.Count > 1
+    ? Path.GetFullPath(posicionales[1])
     : Path.ChangeExtension(xmlPath, ".pdf");
 
-var logoPath = args.Length > 2 ? Path.GetFullPath(args[2]) : null;
+var logoPath = posicionales.Count > 2 ? Path.GetFullPath(posicionales[2]) : null;
 string? logoBase64 = null;
 if (!string.IsNullOrWhiteSpace(logoPath))
 {
@@ -37,11 +55,14 @@ Console.WriteLine($"  XML entrada : {xmlPath}");
 Console.WriteLine($"  PDF salida  : {pdfPath}");
 if (logoPath != null)
     Console.WriteLine($"  Logo        : {logoPath}");
+if (textoPie != null)
+    Console.WriteLine($"  Texto pie   : {textoPie}");
 Console.WriteLine();
 
 var options = new CfdiPdfOptions
 {
-    LogoBase64 = logoBase64
+    LogoBase64 = logoBase64,
+    TextoPiePagina = textoPie
 };
 
 try
@@ -78,13 +99,15 @@ catch (Exception ex)
 static void PrintUsage()
 {
     Console.Error.WriteLine("Uso:");
-    Console.Error.WriteLine("  CFDI.BuildPdf.ConsoleDemo <ruta-xml> [ruta-pdf-salida] [ruta-logo]");
+    Console.Error.WriteLine("  CFDI.BuildPdf.ConsoleDemo <ruta-xml> [ruta-pdf-salida] [ruta-logo] [--pie \"texto\"]");
     Console.Error.WriteLine();
     Console.Error.WriteLine("Ejemplos:");
     Console.Error.WriteLine("  CFDI.BuildPdf.ConsoleDemo ./ejemplo.xml");
     Console.Error.WriteLine("  CFDI.BuildPdf.ConsoleDemo ./ejemplo.xml ./salida.pdf");
     Console.Error.WriteLine("  CFDI.BuildPdf.ConsoleDemo ./ejemplo.xml ./salida.pdf ./logo.png");
+    Console.Error.WriteLine("  CFDI.BuildPdf.ConsoleDemo ./ejemplo.xml ./salida.pdf --pie \"FOLIO INTERNO: HG-123456\"");
     Console.Error.WriteLine();
     Console.Error.WriteLine("Si no se indica la ruta del PDF, se genera junto al XML con extensión .pdf.");
     Console.Error.WriteLine("El logo (PNG/JPG) se inyecta como LogoBase64 en CfdiPdfOptions.");
+    Console.Error.WriteLine("--pie se inyecta como TextoPiePagina: se imprime en el pie de todas las hojas.");
 }
