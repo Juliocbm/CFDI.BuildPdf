@@ -1,6 +1,6 @@
 # Catálogos SAT mapeados — CFDI.BuildPdf
 
-Inventario completo de los campos del PDF donde se resuelve una **clave SAT → descripción legible**. Cada campo usa un helper estático en `CfdiPdfSections.cs` que traduce la clave del catálogo SAT a su nombre descriptivo. Si la clave no está en el catálogo soportado, se devuelve tal cual (fallback seguro, sin excepción).
+Inventario completo de los campos del PDF donde se resuelve una **clave SAT → descripción legible**. Cada campo usa un helper estático en `SatCatalogos.cs` que traduce la clave del catálogo SAT a su nombre descriptivo. Si la clave no está en el catálogo soportado, se devuelve tal cual (fallback seguro, sin excepción).
 
 ---
 
@@ -31,8 +31,6 @@ Inventario completo de los campos del PDF donde se resuelve una **clave SAT → 
 | `NombreFormaPago` | Campo **Forma de Pago** | Forma / Método de Pago | `c_FormaPago` |
 | `NombreMetodoPago` | Campo **Método de Pago** | Forma / Método de Pago | `c_MetodoPago` |
 | `NombreExportacion` | Campo **Exportación** en Datos de Emisión | Datos de Emisión | `c_Exportacion` |
-| `NombrePac` | Campo **PAC que timbró** en bloque fiscal | Encabezado → Datos fiscales | RFC del PAC (`RfcProvCertif`) |
-| `NombrePac` | Campo **PAC que timbró** (Nómina) | Datos del Comprobante de Nómina | RFC del PAC (`RfcProvCertif`) |
 | `NombreCveTransporte` | Campo **Vía de Entrada/Salida** | Complemento Carta Porte → Datos generales | `c_CveTransporte` |
 | `NombrePermisoSCT` | Campo **Permiso SCT** | Complemento Carta Porte → Autotransporte Federal de Carga | `c_TipoPermiso` |
 | `NombreConfigVehicular` | Campo **Configuración Vehicular** | Complemento Carta Porte → Autotransporte Federal de Carga | `c_ConfigAutotransporte` |
@@ -69,7 +67,7 @@ Todos los campos siguen el patrón `clave - descripción`. Ejemplos:
 - **Método de Pago:** `PPD - Pago en parcialidades o diferido`
 - **Exportación:** `01 - No aplica`
 - **Uso del CFDI:** `G03 - Gastos en general`
-- **PAC que timbró:** `Buzón E (SST060807KU0)` (nombre + RFC entre paréntesis)
+- **PAC que timbró:** no es catálogo SAT. Se imprime el RFC del timbre (`SST060807KU0`) o `Nombre (RFC)` si el consumidor configura el nombre en `CfdiPdfOptions.NombresPac`
 - **Objeto Imp.:** `Sí objeto de impuesto` (solo descripción, sin clave)
 - **Clave Unidad:** `Unidad de Servicio` (solo descripción, sin clave)
 - **Impuesto:** `IVA` (nombre corto, sin clave)
@@ -83,7 +81,7 @@ Todos los campos siguen el patrón `clave - descripción`. Ejemplos:
 
 ## Cómo agregar un nuevo mapeo
 
-Los helpers están centralizados en `CFDI.BuildPdf/PdfBuilders/Common/CfdiPdfSections.cs`. Para agregar una nueva entrada a un catálogo existente, simplemente agrega un caso al `switch`:
+Los helpers están centralizados en `CFDI.BuildPdf/Catalogs/SatCatalogos.cs`. Para agregar una nueva entrada a un catálogo existente, simplemente agrega un caso al `switch`:
 
 ```csharp
 public static string NombreFormaPago(string? clave)
@@ -98,17 +96,7 @@ public static string NombreFormaPago(string? clave)
 }
 ```
 
-Para el diccionario de PACs, agrega una entrada al `Dictionary`:
-
-```csharp
-private static readonly Dictionary<string, string> PacsConocidos = new(StringComparer.OrdinalIgnoreCase)
-{
-    { "SST060807KU0", "Buzón E" },
-    { "SED1102088J7", "InvoiceOne" },
-    { "SAT970701NN3", "SAT (pruebas)" },
-    { "NUEVO_RFC_PAC", "Nombre del PAC" },  // ← agregar aquí
-};
-```
+Los nombres de PAC **no son un catálogo de la librería**: los aporta el consumidor con `CfdiPdfOptions.NombresPac` (RFC → nombre, también desde `appsettings.json`; ver README). Sin nombre configurado se imprime solo el RFC del timbre.
 
 ---
 
@@ -116,7 +104,8 @@ private static readonly Dictionary<string, string> PacsConocidos = new(StringCom
 
 | Archivo | Contenido |
 |---|---|
-| `CFDI.BuildPdf/PdfBuilders/Common/CfdiPdfSections.cs` | Todos los helpers `Nombre*` y el diccionario `PacsConocidos` |
+| `CFDI.BuildPdf/Catalogs/SatCatalogos.cs` | Todos los helpers `Nombre*` de catálogos SAT |
+| `CFDI.BuildPdf/PdfBuilders/Common/PacTimbrador.cs` | Texto del campo **PAC que timbró** (RFC + nombre configurado) |
 | `CFDI.BuildPdf/PdfBuilders/CartaPorte/CartaPorteDocumentBuilder.cs` | Uso de los helpers en el PDF de Carta Porte |
 | `CFDI.BuildPdf/PdfBuilders/Nomina/NominaDocumentBuilder.cs` | Uso de los helpers en el PDF de Nómina |
 | `CFDI.BuildPdf/Models/CfdiViewModelBase.cs` | Propiedad `RfcProvCertif` del view model |

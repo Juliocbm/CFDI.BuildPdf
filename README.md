@@ -31,7 +31,7 @@ dotnet add package CFDI.BuildPdf
 - ✔️ **Traducción automática de claves SAT** (`c_FormaPago`, `c_RegimenFiscal`, `c_UsoCFDI`, `c_TipoDeComprobante`, `c_TipoRelacion`, etc.): el PDF muestra `clave - descripción` legible en lugar de códigos crudos. Ver [CATALOGOS_SAT_MAPEADOS.md](CATALOGOS_SAT_MAPEADOS.md).
 - ✔️ **Catálogos del Complemento Nómina 1.2** traducidos: `c_TipoContrato`, `c_TipoRegimen`, `c_PeriodicidadPago`, `c_RiesgoPuesto`, `c_Estado`, `c_TipoPercepcion`, `c_TipoDeduccion`, `c_TipoOtroPago`, `c_TipoIncapacidad`, `c_TipoHoras`.
 - ✔️ Soporte para `<cfdi:CfdiRelacionados>`: render condicional de los UUIDs relacionados con su `TipoRelacion` descrito.
-- ✔️ Identificación del **PAC timbrador** por RFC (Buzón E, InvoiceOne, SAT pruebas; ampliable).
+- ✔️ **PAC que timbró**: RFC del timbre y, opcionalmente, su nombre comercial configurado por el consumidor (`NombresPac`).
 - ✔️ Múltiples formatos de entrada: ruta de archivo, `string`, `byte[]` y `Stream`.
 - ✔️ Escritura directa a archivo o `Stream` de salida (ideal para respuestas HTTP).
 - ✔️ Opciones configurables: mostrar/ocultar mercancías, condiciones del contrato, addenda; logotipo en Base64; orientación portrait/landscape; texto libre en el pie de página (folio, leyenda, código).
@@ -40,6 +40,8 @@ dotnet add package CFDI.BuildPdf
 - ✔️ Excepciones de dominio claras (`CfdiXmlInvalidoException`, `CfdiComplementoNoSoportadoException`).
 
 ## 📁 Estructura del PDF generado
+
+> **Paginación:** los títulos de sección nunca quedan solos al pie de una hoja; cuando una tabla continúa en la hoja siguiente se repiten su título y sus encabezados, las filas no se parten entre hojas y los bloques chicos (datos clave-valor, totales, QR + sellos) se mantienen completos.
 
 - Datos del emisor y receptor (con `Régimen Fiscal` traducido).
 - **Datos de Emisión**: fecha, serie/folio, moneda, tipo de cambio, lugar de expedición, `Exportación` (traducida) y sub-bloque **CFDI Relacionados** cuando el XML lo incluye.
@@ -151,7 +153,7 @@ El PDF traduce las claves del SAT a su descripción legible en tiempo de render 
 | Tipo Relación | `04` | `04 - Sustitución de los CFDI previos` |
 | Objeto Imp. | `02` | `Sí objeto de impuesto` |
 | Clave Unidad | `E48` | `Unidad de Servicio` |
-| PAC que timbró | `SST060807KU0` | `Buzón E (SST060807KU0)` |
+| PAC que timbró | `SST060807KU0` | `SST060807KU0`, o `Buzón E (SST060807KU0)` si se configura en `NombresPac` |
 | Tipo Nómina (contrato) | `01` | `01 - Contrato de trabajo por tiempo indeterminado` |
 | Periodicidad Pago (Nómina) | `04` | `04 - Quincenal` |
 | Tipo Percepción (Nómina) | `001` | `001 - Sueldos, Salarios Rayas y Jornales` |
@@ -159,9 +161,24 @@ El PDF traduce las claves del SAT a su descripción legible en tiempo de render 
 
 Si una clave no está en el catálogo embebido se renderiza tal cual (fallback seguro, sin excepción). Catálogos soportados (23 helpers / 36 campos): `c_ClaveUnidad`, `c_Impuesto`, `c_ObjetoImp`, `c_UsoCFDI`, `c_RegimenFiscal`, `c_FormaPago`, `c_MetodoPago`, `c_Exportacion`, `c_TipoDeComprobante`, `c_TipoRelacion`, `c_CveTransporte`, `c_TipoPermiso`, `c_ConfigAutotransporte`, `c_SubTipoRem`, `c_FiguraTransporte`, `c_TipoContrato`, `c_TipoRegimen`, `c_PeriodicidadPago`, `c_RiesgoPuesto`, `c_Estado`, `c_TipoPercepcion`, `c_TipoDeduccion`, `c_TipoOtroPago`, `c_TipoIncapacidad`, `c_TipoHoras`. Inventario completo en [CATALOGOS_SAT_MAPEADOS.md](CATALOGOS_SAT_MAPEADOS.md).
 
-### Agregar un PAC propio al diccionario
+### Nombre del PAC que timbró (configurable)
 
-El RFC del PAC se traduce a nombre comercial para mostrarlo en el bloque fiscal. Si tu PAC no está en el diccionario embebido, el PDF mostrará `"PAC no identificado"`. Envía un PR agregando la entrada en `PdfBuilders/Common/CfdiPdfSections.cs` (diccionario `PacsConocidos`) o ábrenos un issue con el RFC y nombre comercial.
+El campo **PAC QUE TIMBRÓ** imprime siempre el RFC del PAC, que viene del timbre (`RfcProvCertif`) y es el dato fiscal. El nombre comercial es opcional y lo aporta el consumidor con `NombresPac` (RFC → nombre; las claves no distinguen mayúsculas): con nombre se imprime `Nombre (RFC)`, sin nombre **solo el RFC**.
+
+La librería **no trae nombres de PAC**: los PACs cambian de RFC, de nombre o pierden la autorización fuera del ciclo de versiones de una librería, así que ese dato vive en la configuración de quien la usa. Cambiar de PAC es editar configuración, no publicar otra versión.
+
+```csharp
+options.NombresPac["SST060807KU0"] = "Buzón E";
+options.NombresPac["PPD101129EA3"] = "Mi PAC nuevo";
+```
+
+O desde `appsettings.json` (ver [inyección de dependencias](#-uso-con-inyección-de-dependencias)):
+
+```json
+"CfdiPdf": {
+  "NombresPac": { "PPD101129EA3": "Mi PAC nuevo" }
+}
+```
 
 ## ⚙️ Opciones de generación
 
@@ -173,7 +190,8 @@ var options = new CfdiPdfOptions
     MostrarAddenda = true,               // Incluir sección de addenda
     LogoBase64 = logoBase64,             // Logo de la empresa (opcional)
     Orientacion = PdfOrientation.Portrait,
-    TextoPiePagina = "FOLIO INTERNO: HG-123456" // Texto libre en el pie de todas las hojas (opcional)
+    TextoPiePagina = "FOLIO INTERNO: HG-123456", // Texto libre en el pie de todas las hojas (opcional)
+    NombresPac = { ["PPD101129EA3"] = "Mi PAC" } // RFC → nombre del PAC (opcional; sin nombre se imprime el RFC)
 };
 
 var pdfBytes = await CfdiPdf.DesdeRutaAsync(rutaXml, options);
@@ -209,11 +227,29 @@ using Microsoft.Extensions.DependencyInjection;
 builder.Services.AddCfdiPdfServices(
     configure: opts =>
     {
-        opts.MostrarMercancias = true;
-        opts.MostrarCondicionesContrato = true;
+        opts.TextoPiePagina = "HG-F-CXC-02 REV.:02 24/09/2026";
+        opts.NombresPac["SST060807KU0"] = "Buzón E";
     },
     licenseType: CfdiPdfLicenseType.Community);
 ```
+
+Las opciones de `configure` son las **opciones por defecto**: se aplican en cada llamada a `ICfdiPdfGenerator` que no traiga las suyas. Si una llamada pasa su propio `CfdiPdfOptions`, se usa ése completo, con una excepción: `NombresPac` es un catálogo acumulable y **se combina** con el de DI (si un RFC está en ambos, gana el de la llamada). Así los nombres de PAC configurados una vez no se pierden cuando una llamada trae sus propias opciones.
+
+También se pueden cargar desde `appsettings.json`, así un cambio de leyenda o de PAC es solo de configuración:
+
+```csharp
+builder.Services.Configure<CfdiPdfOptions>(builder.Configuration.GetSection("CfdiPdf"));
+builder.Services.AddCfdiPdfServices();
+```
+
+```json
+"CfdiPdf": {
+  "TextoPiePagina": "HG-F-CXC-02 REV.:02 24/09/2026",
+  "NombresPac": { "SST060807KU0": "Buzón E" }
+}
+```
+
+> Antes de 4.0.0 las opciones de `configure` se registraban pero no se aplicaban.
 
 ### Consumo desde un servicio
 

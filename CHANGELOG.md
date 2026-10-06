@@ -4,6 +4,30 @@ Todas las versiones notables de este proyecto se documentan en este archivo.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/)
 y este proyecto usa [Versionado Semántico](https://semver.org/lang/es/).
 
+## [4.0.0] - 2026-10-05
+
+Versión mayor por un **cambio en el contenido del PDF**, no en la API (el código de los consumidores compila igual): sin configuración, el campo **PAC QUE TIMBRÓ** ya no muestra nombre comercial. Ver [MIGRATION.md](MIGRATION.md#guía-de-migración-v3x--v400).
+
+### Agregado
+- `CfdiPdfOptions.NombresPac` (RFC → nombre comercial) para el campo **PAC QUE TIMBRÓ**, sin distinguir mayúsculas. Los nombres los aporta el consumidor (incluido `appsettings.json`): cambiar de PAC no requiere otra versión de la librería. Es un catálogo acumulable: los nombres configurados en DI se **combinan** con los de cada llamada (gana el de la llamada), sin modificar ninguno de los dos.
+- Demo de consola: opción `--pac RFC=Nombre` (repetible) para probar `NombresPac`.
+
+### Corregido
+- **Las opciones de `AddCfdiPdfServices(configure: ...)` se ignoraban**: se registraban como `IOptions<CfdiPdfOptions>` pero el generador nunca las leía. Ahora son las opciones por defecto de cada llamada que no traiga las suyas; también se respetan las registradas por otra vía (`services.Configure<CfdiPdfOptions>(configuration.GetSection(...))`). Si la llamada trae opciones, se usan ésas completas, salvo `NombresPac`, que se combina.
+- **Paginación** (barrido de 372 PDFs con cortes en todas las posiciones; en 3.2.0: 80 títulos y 6 encabezados huérfanos, 300 tablas continuadas sin encabezado y 61 filas partidas; en 4.0.0: 0 en todos los casos reales):
+  - Los títulos de sección ya no quedan solos al pie de una hoja; se repiten arriba cuando la sección continúa.
+  - Las tablas de datos (conceptos, ubicaciones, mercancías, figuras, percepciones, deducciones, otros pagos, incapacidades) repiten sus encabezados en cada hoja.
+  - Las filas de datos no se parten entre hojas (salvo una fila anómala más alta que ~120 pt, que se parte en vez de fallar).
+  - Bloques que se leen como unidad (tablas clave-valor, totales, QR + sellos) se mantienen completos.
+
+### Changed (BREAKING)
+- **Se elimina el catálogo interno de PACs** (Buzón E, InvoiceOne, SAT pruebas): eran 3 de decenas de PACs autorizados y un dato que cambia (RFC, nombre, autorización) fuera del ciclo de versiones. **Para conservar los nombres que antes salían, configúralos** en `NombresPac`, p. ej. `"SST060807KU0": "Buzón E"`, `"SED1102088J7": "InvoiceOne"`.
+- **PAC sin nombre configurado**: se imprime solo el RFC (dato fiscal del timbre) en lugar de `PAC no identificado (RFC)`, que presentaba un dato correcto como error.
+
+### Cambiado
+- En documentos de varias hojas el reparto de contenido cambia respecto a 3.2.0 (secciones que antes se partían ahora pasan completas a la hoja siguiente): en el barrido, +1.7 % de hojas. Los documentos de una hoja no cambian.
+- `README.md` y `CATALOGOS_SAT_MAPEADOS.md`: rutas de código actualizadas (la documentada era la de 2.x).
+
 ## [3.2.0] - 2026-10-05
 ### Agregado
 - `CfdiPdfOptions.TextoPiePagina`: texto libre (folio interno, leyenda, código, etc.) que se imprime centrado en el pie de **todas las hojas** de Factura, Carta Porte (incluida la hoja de condiciones del contrato) y Nómina, arriba de la leyenda y el paginado. Admite saltos de línea; máximo 2 renglones, el excedente se corta con `…`. Renglones vacíos descartados y caracteres de control normalizados a espacio.
