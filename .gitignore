@@ -363,3 +363,6 @@ MigrationBackup/
 FodyWeavers.xsd
 # Datos de prueba locales / facturas reales (confidenciales) del ConsoleDemo — NO versionar
 CFDI.BuildPdf.ConsoleDemo/test/
+
+# XML/PDF reales para pruebas locales del demo (datos fiscales reales: no versionar)
+CFDI.BuildPdf.ConsoleDemo/xml_pruebas/
