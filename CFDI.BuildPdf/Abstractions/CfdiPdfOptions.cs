@@ -38,6 +38,44 @@ namespace CFDI.BuildPdf
         /// Null o vacío (default): no se imprime nada y el PDF queda igual que sin esta opción.
         /// </summary>
         public string? TextoPiePagina { get; set; }
+
+        /// <summary>
+        /// Nombres comerciales de PAC por RFC (atributo <c>RfcProvCertif</c> del timbre) para el campo
+        /// "PAC QUE TIMBRÓ", que se imprime como <c>Nombre (RFC)</c>, o solo el RFC si no hay nombre.
+        /// La librería no trae nombres de PAC (cambian de RFC, de nombre o de autorización fuera de su ciclo de
+        /// versiones): los aporta el consumidor, normalmente desde configuración. Las claves no distinguen
+        /// mayúsculas/minúsculas.
+        /// A diferencia del resto de opciones, es un catálogo acumulable: los nombres configurados en el
+        /// contenedor DI se combinan con los de la llamada (si un RFC está en ambos, gana el de la llamada).
+        /// </summary>
+        /// <example>
+        /// <code>options.NombresPac["SST060807KU0"] = "Buzón E";</code>
+        /// o en appsettings: <c>"CfdiPdf": { "NombresPac": { "SST060807KU0": "Buzón E" } }</c>.
+        /// </example>
+        public IDictionary<string, string> NombresPac { get; set; } = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
+        /// <summary>
+        /// Devuelve estas opciones con <see cref="NombresPac"/> combinado con <paramref name="nombresGlobales"/>
+        /// (los de esta instancia ganan). No modifica esta instancia ni el diccionario global: si hay algo que
+        /// combinar, trabaja sobre una copia.
+        /// </summary>
+        internal CfdiPdfOptions ConNombresPacGlobales(IDictionary<string, string>? nombresGlobales)
+        {
+            if (nombresGlobales is null || nombresGlobales.Count == 0)
+                return this;
+
+            var combinados = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            foreach (var par in nombresGlobales)
+                if (!string.IsNullOrWhiteSpace(par.Value))
+                    combinados[par.Key.Trim()] = par.Value;
+            foreach (var par in NombresPac ?? new Dictionary<string, string>())
+                if (!string.IsNullOrWhiteSpace(par.Value))
+                    combinados[par.Key.Trim()] = par.Value;
+
+            var copia = (CfdiPdfOptions)MemberwiseClone();
+            copia.NombresPac = combinados;
+            return copia;
+        }
     }
 
     /// <summary>

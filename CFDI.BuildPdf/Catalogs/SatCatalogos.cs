@@ -157,34 +157,6 @@ namespace CFDI.BuildPdf.Catalogs
         }
 
         /// <summary>
-        /// Diccionario RFC → nombre comercial del PAC (Proveedor Autorizado de Certificación).
-        /// Las claves deben estar en MAYÚSCULAS. Amplía esta lista con los PACs que tu organización utilice.
-        /// </summary>
-        private static readonly Dictionary<string, string> PacsConocidos =
-            new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-            {
-                { "SST060807KU0", "Buzón E" },
-                { "SED1102088J7", "InvoiceOne" },
-                { "SAT970701NN3", "SAT (pruebas)" },
-                // Agrega aquí los RFCs de los PACs adicionales con los que trabajes.
-            };
-
-        /// <summary>
-        /// Traduce el RFC del PAC (atributo RfcProvCertif del TimbreFiscalDigital)
-        /// a su nombre comercial. Si el RFC no está en el diccionario, se devuelve
-        /// "PAC no identificado" como fallback visible para el lector.
-        /// </summary>
-        public static string NombrePac(string? rfcProvCertif)
-        {
-            if (string.IsNullOrWhiteSpace(rfcProvCertif))
-                return "PAC no identificado";
-
-            return PacsConocidos.TryGetValue(rfcProvCertif, out var nombre)
-                ? nombre
-                : "PAC no identificado";
-        }
-
-        /// <summary>
         /// Traduce la clave SAT del catálogo c_ObjetoImp a su descripción corta.
         /// Si la clave no corresponde a un valor conocido, se devuelve tal cual.
         /// </summary>

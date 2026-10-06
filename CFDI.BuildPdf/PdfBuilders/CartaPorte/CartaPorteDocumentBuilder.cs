@@ -46,7 +46,7 @@ namespace CFDI.BuildPdf.PdfBuilders.CartaPorte
 
                     page.Content().Column(col =>
                     {
-                        col.Item().Element(c => CfdiPdfSections.ComposeEncabezado(c, model, _logger));
+                        col.Item().Element(c => CfdiPdfSections.ComposeEncabezado(c, model, options, _logger));
                         ComprobanteSections.ComposeClienteYEmision(col, model);
                         ComprobanteSections.ComposeFormaPago(col, model, model.CondicionesPago);
                         ComprobanteSections.ComposeConceptos(col, model.Conceptos);
@@ -96,30 +96,32 @@ namespace CFDI.BuildPdf.PdfBuilders.CartaPorte
         {
             if (model.Addenda == null) return;
 
-            col.Item().Element(c => CfdiPdfSections.SectionTitle(c, "Addenda Genérica"));
-
-            if (model.Addenda.IsParserGenerico && model.Addenda.Secciones?.Any() == true)
+            CfdiPdfSections.Seccion(col, "Addenda Genérica", contenido => contenido.Column(addenda =>
             {
-                foreach (var seccion in model.Addenda.Secciones.Where(s => s.Campos.Any(c => !string.IsNullOrWhiteSpace(c.Value))))
+                if (model.Addenda.IsParserGenerico && model.Addenda.Secciones?.Any() == true)
                 {
-                    col.Item().Border(0.5f).BorderColor(PdfStyleConstants.ColorBorder).Table(table =>
+                    foreach (var seccion in model.Addenda.Secciones.Where(s => s.Campos.Any(c => !string.IsNullOrWhiteSpace(c.Value))))
                     {
-                        table.ColumnsDefinition(c => { c.RelativeColumn(3); c.RelativeColumn(7); });
-                        uint r = 1;
-                        foreach (var campo in seccion.Campos.Where(c => !string.IsNullOrWhiteSpace(c.Value)))
+                        addenda.Item().Border(0.5f).BorderColor(PdfStyleConstants.ColorBorder).Table(table =>
                         {
-                            table.Cell().Row(r).Column(1).Padding(2).Text(campo.Key ?? "").Bold().FontSize(PdfStyleConstants.FontSizeSmall);
-                            table.Cell().Row(r).Column(2).Padding(2).Text(campo.Value ?? "").FontSize(PdfStyleConstants.FontSizeSmall);
-                            r++;
-                        }
-                    });
+                            table.ColumnsDefinition(c => { c.RelativeColumn(3); c.RelativeColumn(7); });
+                            uint r = 1;
+                            foreach (var campo in seccion.Campos.Where(c => !string.IsNullOrWhiteSpace(c.Value)))
+                            {
+                                table.Cell().Row(r).Column(1).SinPartir().Padding(2).Text(campo.Key ?? "").Bold().FontSize(PdfStyleConstants.FontSizeSmall);
+                                table.Cell().Row(r).Column(2).SinPartir().Padding(2).Text(campo.Value ?? "").FontSize(PdfStyleConstants.FontSizeSmall);
+                                r++;
+                            }
+                        });
+                    }
                 }
-            }
-            else if (!string.IsNullOrEmpty(model.Addenda.XmlRaw))
-            {
-                col.Item().Border(0.5f).BorderColor(PdfStyleConstants.ColorBorder)
-                    .Padding(3).Text(model.Addenda.XmlRaw).FontSize(PdfStyleConstants.FontSizeVerySmall);
-            }
+                else if (!string.IsNullOrEmpty(model.Addenda.XmlRaw))
+                {
+                    // El XML crudo puede ser enorme: aquí sí se permite partir entre hojas.
+                    addenda.Item().Border(0.5f).BorderColor(PdfStyleConstants.ColorBorder)
+                        .Padding(3).Text(model.Addenda.XmlRaw).FontSize(PdfStyleConstants.FontSizeVerySmall);
+                }
+            }));
         }
 
         private static void ComposeIdCCP(ColumnDescriptor col, CfdiCartaPorteViewModel model)
@@ -143,9 +145,7 @@ namespace CFDI.BuildPdf.PdfBuilders.CartaPorte
             if (model.CartaPorte == null) return;
             var cp = model.CartaPorte;
 
-            col.Item().Element(c => CfdiPdfSections.SectionTitle(c, "Complemento Carta Porte"));
-
-            col.Item().Table(table =>
+            CfdiPdfSections.Seccion(col, "Complemento Carta Porte", seccion => seccion.Table(table =>
             {
                 table.ColumnsDefinition(c =>
                 {
@@ -159,16 +159,14 @@ namespace CFDI.BuildPdf.PdfBuilders.CartaPorte
                 CfdiPdfSections.HeaderValueRow(table, 2, 1, "Entrada/Salida", cp.EntradaSalidaMercancia);
                 CfdiPdfSections.HeaderValueRow(table, 2, 3, "País Origen/Destino", cp.PaisOrigenDestino);
                 CfdiPdfSections.HeaderValueRow(table, 2, 5, "Distancia Recorrida", cp.DistanciaRecorrida.ToString(CultureInfo.InvariantCulture));
-            });
+            }), indivisible: true);
         }
 
         private static void ComposeUbicaciones(ColumnDescriptor col, CfdiCartaPorteViewModel model)
         {
             if (model.CartaPorte?.Ubicaciones == null || !model.CartaPorte.Ubicaciones.Any()) return;
 
-            col.Item().Element(c => CfdiPdfSections.SectionTitle(c, "Ubicaciones"));
-
-            col.Item().Table(table =>
+            CfdiPdfSections.Seccion(col, "Ubicaciones", seccion => seccion.Table(table =>
             {
                 table.ColumnsDefinition(c =>
                 {
@@ -177,16 +175,13 @@ namespace CFDI.BuildPdf.PdfBuilders.CartaPorte
                     c.RelativeColumn(8); c.RelativeColumn(8); c.RelativeColumn(6); c.RelativeColumn(5);
                 });
 
-                var headers = new[] { "Tipo", "ID Ubicación", "RFC", "Nombre", "Fecha/Hora", "C.P.", "Municipio", "Localidad", "Estado", "País" };
-                for (uint i = 0; i < headers.Length; i++)
-                    table.Cell().Row(1).Column(i + 1)
-                        .Element(c => CfdiPdfSections.TableHeaderCell(c, headers[i]));
+                CfdiPdfSections.EncabezadosTabla(table, "Tipo", "ID Ubicación", "RFC", "Nombre", "Fecha/Hora", "C.P.", "Municipio", "Localidad", "Estado", "País");
 
-                uint row = 2;
+                uint row = 1;
                 foreach (var u in model.CartaPorte.Ubicaciones)
                 {
                     var r = row;
-                    IContainer BCell(uint column) => table.Cell().Row(r).Column(column)
+                    IContainer BCell(uint column) => table.Cell().Row(r).Column(column).SinPartir()
                         .Border(0.3f).BorderColor(PdfStyleConstants.ColorBorderSoft).Padding(2);
 
                     BCell(1).Text(u.TipoUbicacion ?? "").FontSize(PdfStyleConstants.FontSizeSmall);
@@ -201,7 +196,7 @@ namespace CFDI.BuildPdf.PdfBuilders.CartaPorte
                     BCell(10).Text(u.Pais ?? "").FontSize(PdfStyleConstants.FontSizeSmall);
                     row++;
                 }
-            });
+            }));
         }
 
         private static void ComposeMercancias(ColumnDescriptor col, CfdiCartaPorteViewModel model, CfdiPdfOptions options)
@@ -210,24 +205,20 @@ namespace CFDI.BuildPdf.PdfBuilders.CartaPorte
 
             if (options.MostrarMercancias)
             {
-                col.Item().Element(c => CfdiPdfSections.SectionTitle(c, "Mercancías"));
-                col.Item().Table(table =>
+                CfdiPdfSections.Seccion(col, "Mercancías", seccion => seccion.Table(table =>
                 {
                     table.ColumnsDefinition(c =>
                     {
                         c.RelativeColumn(30); c.RelativeColumn(10); c.RelativeColumn(10); c.RelativeColumn(15); c.RelativeColumn(15);
                     });
 
-                    var headers = new[] { "Descripción", "Cantidad", "Clave Unidad", "Peso en KG", "Valor Mercancía" };
-                    for (uint i = 0; i < headers.Length; i++)
-                        table.Cell().Row(1).Column(i + 1)
-                            .Element(c => CfdiPdfSections.TableHeaderCell(c, headers[i]));
+                    CfdiPdfSections.EncabezadosTabla(table, "Descripción", "Cantidad", "Clave Unidad", "Peso en KG", "Valor Mercancía");
 
-                    uint row = 2;
+                    uint row = 1;
                     foreach (var m in model.CartaPorte.MercanciasDetalle)
                     {
                         var r = row;
-                        IContainer BCell(uint column) => table.Cell().Row(r).Column(column)
+                        IContainer BCell(uint column) => table.Cell().Row(r).Column(column).SinPartir()
                             .Border(0.3f).BorderColor(PdfStyleConstants.ColorBorderSoft).Padding(2);
 
                         BCell(1).Text(m.Descripcion ?? "").FontSize(PdfStyleConstants.FontSizeSmall);
@@ -237,12 +228,11 @@ namespace CFDI.BuildPdf.PdfBuilders.CartaPorte
                         BCell(5).AlignRight().Text(CfdiPdfSections.Format6(m.ValorMercancia)).FontSize(PdfStyleConstants.FontSizeSmall);
                         row++;
                     }
-                });
+                }));
             }
             else
             {
-                col.Item().Element(c => CfdiPdfSections.SectionTitle(c, "Resumen de Mercancías"));
-                col.Item().Table(table =>
+                CfdiPdfSections.Seccion(col, "Resumen de Mercancías", seccion => seccion.Table(table =>
                 {
                     table.ColumnsDefinition(c => { c.RelativeColumn(); c.RelativeColumn(); c.RelativeColumn(); });
 
@@ -256,7 +246,7 @@ namespace CFDI.BuildPdf.PdfBuilders.CartaPorte
                     SCell(1).AlignCenter().Text(model.CartaPorte.NumeroTotalMercancias.ToString()).FontSize(PdfStyleConstants.FontSizeDefault);
                     SCell(2).AlignRight().Text(CfdiPdfSections.Format6(model.CartaPorte.PesoBrutoTotal)).FontSize(PdfStyleConstants.FontSizeDefault);
                     SCell(3).AlignCenter().Text(model.CartaPorte.UnidadPeso ?? "").FontSize(PdfStyleConstants.FontSizeDefault);
-                });
+                }), indivisible: true);
             }
         }
 
@@ -265,8 +255,7 @@ namespace CFDI.BuildPdf.PdfBuilders.CartaPorte
             if (model.CartaPorte?.Autotransporte == null) return;
             var at = model.CartaPorte.Autotransporte;
 
-            col.Item().Element(c => CfdiPdfSections.SectionTitle(c, "Datos de Autotransporte"));
-            col.Item().Table(table =>
+            CfdiPdfSections.Seccion(col, "Datos de Autotransporte", seccion => seccion.Table(table =>
             {
                 table.ColumnsDefinition(c => { c.RelativeColumn(); c.RelativeColumn(); c.RelativeColumn(); c.RelativeColumn(); });
 
@@ -276,7 +265,7 @@ namespace CFDI.BuildPdf.PdfBuilders.CartaPorte
                 CfdiPdfSections.HeaderValueRow(table, 2, 3, "Peso Bruto Vehicular", at.PesoBrutoVehicular.ToString(CultureInfo.InvariantCulture));
                 CfdiPdfSections.HeaderValueRow(table, 3, 1, "Placa Vehículo", at.PlacaVM);
                 CfdiPdfSections.HeaderValueRow(table, 3, 3, "Año Modelo Vehículo", at.AnioModeloVM.ToString());
-            });
+            }), indivisible: true);
         }
 
         private static void ComposeSeguros(ColumnDescriptor col, CfdiCartaPorteViewModel model)
@@ -287,8 +276,7 @@ namespace CFDI.BuildPdf.PdfBuilders.CartaPorte
                 string.IsNullOrEmpty(seg.AseguradoraCarga) &&
                 string.IsNullOrEmpty(seg.AseguradoraMedAmbiente)) return;
 
-            col.Item().Element(c => CfdiPdfSections.SectionTitle(c, "Datos del Seguro"));
-            col.Item().Table(table =>
+            CfdiPdfSections.Seccion(col, "Datos del Seguro", seccion => seccion.Table(table =>
             {
                 table.ColumnsDefinition(c => { c.RelativeColumn(); c.RelativeColumn(); c.RelativeColumn(); c.RelativeColumn(); });
                 uint r = 1;
@@ -309,41 +297,36 @@ namespace CFDI.BuildPdf.PdfBuilders.CartaPorte
                     CfdiPdfSections.HeaderValueRow(table, r, 1, "Aseg. Medio Ambiente", seg.AseguradoraMedAmbiente);
                     CfdiPdfSections.HeaderValueRow(table, r, 3, "Póliza Medio Ambiente", seg.PolizaMedAmbiente);
                 }
-            });
+            }), indivisible: true);
         }
 
         private static void ComposeRemolque(ColumnDescriptor col, CfdiCartaPorteViewModel model)
         {
             if (model.CartaPorte?.Remolque == null) return;
 
-            col.Item().Element(c => CfdiPdfSections.SectionTitle(c, "Datos del Remolque"));
-            col.Item().Table(table =>
+            CfdiPdfSections.Seccion(col, "Datos del Remolque", seccion => seccion.Table(table =>
             {
                 table.ColumnsDefinition(c => { c.RelativeColumn(); c.RelativeColumn(); c.RelativeColumn(); c.RelativeColumn(); });
                 CfdiPdfSections.HeaderValueRow(table, 1, 1, "SubTipo Remolque", SatCatalogos.NombreSubTipoRemolque(model.CartaPorte.Remolque.SubTipoRemolque));
                 CfdiPdfSections.HeaderValueRow(table, 1, 3, "Placa", model.CartaPorte.Remolque.Placa);
-            });
+            }), indivisible: true);
         }
 
         private static void ComposeFigurasTransporte(ColumnDescriptor col, CfdiCartaPorteViewModel model)
         {
             if (model.CartaPorte?.FigurasTransporte == null || !model.CartaPorte.FigurasTransporte.Any()) return;
 
-            col.Item().Element(c => CfdiPdfSections.SectionTitle(c, "Figuras de Transporte"));
-            col.Item().Table(table =>
+            CfdiPdfSections.Seccion(col, "Figuras de Transporte", seccion => seccion.Table(table =>
             {
                 table.ColumnsDefinition(c => { c.RelativeColumn(); c.RelativeColumn(); c.RelativeColumn(); c.RelativeColumn(); });
 
-                var headers = new[] { "Tipo Figura", "RFC Figura", "Nombre Figura", "Licencia" };
-                for (uint i = 0; i < headers.Length; i++)
-                    table.Cell().Row(1).Column(i + 1)
-                        .Element(c => CfdiPdfSections.TableHeaderCell(c, headers[i]));
+                CfdiPdfSections.EncabezadosTabla(table, "Tipo Figura", "RFC Figura", "Nombre Figura", "Licencia");
 
-                uint row = 2;
+                uint row = 1;
                 foreach (var f in model.CartaPorte.FigurasTransporte)
                 {
                     var r = row;
-                    IContainer BCell(uint column) => table.Cell().Row(r).Column(column)
+                    IContainer BCell(uint column) => table.Cell().Row(r).Column(column).SinPartir()
                         .Border(0.3f).BorderColor(PdfStyleConstants.ColorBorderSoft).Padding(3);
 
                     BCell(1).Text(SatCatalogos.NombreTipoFigura(f.TipoFigura)).FontSize(PdfStyleConstants.FontSizeSmall);
@@ -352,7 +335,7 @@ namespace CFDI.BuildPdf.PdfBuilders.CartaPorte
                     BCell(4).Text(f.NumeroLicencia ?? "").FontSize(PdfStyleConstants.FontSizeSmall);
                     row++;
                 }
-            });
+            }));
         }
 
         private static void ComposeCondicionesContrato(ColumnDescriptor col, CfdiCartaPorteViewModel model)

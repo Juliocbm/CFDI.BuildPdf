@@ -18,12 +18,19 @@ namespace CFDI.BuildPdf.Services
     internal class CfdiPdfGenerator : ICfdiPdfGenerator
     {
         private readonly IReadOnlyList<ICfdiComplementHandler> _handlers;
+        private readonly CfdiPdfOptions? _opcionesPorDefecto;
 
-        public CfdiPdfGenerator(IEnumerable<ICfdiComplementHandler> handlers)
+        /// <param name="handlers">Handlers de complemento soportados.</param>
+        /// <param name="opcionesPorDefecto">
+        /// Opciones a usar cuando una llamada no trae las suyas (las configuradas en el contenedor DI).
+        /// Si la llamada trae opciones, se usan ésas completas, salvo NombresPac, que se combina con el global.
+        /// </param>
+        public CfdiPdfGenerator(IEnumerable<ICfdiComplementHandler> handlers, CfdiPdfOptions? opcionesPorDefecto = null)
         {
             if (handlers is null)
                 throw new ArgumentNullException(nameof(handlers));
 
+            _opcionesPorDefecto = opcionesPorDefecto;
             _handlers = handlers.OrderByDescending(h => h.Priority).ToList();
 
             // Unicidad: dos handlers no pueden declarar el mismo namespace de complemento.
@@ -102,7 +109,11 @@ namespace CFDI.BuildPdf.Services
         /// </summary>
         private byte[] GenerarPdfInterno(XDocument xdoc, CfdiPdfOptions? options)
         {
-            var opts = options ?? new CfdiPdfOptions();
+            // Sin opciones en la llamada: las del contenedor DI (o las predeterminadas). Con opciones: ésas completas,
+            // salvo NombresPac, que es un catálogo acumulable y se combina con el global.
+            var opts = options is null
+                ? _opcionesPorDefecto ?? new CfdiPdfOptions()
+                : options.ConNombresPacGlobales(_opcionesPorDefecto?.NombresPac);
             var handler = ResolveHandler(xdoc);
 
             if (handler is null)

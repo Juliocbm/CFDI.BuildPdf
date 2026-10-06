@@ -40,7 +40,7 @@ namespace CFDI.BuildPdf.PdfBuilders.Factura
 
                     page.Content().Column(col =>
                     {
-                        col.Item().Element(c => CfdiPdfSections.ComposeEncabezado(c, model, _logger));
+                        col.Item().Element(c => CfdiPdfSections.ComposeEncabezado(c, model, options, _logger));
                         ComprobanteSections.ComposeClienteYEmision(col, model);
                         ComprobanteSections.ComposeFormaPago(col, model, model.CondicionesPago);
                         ComprobanteSections.ComposeConceptos(col, model.Conceptos);

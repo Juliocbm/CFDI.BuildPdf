@@ -2,6 +2,7 @@ using System;
 using CFDI.BuildPdf;
 using CFDI.BuildPdf.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
@@ -15,7 +16,12 @@ namespace Microsoft.Extensions.DependencyInjection
         /// y establece la licencia QuestPDF a aplicar en el proceso.
         /// </summary>
         /// <param name="services">Colección de servicios del contenedor.</param>
-        /// <param name="configure">Acción opcional para configurar <see cref="CfdiPdfOptions"/>.</param>
+        /// <param name="configure">
+        /// Acción opcional para configurar las <see cref="CfdiPdfOptions"/> por defecto. Se aplican cuando una
+        /// llamada a <see cref="ICfdiPdfGenerator"/> no trae opciones; si la llamada trae las suyas, se usan ésas
+        /// completas (salvo <see cref="CfdiPdfOptions.NombresPac"/>, que se combina). También se respetan las registradas por otra vía, por ejemplo
+        /// <c>services.Configure&lt;CfdiPdfOptions&gt;(configuration.GetSection("CfdiPdf"))</c>.
+        /// </param>
         /// <param name="licenseType">
         /// Tipo de licencia QuestPDF (Community por defecto). El consumidor es responsable
         /// de cumplir los términos comerciales de QuestPDF; consulta https://www.questpdf.com/license/.
@@ -36,8 +42,11 @@ namespace Microsoft.Extensions.DependencyInjection
             if (configure != null)
                 services.Configure(configure);
 
-            // Orquestador construido por el composition root compartido (usa el ILoggerFactory del contenedor si está).
-            services.AddTransient<ICfdiPdfGenerator>(sp => CfdiPdfFactory.CreateGenerator(sp.GetService<ILoggerFactory>()));
+            // Orquestador construido por el composition root compartido (usa el ILoggerFactory del contenedor si está)
+            // con las opciones por defecto del contenedor: antes se registraban pero nunca se leían.
+            services.AddTransient<ICfdiPdfGenerator>(sp => CfdiPdfFactory.CreateGenerator(
+                sp.GetService<ILoggerFactory>(),
+                sp.GetService<IOptions<CfdiPdfOptions>>()?.Value));
 
             return services;
         }

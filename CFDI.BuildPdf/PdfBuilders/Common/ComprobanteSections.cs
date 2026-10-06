@@ -126,9 +126,7 @@ namespace CFDI.BuildPdf.PdfBuilders.Common
         {
             if (conceptos == null || !conceptos.Any()) return;
 
-            col.Item().Element(c => CfdiPdfSections.SectionTitle(c, "Conceptos Facturados"));
-
-            col.Item().Table(table =>
+            CfdiPdfSections.Seccion(col, "Conceptos Facturados", seccion => seccion.Table(table =>
             {
                 table.ColumnsDefinition(c =>
                 {
@@ -144,23 +142,18 @@ namespace CFDI.BuildPdf.PdfBuilders.Common
                     c.RelativeColumn(10); // ObjetoImp
                 });
 
-                // Header con fondo oscuro y texto blanco
-                var headers = new[] { "Clave Prod/Serv", "No. Ident.", "Cantidad", "Clave Unidad", "Unidad", "Descripción", "Precio Unitario", "Importe", "Descuento", "Objeto Imp." };
-                for (uint i = 0; i < headers.Length; i++)
-                {
-                    table.Cell().Row(1).Column(i + 1)
-                        .Element(c => CfdiPdfSections.TableHeaderCell(c, headers[i]));
-                }
+                // Header con fondo oscuro y texto blanco (se repite en cada hoja)
+                CfdiPdfSections.EncabezadosTabla(table, "Clave Prod/Serv", "No. Ident.", "Cantidad", "Clave Unidad", "Unidad", "Descripción", "Precio Unitario", "Importe", "Descuento", "Objeto Imp.");
 
                 bool useZebra = conceptos.Count >= 4;
-                uint row = 2;
+                uint row = 1;
                 foreach (var concepto in conceptos)
                 {
                     var r = row;
-                    bool zebra = useZebra && (r % 2 == 0);
+                    bool zebra = useZebra && (r % 2 == 1);
                     IContainer BodyCell(uint column)
                     {
-                        var cell = table.Cell().Row(r).Column(column)
+                        var cell = table.Cell().Row(r).Column(column).SinPartir()
                             .Border(0.3f).BorderColor(PdfStyleConstants.ColorBorderSoft);
                         if (zebra) cell = cell.Background(PdfStyleConstants.ColorZebra);
                         return cell.Padding(2);
@@ -243,13 +236,14 @@ namespace CFDI.BuildPdf.PdfBuilders.Common
 
                     row++;
                 }
-            });
+            }));
         }
 
         public static void ComposeTotales(ColumnDescriptor col, CfdiViewModelBase model, IReadOnlyList<ImpuestoConceptoViewModel> trasladosResumen, IReadOnlyList<RetencionImpuestoViewModel> retencionesResumen, decimal totalTrasladados, decimal totalRetenidos)
         {
             // Layout 2 columnas: izquierda "Cantidad con letra"; derecha panel de totales desglosado.
-            col.Item().PaddingTop(6).Table(table =>
+            // Se lee como unidad: pasa completo a la hoja siguiente si no cabe.
+            col.Item().PaddingTop(6).EnsureSpace(CfdiPdfSections.MinAlturaParaPartirBloque).Table(table =>
             {
                 table.ColumnsDefinition(c =>
                 {

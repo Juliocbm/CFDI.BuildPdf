@@ -23,7 +23,8 @@ namespace CFDI.BuildPdf.Configuration
         /// Construye el orquestador con todos los handlers de complemento soportados.
         /// </summary>
         /// <param name="loggerFactory">Factory opcional para inyectar loggers en los mappers.</param>
-        public static ICfdiPdfGenerator CreateGenerator(ILoggerFactory? loggerFactory = null)
+        /// <param name="opcionesPorDefecto">Opciones a usar cuando una llamada no trae las suyas (configuración DI).</param>
+        public static ICfdiPdfGenerator CreateGenerator(ILoggerFactory? loggerFactory = null, CfdiPdfOptions? opcionesPorDefecto = null)
         {
             var qrGenerator = new QrGeneratorService();
 
@@ -40,7 +41,7 @@ namespace CFDI.BuildPdf.Configuration
                     new FacturaDocumentBuilder())
             };
 
-            return new CfdiPdfGenerator(handlers);
+            return new CfdiPdfGenerator(handlers, opcionesPorDefecto);
         }
     }
 }

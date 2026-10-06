@@ -24,6 +24,57 @@ namespace CFDI.BuildPdf.PdfBuilders.Common
         internal const int MaxRenglonesTextoPiePagina = 2;
 
         /// <summary>
+        /// Una fila de tabla solo se parte entre hojas si quedan al menos estos puntos; si no, pasa completa a
+        /// la siguiente. Con <c>EnsureSpace</c> (y no <c>ShowEntire</c>) una fila anómala más alta que una hoja
+        /// se sigue partiendo en lugar de lanzar <c>DocumentLayoutException</c>.
+        /// </summary>
+        internal const float MinAlturaParaPartirFila = 120f;
+
+        /// <summary>
+        /// Igual que <see cref="MinAlturaParaPartirFila"/> para bloques chicos que se leen como unidad
+        /// (tablas clave-valor, totales, QR + sellos): en la práctica nunca se parten.
+        /// </summary>
+        internal const float MinAlturaParaPartirBloque = 250f;
+
+        /// <summary>
+        /// Renderiza una sección: título + contenido. El título va en el <c>Before</c> de un Decoration, así
+        /// nunca queda solo al pie de una hoja (si el contenido no cabe, la sección completa pasa a la siguiente)
+        /// y se repite arriba del contenido cuando éste continúa en otra hoja.
+        /// </summary>
+        /// <param name="col">Columna del documento donde se agrega la sección.</param>
+        /// <param name="titulo">Título de la sección (se pinta en mayúsculas).</param>
+        /// <param name="contenido">Contenido de la sección (normalmente una tabla).</param>
+        /// <param name="indivisible">El contenido es un bloque chico que no debe partirse entre hojas.</param>
+        public static void Seccion(ColumnDescriptor col, string titulo, Action<IContainer> contenido, bool indivisible = false)
+        {
+            col.Item().Decoration(d =>
+            {
+                d.Before().Element(c => SectionTitle(c, titulo));
+                var cuerpo = indivisible ? d.Content().EnsureSpace(MinAlturaParaPartirBloque) : d.Content();
+                cuerpo.Element(contenido);
+            });
+        }
+
+        /// <summary>
+        /// Celda de una fila de datos que no se parte entre hojas (ver <see cref="MinAlturaParaPartirFila"/>).
+        /// Al aplicarse a todas las celdas de la fila, la fila completa pasa a la hoja siguiente.
+        /// </summary>
+        public static IContainer SinPartir(this IContainer cell) => cell.EnsureSpace(MinAlturaParaPartirFila);
+
+        /// <summary>
+        /// Encabezados de una tabla de datos en <c>table.Header</c>: se repiten en cada hoja donde la tabla
+        /// continúa y nunca quedan solos al pie sin al menos una fila debajo.
+        /// </summary>
+        public static void EncabezadosTabla(TableDescriptor table, params string[] encabezados)
+        {
+            table.Header(header =>
+            {
+                foreach (var encabezado in encabezados)
+                    header.Cell().Element(c => TableHeaderCell(c, encabezado));
+            });
+        }
+
+        /// <summary>
         /// Renderiza el pie de página de las hojas del comprobante: el texto libre de
         /// <see cref="CfdiPdfOptions.TextoPiePagina"/> (si viene) arriba de la línea de paginado.
         /// </summary>
@@ -102,7 +153,8 @@ namespace CFDI.BuildPdf.PdfBuilders.Common
         /// </summary>
         public static void ComposeFooterFiscal(IContainer container, CfdiViewModelBase model)
         {
-            container.Column(col =>
+            // Título, QR y sellos se leen como unidad: el bloque pasa completo a la hoja siguiente si no cabe.
+            container.EnsureSpace(MinAlturaParaPartirBloque).Column(col =>
             {
                 col.Item().PaddingTop(10).Element(c => SectionTitle(c, "INFORMACIÓN FISCAL DIGITAL"));
 
@@ -158,14 +210,14 @@ namespace CFDI.BuildPdf.PdfBuilders.Common
         /// </summary>
         public static void HeaderValueRow(TableDescriptor table, uint row, uint startCol, string header, string? value)
         {
-            table.Cell().Row(row).Column(startCol)
+            table.Cell().Row(row).Column(startCol).SinPartir()
                 .Border(0.5f).BorderColor(PdfStyleConstants.ColorBorderSoft)
                 .Background(PdfStyleConstants.ColorSectionBg)
                 .Padding(3).Text(header).Bold()
                 .FontSize(PdfStyleConstants.FontSizeLabel)
                 .FontColor(PdfStyleConstants.ColorText);
 
-            table.Cell().Row(row).Column(startCol + 1)
+            table.Cell().Row(row).Column(startCol + 1).SinPartir()
                 .Border(0.5f).BorderColor(PdfStyleConstants.ColorBorderSoft)
                 .Padding(3).Text(value ?? "")
                 .FontSize(PdfStyleConstants.FontSizeLabel)
@@ -246,7 +298,7 @@ namespace CFDI.BuildPdf.PdfBuilders.Common
         /// Renderiza el encabezado fiscal compartido: logo + datos del emisor + datos de certificación.
         /// Reutilizable en CartaPorte y Nómina porque todos los campos provienen de CfdiViewModelBase.
         /// </summary>
-        public static void ComposeEncabezado(IContainer container, CfdiViewModelBase model, ILogger logger)
+        public static void ComposeEncabezado(IContainer container, CfdiViewModelBase model, CfdiPdfOptions options, ILogger logger)
         {
             container.BorderBottom(1f).BorderColor(PdfStyleConstants.ColorBorder).PaddingBottom(6)
                 .Table(table =>
@@ -308,7 +360,7 @@ namespace CFDI.BuildPdf.PdfBuilders.Common
                     FiscalRow(c, "FECHA CERTIFICACIÓN:", model.FechaCertificacion.ToString("dd/MM/yyyy HH:mm:ss"));
                     FiscalRow(c, "NO. CERTIFICADO SAT:", model.NoCertificadoSAT);
                     FiscalRow(c, "NO. CERTIFICADO EMISOR:", model.NoCertificadoEmisor);
-                    FiscalRow(c, "PAC QUE TIMBRÓ:", $"{SatCatalogos.NombrePac(model.RfcProvCertif)} ({model.RfcProvCertif})");
+                    FiscalRow(c, "PAC QUE TIMBRÓ:", PacTimbrador.Texto(model.RfcProvCertif, options.NombresPac));
                     FiscalRow(c, "VERSIÓN CFDI:", model.Version);
                 });
             });
